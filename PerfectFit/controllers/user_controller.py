@@ -30,4 +30,4 @@ def get_user(user_id: int): ## 이름맞춰주고 자료형 작성하면 인자�
 
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
 
-    return render_template("user.html", user=response) ## 렌더 템플릿 페이지 띄워준다.
+    return render_template("user.html", user=response) ## 렌더 템플릿 페이지 띄워준다..
