@@ -1,0 +1,25 @@
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>Title</title>#}
+{#</head>#}
+{#<body>#}
+{#    #}
+{#</body>#}
+{#</html>#}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+{% endblock %}
+
+
+{% block content %}
+    <div class = "login-container">
+        <a href = "#"><img src="{{ url_for('static', filename='img/logo.svg') }}" /></a>
+        <p class = "custom-text">소셜 계정으로 간편 로그인</p>
+        <a href = "#"><img src="{{ url_for('static', filename='img/naver.svg') }}" width = "237" height = "70"  class = "login-img"/></a>
+        <a href = "#"><img src="{{ url_for('static', filename='img/google.svg') }}" width = "237" height = "70" class = "login-img"/></a>
+        <a href = "#"><img src="{{ url_for('static', filename='img/kakao.svg') }}" width = "237" height = "70" class = "login-img"/></a>
+    </div>
+{% endblock %}
