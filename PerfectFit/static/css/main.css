@@ -1,0 +1,120 @@
+.container {
+    display: flex;
+    width: 90rem;
+    flex-direction: column;
+    /*align-items: center;*/
+    font-family: 'Noto Sans KR', sans-serif;
+    margin : 0 auto;
+    gap : 45px;
+}
+
+.function-card {
+    border-radius: 25px;
+}
+
+.function-card:hover {
+    filter: drop-shadow(0px 4px 12px #010D3E);
+}
+
+.main-function {
+    gap : 100px !important;
+}
+
+a {
+    text-decoration-line: none !important;
+}
+
+.resume-tab {
+    border-radius: 25px;
+    background: rgba(23, 95, 230, 0.15);
+    padding : 40px 55px;
+}
+
+.resume-card {
+    position : relative;
+    border-radius: 25px !important;
+    height : 550px;
+
+}
+
+.resume-card:hover {
+    filter: drop-shadow(0px 4px 12px #010D3E);
+}
+
+.resume-category {
+    font-size : 14px !important;
+}
+
+.card-title {
+    display: flex;
+    align-items: center;  /* 수직 가운데 정렬 */
+    gap: 8px; /* 텍스트 사이 간격 */
+    font-size: 18px;
+    position: relative;
+}
+
+.card-category {
+    color : #175FE6;
+    font-size : 13px;
+}
+
+.resume-card-content {
+    height : 70%;
+    overflow: hidden;
+    color: #222;
+    /* Regular-16 */
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.uk-card-large .uk-card-body, .uk-card-large.uk-card-body {
+        padding: 30px 30px;
+    }
+
+.sub-comment-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+.Engagement {
+    position : absolute;
+    top : 90%;
+    right : 0;
+    display: flex;
+    justify-content: end;
+    align-items: flex-end;
+    gap : 8px;
+    padding : 0 20px;
+
+}
+
+.interview-card {
+    position: relative;
+    height : 380px;
+    border-radius: 25px;
+    border: 3px solid rgba(23, 95, 230, 0.65);
+    /*gap : 20px;*/
+}
+
+.interview-card-content {
+    max-height : calc(70% - 40px);
+    overflow: hidden;
+    color: #222;
+    /* Regular-16 */
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.interview-card:hover {
+    filter: drop-shadow(0px 4px 12px #010D3E);
+}
+
+

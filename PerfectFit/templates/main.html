@@ -2,8 +2,237 @@
 
 {% include 'components/header.html' %}
 
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+{% endblock %}
+
+{% set resumeViews = 32 %}
+{% set resumeLikes = 126 %}
+{% set resumeTitle = "자기소개서 제목" %}
+{% set resumeContent01 = "항목1 내용" %}
+{% set resumeItem01 = "항목1 제목" %}
+{% set resumeOccupation = "직군 |" %}
+{% set resumeJob = "직업 |" %}
+{% set resumePersonalHistory = "경력" %}
+{% set interviewTitle = "모의면접 제목" %}
+{% set interviewOccupation = "직군 |" %}
+{% set interviewJob = "직업 |" %}
+{% set interviewPersonalHistory = "경력" %}
+{% set interviewQuestion01 = "Q1. 질문 내용" %}
+{% set interviewAnswer01 = "A1. 답변 내용" %}
+{% set interviewViews = 110 %}
+{% set interviewLikes = 134 %}
+
+
 {% block content %}
     <div class = "container">
+        <img src="{{ url_for('static', filename='img/banner.svg') }}" alt="banner"/>
+        {# 메인페이지 기능 탭#}
+        <div class = "main-function">
+            {#소제목 및 문구#}
+            <p class = "Bold-24">기능</p>
+            <p class = "Medium-22">퍼펙트핏이 제공하는 기술을 만나보세요.</p>
+            {#각 기능별 카드#}
+            <div class="uk-grid-small uk-child-width-expand@s uk-text-center" uk-grid>
 
+                <a href = "#" class = "link-deco">
+                    <div>
+                        <div class="uk-card uk-card-default uk-card-body function-card">
+                            <img src="{{ url_for('static', filename='img/resume.svg') }}"  width = "350" height = "250" alt="resume"/>
+                            <p class = "Medium-22">자기소개서 작성</p>
+                            <p class = "Regular-16-light">당신이 작성한 정보에 알맞게 도움을 주는 AI와 함께 자기소개서를 작성해보세요.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href = "#" class = "link-deco">
+                    <div>
+                        <div class="uk-card uk-card-default uk-card-body function-card">
+                            <img src="{{ url_for('static', filename='img/interview.svg') }}" width = "350" height = "250" alt="interview"/>
+                            <p class = "Medium-22">AI 모의면접</p>
+                            <p class = "Regular-16-light">당신이 작성한 자기소개서를 기반으로한 AI 모의면접을 통해 면접 능력을 향상 시켜보세요.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href = "#" class = "link-deco">
+                    <div>
+                        <div class="uk-card uk-card-default uk-card-body function-card">
+                            <img src="{{ url_for('static', filename='img/spellchecker.svg') }}"  width = "350" height = "250" alt="spell-checker"/>
+                            <p class = "Medium-22">맞춤법 검사기</p>
+                            <p class = "Regular-16-light">당신이 작성한 자기소개서에 맞춤법 검사를 진행하여 실수를 바로잡아 드립니다.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {# 메인 페이지 자기소개서 탭#}
+        <div class = "main-resume">
+            {#소제목 및 문구#}
+            <p class = "Bold-24">자기소개서</p>
+            <div class = "sub-comment-box">
+                <p class="Medium-22">지금 가장 <span class="highlight">HOT</span> 한 자기소개서</p>
+                <a href = "#"><p class = "Medium-18-light">더보기 ></p></a>
+            </div>
+                <div class = "resume-tab">
+                        <div class="uk-child-width-1-2@s" uk-grid>
+                            {# 자기소개서 카드 #}
+                            <a href = "#">
+                                <div class="uk-card uk-card-default uk-card-large uk-card-body resume-card">
+                                    <div class = "card-title">
+                                        <span class = "card-category">{{ resumeOccupation }}</span>
+                                        <span class = "card-category">{{ resumeJob }}</span>
+                                        <span class = "card-category">{{ resumePersonalHistory }}</span>
+                                        <span class = Medium-22>{{ resumeTitle }}</span>
+                                    </div>
+                                    <p class = "Medium-18">{{ resumeItem01 }}</p>
+                                    <p class = "resume-card-content">{{ resumeContent01 }}</p>
+                                    <div class = "Engagement">
+                                        <div class = "Views">
+                                            <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                            <span class = "Regular-16-light">{{ resumeViews }}</span>
+                                        </div>
+                                        <div class = "Likes">
+                                            <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                            <span class = "Regular-16-light">{{ resumeLikes }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            {# 자기소개서 카드 #}
+                            <a href = "#">
+                                <div class="uk-card uk-card-default uk-card-large uk-card-body resume-card">
+                                    <div class = "card-title">
+                                        <span class = "card-category">{{ resumeOccupation }}</span>
+                                        <span class = "card-category">{{ resumeJob }}</span>
+                                        <span class = "card-category">{{ resumePersonalHistory }}</span>
+                                        <span class = uk-card-title>{{ resumeTitle }}</span>
+                                    </div>
+                                    <p class = "Medium-18">{{ resumeItem01 }}</p>
+                                    <p class = "resume-card-content">{{ resumeContent01 }}</p>
+                                    {#조회수 및 좋아요#}
+                                    <div class = "Engagement">
+                                        <div class = "Views">
+                                            <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                            <span class = "Regular-16-light">{{ resumeViews }}</span>
+                                        </div>
+                                        <div class = "Likes">
+                                            <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                            <span class = "Regular-16-light">{{ resumeLikes }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                </div>
+        </div>
+                    {# 메인 페이지 모의면접 탭 #}
+            <div class = "main-interview">
+                {# 모의면접 대제목 및 문구 #}
+                <p class = "Bold-24">AI 모의면접</p>
+                <div class = "sub-comment-box">
+                    <p class="Medium-22">가장 조회수가 많은 AI 모의면접</p>
+                    <a href = "#"><p class = "Medium-18-light">더보기 ></p></a>
+                </div>
+                {# 모의 면접 카드 탭 #}
+                <div class = "interview-tab">
+                    <div class="uk-child-width-1-2@s" uk-grid>
+                                                    {# 모의 면접 카드 #}
+                        <a href = "#">
+                            <div class="uk-card uk-card-default uk-card-large uk-card-body interview-card">
+                                <div class = "card-title">
+                                    <span class = "card-category">{{ interviewOccupation }}</span>
+                                    <span class = "card-category">{{ interviewJob }}</span>
+                                    <span class = "card-category">{{ interviewPersonalHistory }}</span>
+                                    <span class = Medium-22>{{ interviewTitle }}</span>
+                                </div>
+                                <p class = "Medium-18">{{ interviewQuestion01 }}</p>
+                                <p class = "interview-card-content">{{ interviewAnswer01 }}</p>
+                                <div class = "Engagement">
+                                    <div class = "Views">
+                                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewViews }}</span>
+                                    </div>
+                                    <div class = "Likes">
+                                        <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewLikes }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                                                    {# 모의 면접 카드 #}
+                        <a href = "#">
+                            <div class="uk-card uk-card-default uk-card-large uk-card-body interview-card">
+                                <div class = "card-title">
+                                    <span class = "card-category">{{ interviewOccupation }}</span>
+                                    <span class = "card-category">{{ interviewJob }}</span>
+                                    <span class = "card-category">{{ interviewPersonalHistory }}</span>
+                                    <span class = Medium-22>{{ interviewTitle }}</span>
+                                </div>
+                                <p class = "Medium-18">{{ interviewQuestion01 }}</p>
+                                <p class = "interview-card-content">{{ interviewAnswer01 }}</p>
+                                <div class = "Engagement">
+                                    <div class = "Views">
+                                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewViews }}</span>
+                                    </div>
+                                    <div class = "Likes">
+                                        <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewLikes }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                                                    {# 모의 면접 카드 #}
+                        <a href = "#">
+                            <div class="uk-card uk-card-default uk-card-large uk-card-body interview-card">
+                                <div class = "card-title">
+                                    <span class = "card-category">{{ interviewOccupation }}</span>
+                                    <span class = "card-category">{{ interviewJob }}</span>
+                                    <span class = "card-category">{{ interviewPersonalHistory }}</span>
+                                    <span class = Medium-22>{{ interviewTitle }}</span>
+                                </div>
+                                <p class = "Medium-18">{{ interviewQuestion01 }}</p>
+                                <p class = "interview-card-content">{{ interviewAnswer01 }}</p>
+                                <div class = "Engagement">
+                                    <div class = "Views">
+                                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewViews }}</span>
+                                    </div>
+                                    <div class = "Likes">
+                                        <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewLikes }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                                                    {# 모의 면접 카드 #}
+                        <a href = "#">
+                            <div class="uk-card uk-card-default uk-card-large uk-card-body interview-card">
+                                <div class = "card-title">
+                                    <span class = "card-category">{{ interviewOccupation }}</span>
+                                    <span class = "card-category">{{ interviewJob }}</span>
+                                    <span class = "card-category">{{ interviewPersonalHistory }}</span>
+                                    <span class = Medium-22>{{ interviewTitle }}</span>
+                                </div>
+                                <p class = "Medium-18">{{ interviewQuestion01 }}</p>
+                                <p class = "interview-card-content">{{ interviewAnswer01 }}</p>
+                                <div class = "Engagement">
+                                    <div class = "Views">
+                                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewViews }}</span>
+                                    </div>
+                                    <div class = "Likes">
+                                        <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                        <span class = "Regular-16-light">{{ interviewLikes }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
     </div>
 {% endblock %}
