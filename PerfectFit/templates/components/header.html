@@ -6,6 +6,8 @@
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 {% endblock %}
 
+{% set login = true %}
+
 <header>
     <div class="header-wrapper">
         <nav class="uk-navbar-container header-nav" uk-navbar>
@@ -29,8 +31,7 @@
                             <div class="uk-navbar-dropdown">
                                 <ul class="uk-nav uk-navbar-dropdown-nav">
                                     <li><a href="#">면접 목록</a></li>
-                                    <li><a href="#">직업 기반 면접</a></li>
-                                    <li><a href="#">자기소개서 기반 면접</a></li>
+                                    <li><a href="#">모의 면접 진행</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -39,30 +40,33 @@
                 </div>
             </div>
 {#            ===================== 로그인이 안됐을 때 =====================#}
-{#            <div class="uk-navbar-right">#}
-{#                <ul class="uk-navbar-nav">#}
-{#                    <li>#}
-{#                        <a href="#modal-container" uk-toggle>#}
-{#                            <span uk-icon="icon: user; ratio: 1.2;"></span>#}
-{#                        </a>#}
-{#                    </li>#}
-{#                </ul>#}
-{#            </div>#}
-{#            <div id="modal-container" class="uk-modal-container" uk-modal>#}
-{#                <div class="uk-modal-dialog uk-margin-auto-vertical">#}
-{#                    {% include 'login.html' %}#}
-{#                </div>#}
-{#            </div>#}
-{#            ==================== 로그인이 됐을 때 ===================#}
-            <div class="uk-navbar-right">
-                <img src="{{ url_for('static', filename='img/logo.svg') }}" class = "user-profile" />
-                <div class="uk-navbar-dropdown">
-                    <ul class="uk-nav uk-navbar-dropdown-nav">
-                        <li><a href="#">마이페이지</a></li>
-                        <li><a href="#">로그아웃</a></li>
+            {% if not login %}
+                <div class="uk-navbar-right">
+                    <ul class="uk-navbar-nav">
+                        <li>
+                            <a href="#modal-container" uk-toggle>
+                                <span uk-icon="icon: user; ratio: 1.2;"></span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
-            </div>
+                <div id="modal-container" class="uk-modal-container" uk-modal>
+                    <div class="uk-modal-dialog uk-margin-auto-vertical">
+                        {% include 'login.html' %}
+                    </div>
+                </div>
+{#            ==================== 로그인이 됐을 때 ===================#}
+            {% else %}
+                <div class="uk-navbar-right">
+                    <img src="{{ url_for('static', filename='img/logo.svg') }}" class = "user-profile" />
+                    <div class="uk-navbar-dropdown">
+                        <ul class="uk-nav uk-navbar-dropdown-nav">
+                            <li><a href="#">마이페이지</a></li>
+                            <li><a href="#">로그아웃</a></li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
         </nav>
     </div>
 </header>
