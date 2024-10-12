@@ -1,0 +1,137 @@
+.Regular-16 {
+    color: #222;
+    /* Regular-16 */
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.Regular-16-light {
+    color: rgba(0, 0, 0, 0.50);
+    /* Regular-16 */
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.Regular-20 {
+    color: #222;
+    /* Regular-20 */
+    font-family: "Noto Sans KR";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.Regular-20-light {
+    color: rgba(0, 0, 0, 0.50);
+    /* Regular-20 */
+    font-family: "Noto Sans KR";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.Medium-18 {
+    color: #000;
+    /* Medium-18 */
+    font-family: "Noto Sans KR";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.Medium-18-light {
+    color: rgba(0, 0, 0, 0.50);
+    /* Medium-18 */
+    font-family: "Noto Sans KR";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.Medium-20 {
+    color: #222;
+    /* Medium-20 */
+    font-family: "Noto Sans KR";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    text-decoration-line: none;
+}
+
+.Medium-20-light {
+    color: rgba(0, 0, 0, 0.50);
+    /* Medium-20 */
+    font-family: "Noto Sans KR";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    text-decoration-line: none;
+}
+
+.Medium-22 {
+    color: #000;
+    /* Medium-22 */
+    font-family: "Noto Sans KR";
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+
+.Medium-24-light {
+    color: rgba(0, 0, 0, 0.50);
+    /* Medium-24 */
+    font-family: "Noto Sans KR";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    text-decoration-line: none;
+}
+
+.Medium-28 {
+    color: #000;
+    /* Medium-28 */
+    font-family: "Noto Sans KR";
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+
+.Bold-24 {
+    color: #000;
+    /* Bold-32 */
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #000;
+    font-family: "Noto Sans KR";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+
+
+
+
+
+
+.highlight {
+    color : #E72B2B;
+}
+
