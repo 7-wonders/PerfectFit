@@ -59,8 +59,6 @@ a {
 }
 
 .resume-card-content {
-    height : 70%;
-    overflow: hidden;
     color: #222;
     /* Regular-16 */
     font-family: "Noto Sans KR";
@@ -68,6 +66,11 @@ a {
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    display : -webkit-box;
+    -webkit-line-clamp: 14;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .uk-card-large .uk-card-body, .uk-card-large.uk-card-body {
@@ -102,8 +105,6 @@ a {
 }
 
 .interview-card-content {
-    max-height : calc(70% - 40px);
-    overflow: hidden;
     color: #222;
     /* Regular-16 */
     font-family: "Noto Sans KR";
@@ -111,6 +112,11 @@ a {
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    display : -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .interview-card:hover {
