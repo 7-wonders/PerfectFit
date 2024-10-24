@@ -1,0 +1,49 @@
+
+
+{% set resumeListTitle = "자기소개서 제목" %}
+{% set resumeListContent01 = "항목1 내용" %}
+{% set resumeListOccupation = "직군 |" %}
+{% set resumeListJob = "직업 |" %}
+{% set resumeListPersonalHistory = "경력" %}
+{% set resumeRelease = "공개" %}
+{% set userResumeCount = 10 %}
+{% set resumeViews = 30 %}
+{% set resumeLikes = 50 %}
+
+{% block Content %}
+{% include 'components/mypage.html' %}
+    <div class = "container">
+        {% for i in range(userResumeCount) %}
+            <div class = "resume-list">
+                {#게시물 왼쪽 부분#}
+                <div>
+                    <div class = "resume-list-header">
+                        <span class = "title-category">{{ resumeListOccupation }}</span>
+                        <span class = "title-category">{{ resumeListJob }}</span>
+                        <span class = "title-category">{{ resumeListPersonalHistory }}</span>
+                        <a href = "#"><span class = Medium-20>{{ resumeListTitle }}</span></a>
+                    </div>
+                    <p class = "Regular-16">공개 여부 : {{ resumeRelease }} </p>
+                </div>
+                {#게시물 오른쪽 부분#}
+                <div>
+                    <p class = "Regular-16">작성일 : 2024-10-10</p>
+                    <div class = "resume-list-Engagement">
+                        <div>
+                            <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                            <span class = "Regular-16-light">{{ resumeViews }}</span>
+                        </div>
+                        <div>
+                            <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                            <span class = "Regular-16-light">{{ resumeLikes }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if i < userResumeCount - 1 %}
+                <hr>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+

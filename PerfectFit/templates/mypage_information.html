@@ -1,0 +1,110 @@
+
+{% set userName = "한정석" %}
+{% set userAge = 24 %}
+{% set userAddress = "서울시 중랑구" %}
+{% set userEmail = "kingjeongseok0117@naver.com" %}
+
+{% set Education = "서일대학교" %}
+{% set academicRecords = "재학" %}
+{% set major = "소프트웨어공학과" %}
+{% set credit = 4.5 %}
+{% set userPhoneNumber = "010-1234-5678" %}
+{% set personalHistorySize = 2 %}
+{% set startAnnualLeave = "23.09.31" %}
+{% set endAnnualLeave = "24.10.31" %}
+{% set companyName = "서일대학교" %}
+{% set position = "조교" %}
+{% set thing = "잡일" %}
+{% set projectSize = 2 %}
+{% set projectName = "PerfectFit" %}
+{% set projectStartPeriod = "24.01.01" %}
+{% set projectEndPeriod = "24.06.01" %}
+{% set projectContent01 = "백엔드 담당" %}
+{% set projectContent02 = "API 사용" %}
+{% set projectContent03 = "챗 봇 이용" %}
+{% set resignationReason = "일하기싫어서용.." %}
+
+{% block Content %}
+    {% include 'components/mypage.html' %}
+    <div class = "container">
+        {#필수 정보#}
+        <div class = "information-box">
+            <table class="uk-table">
+                <thead>
+                    <tr>
+                        <td class = "Bold-20">필수 정보</td>
+                        <td class = "information-box-update"><a href = "#" ><span class = "Regular-16-light">내용 수정하기></span></a></td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td class = "Regular-16-Medium">이름</td>
+                        <td class = "Medium-16-Medium">{{ userName }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">나이</td>
+                        <td class = "Medium-16-Medium">{{ userAge }}세</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">주소</td>
+                        <td class = "Medium-16-Medium">{{ userAddress }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">이메일 주소</td>
+                        <td class = "Medium-16-Medium">{{ userEmail }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {#선택 정보#}
+        <div class = "information-box">
+            <table class="uk-table">
+                <thead>
+                    <tr>
+                        <td class = "Bold-20">선택 정보</td>
+                        <td class = "information-box-update"><a href = "#" ><span class = "Regular-16-light">내용 수정하기></span></a></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class = "Regular-16-Medium">학력</td>
+                        <td class = "Medium-16-Medium">{{ Education }} {{ academicRecords }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">전공</td>
+                        <td class = "Medium-16-Medium">{{ major }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">학점</td>
+                        <td class = "Medium-16-Medium">{{ credit }}/4.5</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">전화번호</td>
+                        <td class = "Medium-16-Medium">{{ userPhoneNumber }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">경력</td>
+                        <td class = "Medium-16-Medium">
+                            연차 : {{ startAnnualLeave }} ~ {{ endAnnualLeave }} <p></p>
+                            회사 이름 : {{ companyName }} <p></p>
+                            직책 : {{ position }} <p></p>
+                            맡은 일 : {{ thing }} <p></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">프로젝트 경험</td>
+                        <td class = "Medium-16-Medium">
+                            프로젝트 이름 : {{ projectName }}<p></p>
+                            개발 기간 : {{ projectStartPeriod }} ~ {{ projectEndPeriod }} <p></p>
+                            프로젝트 내용1 : {{ projectContent01 }} <p></p>
+                            프로젝트 내용2 : {{ projectContent02 }} <p></p>
+                            프로젝트 내용3 : {{ projectContent03 }} <p></p>
+                            퇴사 사유 : {{ resignationReason }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,52 @@
+
+
+{% set interviewListTitle = "AI 모의면접 제목" %}
+{% set interviewListContent01 = "항목1 내용" %}
+{% set interviewListOccupation = "직군 |" %}
+{% set interviewListJob = "직업 |" %}
+{% set interviewListPersonalHistory = "경력" %}
+{% set interviewRelease = "공개" %}
+{% set userInterviewCount = 10 %}
+{% set interviewViews = 37 %}
+{% set interviewLikes = 58 %}
+
+{% block Content %}
+    {% include 'components/mypage.html' %}
+    <div class="container">
+        {#모의면접 게시물#}
+        <div>
+            {% for i in range(userInterviewCount) %}
+                <div class = "resume-list">
+                    {#게시물 왼쪽 부분#}
+                    <div>
+                        <div class = "resume-list-header">
+                            <span class = "title-category">{{ interviewListOccupation }}</span>
+                            <span class = "title-category">{{ interviewListJob }}</span>
+                            <span class = "title-category">{{ interviewListPersonalHistory }}</span>
+                            <a href = "#"><span class = Medium-20>{{ interviewListTitle }}</span></a>
+                        </div>
+                        <p class = "Regular-16">공개 여부 : {{ interviewRelease }} </p>
+                    </div>
+                    {#게시물 오른쪽 부분#}
+                    <div>
+                        <p class = "Regular-16">작성일 : 2024-10-10</p>
+                        <div class = "resume-list-Engagement">
+                            <div>
+                                <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                <span class = "Regular-16-light">{{ interviewViews }}</span>
+                            </div>
+                            <div>
+                                <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                <span class = "Regular-16-light">{{ interviewLikes }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if i < userInterviewCount - 1 %}
+                    <hr>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}
