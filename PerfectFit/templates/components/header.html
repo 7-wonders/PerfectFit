@@ -11,7 +11,7 @@
 <header>
     <div class="header-wrapper">
         <nav class="uk-navbar-container header-nav" uk-navbar>
-            <a href="/static" class="uk-navbar-item uk-logo logo">
+            <a href="http://127.0.0.1:5000/" class="uk-navbar-item uk-logo logo">
                 <img src="{{ url_for('static', filename='img/logo.svg') }}" />
             </a>
             <div class = "main-menu">
@@ -61,7 +61,7 @@
                     <img src="{{ url_for('static', filename='img/logo.svg') }}" class = "user-profile" />
                     <div class="uk-navbar-dropdown">
                         <ul class="uk-nav uk-navbar-dropdown-nav">
-                            <li><a href="#">마이페이지</a></li>
+                            <li><a href="http://127.0.0.1:5000/user/mypage/resume">마이페이지</a></li>
                             <li><a href="#">로그아웃</a></li>
                         </ul>
                     </div>
