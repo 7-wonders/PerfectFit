@@ -1,15 +1,16 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from database.config import Base
+from database.config import db
 
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, TEXT, TIMESTAMP
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
-from database.resume import Resume
+if TYPE_CHECKING:
+    from domain.models.resume import Resume
 
 
-class ResumeSection(Base):
+class ResumeSection(db.Model):
     __tablename__ = "resume_section"
 
     resume_section_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
@@ -22,4 +23,4 @@ class ResumeSection(Base):
     content: Mapped[str] = mapped_column(TEXT, nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    resume: Mapped[Resume] = relationship("Resume", back_populates="resume_sections")
+    resume: Mapped["Resume"] = db.relationship("Resume", back_populates="resume_sections")

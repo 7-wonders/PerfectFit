@@ -1,14 +1,16 @@
-from database.app_user import AppUser
-from database.config import Base
+from typing import Optional, TYPE_CHECKING
 
-from typing import Optional
+from database.config import db
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, DATE, TIMESTAMP
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
+
+if TYPE_CHECKING:
+    from domain.models.app_user import AppUser
 
 
-class WorkExperience(Base):
+class WorkExperience(db.Model):
     __tablename__ = "work_experience"
 
     work_experience_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
@@ -25,4 +27,4 @@ class WorkExperience(Base):
     responsibility: Mapped[str] = mapped_column(VARCHAR(500), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    user: Mapped[AppUser] = relationship("AppUser", back_populates="work_experience")
+    user: Mapped["AppUser"] = db.relationship("AppUser", back_populates="work_experience")

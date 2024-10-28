@@ -1,15 +1,16 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from database.config import Base
+from database.config import db
 
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, CHAR, TIMESTAMP
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
-from database.job import Job
+if TYPE_CHECKING:
+    from domain.models.job import Job
 
 
-class Occupation(Base):
+class Occupation(db.Model):
     __tablename__ = "occupation"
 
     occupation_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
@@ -18,4 +19,4 @@ class Occupation(Base):
     sub_category: Mapped[str] = mapped_column(CHAR(1), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    jobs: Mapped[list[Job]] = relationship("Job", back_populates="occupation")
+    jobs: Mapped[list["Job"]] = db.relationship("Job", back_populates="occupation")

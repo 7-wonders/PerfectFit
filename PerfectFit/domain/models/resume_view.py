@@ -1,19 +1,20 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from database.app_user import AppUser
-from database.config import Base
+from database.config import db
 
 from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
-from database.resume import Resume
+if TYPE_CHECKING:
+    from domain.models.app_user import AppUser
+    from domain.models.resume import Resume
 
 
-class ResumeLike(Base):
-    __tablename__ = "resume_like"
+class ResumeView(db.Model):
+    __tablename__ = "resume_view"
 
-    like_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    view_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),
@@ -26,6 +27,5 @@ class ResumeLike(Base):
     )
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    # 관계 설정 (optional)
-    resume: Mapped[Resume] = relationship("Resume", back_populates="resume_likes")
-    user: Mapped[AppUser] = relationship("AppUser", back_populates="resume_likes")
+    resume: Mapped["Resume"] = db.relationship("Resume", back_populates="resume_views")
+    user: Mapped["AppUser"] = db.relationship("AppUser", back_populates="resume_views")
