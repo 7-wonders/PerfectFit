@@ -1,13 +1,15 @@
 from flask import flash
+from flask_sqlalchemy.pagination import Pagination
 
-from domain.models.user import User
-from utils.open_ai import get_test_llama_transformers, get_test_llama
+from database.config import db
+from domain.models.app_user import AppUser
+
 
 class UserService:
     @staticmethod
-    def get_users(page: int, count: int):
+    def get_users(page: int, count: int) -> Pagination:
         try:
-            paginate_user = User.query.paginate(page=page, per_page=count, error_out=False)
+            paginate_user = AppUser.query.paginate(page=page, per_page=count, error_out=False)
             return paginate_user
         except Exception as e:
             print(f"Error fetching users: {e}")  # 에러 발생 시 메시지 출력
@@ -15,9 +17,9 @@ class UserService:
             return None
 
     @staticmethod
-    def get_user(user_id: int) -> User | None:
+    def get_user(user_id: int) -> AppUser | None:
         try:
-            user = User.query.filter(User.id == user_id).first()
+            user = db.get_or_404(AppUser, user_id)
 
             if not user:
                 return None

@@ -5,8 +5,8 @@ class UserDto:
     class Response:
         @dataclass
         class IntroUser:
-            id: int
-            name: str
+            user_id: int
+            username: str
 
         @dataclass
         class Users:
