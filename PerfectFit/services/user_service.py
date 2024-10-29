@@ -1,31 +1,25 @@
-from flask import flash
+from flask import flash, abort
 from flask_sqlalchemy.pagination import Pagination
 
-from database.config import db
+from database.config import get_session
 from domain.models.app_user import AppUser
+from exception.custom_exception import CustomException
+from exception.exception_type import ExceptionType
 
 
 class UserService:
     @staticmethod
     def get_users(page: int, count: int) -> Pagination:
-        try:
-            paginate_user = AppUser.query.paginate(page=page, per_page=count, error_out=False)
-            return paginate_user
-        except Exception as e:
-            print(f"Error fetching users: {e}")  # 에러 발생 시 메시지 출력
-            flash("예기치 못한 에러가 발생하였습니다.", "error")
-            return None
+        paginate_user = AppUser.query.paginate(page=page, per_page=count, error_out=False)
+        return paginate_user
 
     @staticmethod
     def get_user(user_id: int) -> AppUser | None:
-        try:
-            user = db.get_or_404(AppUser, user_id)
+        user = get_session().query(AppUser).filter(
+            AppUser.user_id == user_id
+        ).first()
 
-            if not user:
-                return None
+        if not user:
+            raise CustomException(ExceptionType.NOT_FOUND_USER)
 
-            return user
-        except Exception as e:
-            print(f"Error fetching user : {e}")
-            flash("예기치 못한 에러가 발생하였습니다.", "error")
-            return None
+        return user

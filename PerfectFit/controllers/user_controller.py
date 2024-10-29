@@ -14,7 +14,6 @@ def get_users():
     count = request.args.get('count', default=10, type=int)
 
     paginate_user = UserService.get_users(page, count)
-    print(paginate_user.items)
     response: UserDto.Response.Users = UserDto.Response.Users(
         users=[UserDto.Response.IntroUser(user.user_id, user.username) for user in paginate_user.items],
         pages=paginate_user.pages,
@@ -26,9 +25,6 @@ def get_users():
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
-    if not user:
-        return render_template("user.html")
-
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
 
     return render_template("user.html", user=response)
