@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error Page!</title>
+</head>
+<body>
+    {% if error %}
+        <p>{{ error.exception.status_code }}</p>
+        <p>{{ error.exception.error_code }}</p>
+        <p>{{ error.exception.message }}</p>
+    {% endif %}
+</body>
+</html>
