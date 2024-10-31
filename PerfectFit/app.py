@@ -11,7 +11,7 @@ from utils.check_api import is_api_call
 load_dotenv()
 
 app = Flask(__name__)
-app.config.from_object(Config)  # config.py의 Config 클래스를 사용
+app.config.from_object(Config)  # config.py의 Config 클래스를 사용.
 
 # 데이터베이스 초기화
 db.init_app(app)
