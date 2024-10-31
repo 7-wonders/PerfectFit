@@ -28,3 +28,6 @@ def get_user(user_id: int):
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
 
     return render_template("user.html", user=response)
+
+@user_bp.route('/user/mypage/info')
+def get_info():
