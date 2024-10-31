@@ -19,3 +19,14 @@ def get_jobs(occupation_id: int):
     print(response.jobs[0].job_name)
 
     return asdict(response), 200, {'Content-Type': 'application/json; charset=utf-8'}
+@job_bp.route('/job/occupation', methods=['GET'])
+def get_occupations():
+
+    occupations = JobService.get_occupations()
+    response: JobDto.Response.Occupations = JobDto.Response.Occupations(
+        occupations=[JobDto.Response.OccupationInfo(occupation.occupation_id, occupation.occupation_name,
+                                                    occupation.major_category, occupation.sub_category)
+                                                    for occupation in occupations],
+    )
+
+    return asdict(response), 200, {'Content-Type': 'application/json; charset=utf-8'}
