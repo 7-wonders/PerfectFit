@@ -11,28 +11,6 @@ from utils.const import const
 user_bp = Blueprint('user', __name__)
 
 
-@user_bp.route('/user', methods=['POST'])
-def post_user():
-    user_data = request.get_json()
-
-    if 'snsKind' not in user_data:
-        raise CustomException(ExceptionType.REQUIRED_SNS_KIND)
-    if 'snsId' not in user_data:
-        raise CustomException(ExceptionType.REQUIRED_SNS_ID)
-    if 'name' not in user_data:
-        raise CustomException(ExceptionType.REQUIRED_NAME)
-
-    if user_data['snsKind'] not in const.valid_sns_kinds:
-        raise CustomException(ExceptionType.SNS_KIND_BAD_REQUEST)
-    if len(user_data['name']) > 32:
-        raise CustomException(ExceptionType.NAME_BAD_REQUEST)
-
-    #jwt_token = UserService.post_user(user_data)
-    jwt_token = "tokenstokens"
-
-    return {"token": jwt_token}, 201
-
-
 @user_bp.route('/users')
 def get_users():
     page = request.args.get('page', default=1, type=int)

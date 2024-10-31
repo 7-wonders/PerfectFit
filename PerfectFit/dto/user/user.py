@@ -13,10 +13,3 @@ class UserDto:
             users: list['UserDto.Response.IntroUser']
             pages: int
 
-        @dataclass
-        class PostUser:
-            snsKind: str
-            snsId: str
-            name: str
-            profile: str
-            token: str
