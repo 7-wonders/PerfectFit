@@ -3,11 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
 
-class Base(DeclarativeBase):
+class Base(DeclarativeBase): #DeclarativeBase는 SQLAlchemy에서 사용하는 기본 모델 클래스
     pass
 
 
-db = SQLAlchemy(model_class=Base)
+db = SQLAlchemy(model_class=Base) #SQLAlchemy 인스턴스 생성
 
 
 def get_session():
