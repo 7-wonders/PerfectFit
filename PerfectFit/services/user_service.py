@@ -15,11 +15,26 @@ class UserService:
 
     @staticmethod
     def get_user(user_id: int) -> AppUser | None:
-        user = get_session().query(AppUser).filter(
+        user: AppUser = get_session().query(AppUser).filter( ##
             AppUser.user_id == user_id
         ).first()
+        user.project_experience ## 이거 변수에 담아야 함 SQL Alchemy 관계설정
 
         if not user:
             raise CustomException(ExceptionType.NOT_FOUND_USER)
 
         return user
+
+
+
+
+
+
+
+
+
+
+
+
+
+
