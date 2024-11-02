@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for
 from dotenv import load_dotenv
 
 from database.config import Config, db  # Config와 db를 import
@@ -20,6 +20,15 @@ db.init_app(app)
 # UserController의 Blueprint 등록
 app.register_blueprint(user_bp)
 app.register_blueprint(auth_bp)
+
+from flask import Flask, send_from_directory
+
+app = Flask(__name__)
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.errorhandler(CustomException)
