@@ -21,15 +21,15 @@ if TYPE_CHECKING:
 class AppUser(db.Model):
     __tablename__ = "app_user"
 
-    user_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    user_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     sns_id: Mapped[str] = mapped_column(VARCHAR(200), nullable=False)
     sns_kind: Mapped[str] = mapped_column(CHAR(4), nullable=False)
     username: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
-    age: Mapped[int] = mapped_column(TINYINT, nullable=False)
-    major: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
-    job: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
-    address: Mapped[str] = mapped_column(VARCHAR(100), nullable=False)
-    detail_address: Mapped[str] = mapped_column(VARCHAR(50), nullable=False)
+    age: Mapped[int] = mapped_column(TINYINT)
+    major: Mapped[str] = mapped_column(VARCHAR(30))
+    job: Mapped[str] = mapped_column(VARCHAR(30))
+    address: Mapped[str] = mapped_column(VARCHAR(100))
+    detail_address: Mapped[str] = mapped_column(VARCHAR(50))
     phone_number: Mapped[Optional[str]] = mapped_column(VARCHAR(11))
     university: Mapped[Optional[str]] = mapped_column(VARCHAR(30))
     university_status: Mapped[Optional[str]] = mapped_column(VARCHAR(10))

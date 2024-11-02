@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request
+from dotenv import load_dotenv
 
 from database.config import Config, db  # Config와 db를 import
 from controllers.user_controller import user_bp
-from dotenv import load_dotenv
+from controllers.auth_controller import auth_bp
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -18,6 +19,7 @@ db.init_app(app)
 
 # UserController의 Blueprint 등록
 app.register_blueprint(user_bp)
+app.register_blueprint(auth_bp)
 
 
 @app.errorhandler(CustomException)
@@ -46,7 +48,7 @@ def internal_server_error_page(e: Exception):
 
 
 @app.route('/')
-def hello_world():
+def index():
     return render_template("main.html")
 
 
