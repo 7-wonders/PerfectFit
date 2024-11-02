@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Job(db.Model):
     __tablename__ = "job"
 
-    job_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    job_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     occupation_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("occupation.occupation_id", onupdate="CASCADE", ondelete="CASCADE"),

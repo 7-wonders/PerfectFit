@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class ProjectExperience(db.Model):
     __tablename__ = "project_experience"
 
-    project_experience_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    project_experience_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("app_user.user_id", onupdate="CASCADE", ondelete="CASCADE"),

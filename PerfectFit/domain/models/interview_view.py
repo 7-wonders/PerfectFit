@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class InterviewView(db.Model):
     __tablename__ = "interview_view"
 
-    view_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    view_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     interview_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("interview.interview_id", onupdate="CASCADE", ondelete="CASCADE"),

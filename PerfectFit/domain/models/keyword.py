@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Keyword(db.Model):
     __tablename__ = "keyword"
 
-    keyword_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    keyword_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),

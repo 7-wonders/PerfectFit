@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Occupation(db.Model):
     __tablename__ = "occupation"
 
-    occupation_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    occupation_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     occupation_name: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
     major_category: Mapped[str] = mapped_column(CHAR(1), nullable=False)
     sub_category: Mapped[str] = mapped_column(CHAR(1), nullable=False)

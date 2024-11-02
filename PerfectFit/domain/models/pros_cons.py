@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class ProsCons(db.Model):
     __tablename__ = "pros_cons"
 
-    pros_cons_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    pros_cons_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),

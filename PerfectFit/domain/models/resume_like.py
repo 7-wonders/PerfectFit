@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class ResumeLike(db.Model):
     __tablename__ = "resume_like"
 
-    like_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    like_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),

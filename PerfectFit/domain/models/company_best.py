@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class CompanyBest(db.Model):
     __tablename__ = "company_best"
 
-    best_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    best_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     company_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("company.company_id", onupdate="CASCADE", ondelete="CASCADE"),

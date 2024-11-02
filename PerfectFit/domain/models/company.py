@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class Company(db.Model):
     __tablename__ = "company"
 
-    company_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    company_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     company_name: Mapped[str] = mapped_column(VARCHAR(300), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 

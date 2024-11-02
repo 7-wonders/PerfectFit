@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class ResumeSection(db.Model):
     __tablename__ = "resume_section"
 
-    resume_section_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    resume_section_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),
