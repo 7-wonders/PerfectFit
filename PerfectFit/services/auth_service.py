@@ -24,7 +24,7 @@ class AuthService:
         if not client_id or not client_secret_key or not redirect_uri:
             logger.info(f"Google Environment Error\n"
                         f"client_id : {client_id} | client_secret_key : {client_secret_key} | redirect_uri : {redirect_uri}")
-            raise CustomException(ExceptionType.GOOGLE_LOGIN_ERROR)
+            raise CustomException(ExceptionType.GOOGLE_ENVIRONMENT_ERROR)
 
         token_params = {
             "code": code,

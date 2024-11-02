@@ -2,12 +2,19 @@ from enum import Enum
 
 
 class ExceptionType(Enum):
-    GOOGLE_NOT_ENOUGH_INFO = ("400", "B40010", "구글 로그인 정보가 부족합니다. e.g. id, email, name")
+    GOOGLE_NOT_ENOUGH_INFO = ("400", "B40010", "필수 정보가 부족합니다. e.g. id, email, name")
+    NAVER_NOT_ENOUGH_INFO = ("400", "B40011", "필수 정보가 부족합니다. e.g. id, email, name")
+    KAKAO_NOT_ENOUGH_INFO = ("400", "B40012", "필수 정보가 부족합니다. e.g. id, email, name")
 
     NOT_FOUND_USER = ("404", "N40410", "사용자를 찾을 수 없습니다.")
 
     INTERNAL_SERVER_ERROR = ("500", "I500", "서버 내부에서 오류가 발생하였습니다.")
     GOOGLE_LOGIN_ERROR = ("500", "I50010", "구글 로그인에 문제가 생겼습니다.")
+    GOOGLE_ENVIRONMENT_ERROR = ("500", "I50011", "구글 환경 변수가 설정되지 않았습니다.")
+    NAVER_LOGIN_ERROR = ("500", "I50012", "네이버 로그인에 문제가 생겼습니다.")
+    NAVER_ENVIRONMENT_ERROR = ("500", "I50013", "네이버 환경 변수가 설정되지 않았습니다.")
+    KAKAO_LOGIN_ERROR = ("500", "I50014", "카카오 로그인에 문제가 생겼습니다.")
+    KAKAO_ENVIRONMENT_ERROR = ("500", "I50015", "카카오 환경 변수가 설정되지 않았습니다.")
 
     @property
     def status_code(self):
