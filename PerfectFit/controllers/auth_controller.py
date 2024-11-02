@@ -6,6 +6,9 @@ from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
 from services.auth_service import AuthService
+from utils.oauth.google_oauth_handler import GoogleOAuthHandler
+from utils.oauth.kakao_oauth_handler import KakaoOAuthHandler
+from utils.oauth.naver_oauth_handler import NaverOAuthHandler
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,16 +22,8 @@ def test():
 
 @auth_bp.route('/login/google', methods=['GET'])
 def login_google():
-    client_id = os.environ.get('GOOGLE_CLIENT_ID')
-    redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
     session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
-
-    if not client_id or not redirect_uri:
-        logger.error(f"Google Environment Error\n"
-                     f"client_id : {client_id} | redirect_uri : {redirect_uri}")
-        raise CustomException(ExceptionType.GOOGLE_ENVIRONMENT_ERROR)
-
-    return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope=email profile")
+    return redirect(GoogleOAuthHandler().get_login_url())
 
 
 @auth_bp.route('/google', methods=['GET'])
@@ -51,16 +46,8 @@ def auth_google_callback():
 
 @auth_bp.route('/login/naver', methods=['GET'])
 def auth_naver():
-    client_id = os.environ.get('NAVER_CLIENT_ID')
-    redirect_uri = os.environ.get('NAVER_REDIRECT_URI')
     session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
-
-    if not client_id or not redirect_uri:
-        logger.error(f"Naver Environment Error\n"
-                     f"client_id : {client_id} | redirect_uri : {redirect_uri}")
-        raise CustomException(ExceptionType.NAVER_ENVIRONMENT_ERROR)
-
-    return redirect(f"https://nid.naver.com/oauth2.0/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&state=STATE")
+    return redirect(NaverOAuthHandler().get_login_url())
 
 
 @auth_bp.route('/naver', methods=['GET'])
@@ -74,5 +61,31 @@ def auth_naver_callback():
         raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
 
     AuthService.naver_login(code, state)
+
+    return redirect(redirect_uri)
+
+
+@auth_bp.route('/login/kakao', methods=['GET'])
+def auth_kakao():
+    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
+    return redirect(KakaoOAuthHandler().get_login_url())
+
+
+@auth_bp.route('/kakao', methods=['GET'])
+def auth_kakao_callback():
+    code = request.args.get('code', type=str)
+    error = request.args.get('error', type=str)
+    state = request.args.get('state', type=str)
+
+    redirect_uri = session.get('redirect_uri')
+    session.pop('redirect_uri', None)
+
+    if error == 'access_denied':
+        return redirect(redirect_uri)
+
+    if not code or error:
+        raise CustomException(ExceptionType.KAKAO_LOGIN_ERROR)
+
+    AuthService.kakao_login(code, state)
 
     return redirect(redirect_uri)

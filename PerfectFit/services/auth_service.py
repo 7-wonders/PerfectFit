@@ -1,4 +1,5 @@
 import os
+from typing import Mapping
 
 import requests
 
@@ -9,64 +10,27 @@ from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
 from utils.age import get_age
+from utils.oauth.google_oauth_handler import GoogleOAuthHandler
+from utils.oauth.kakao_oauth_handler import KakaoOAuthHandler
+from utils.oauth.naver_oauth_handler import NaverOAuthHandler
 
-logger = Logger("auth_service")
+logger = Logger('auth_service')
 
 
 class AuthService:
     @staticmethod
     def google_login(code: str):
-        token_base_url = "https://oauth2.googleapis.com/token"
-        user_base_url = "https://www.googleapis.com/userinfo/v2/me"
-        client_id = os.environ.get('GOOGLE_CLIENT_ID')
-        client_secret_key = os.environ.get('GOOGLE_SECRET_KEY')
-        redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
-
-        if not client_id or not client_secret_key or not redirect_uri:
-            logger.info(f"Google Environment Error\n"
-                        f"client_id : {client_id} | client_secret_key : {client_secret_key} | redirect_uri : {redirect_uri}")
-            raise CustomException(ExceptionType.GOOGLE_ENVIRONMENT_ERROR)
-
-        token_params = {
-            "code": code,
-            "client_id": client_id,
-            "client_secret": client_secret_key,
-            "redirect_uri": redirect_uri,
-            "grant_type": "authorization_code"
-        }
-
-        token_response = requests.post(token_base_url, data=token_params)
-        token_response_json = token_response.json()
-
-        if token_response.status_code != 200:
-            logger.error(f"Token Request Error\n"
-                         f"status_code : {token_response.status_code} | response : {token_response_json}")
-            raise CustomException(ExceptionType.GOOGLE_LOGIN_ERROR)
-
-        access_token = token_response_json.get('access_token')
-        token_type = token_response_json.get('token_type')
-
-        if not access_token or not token_type:
-            logger.error(f"Token Request Error\n"
-                         f"access_token : {access_token} | token_type : {token_type}")
-            raise CustomException(ExceptionType.GOOGLE_LOGIN_ERROR)
-
-        user_response = requests.get(user_base_url, headers={"Authorization": f"{token_type} {access_token}"})
-        user_response_json = user_response.json()
-
-        if user_response.status_code != 200:
-            logger.error(f"User Request Error\n"
-                         f"status_code : {user_response.status_code} | response : {user_response_json}")
-            raise CustomException(ExceptionType.GOOGLE_LOGIN_ERROR)
+        access_token, token_type = GoogleOAuthHandler().get_access_token(code)
+        user_response_json = GoogleOAuthHandler().get_user_info(token_type, access_token)
 
         sns_id = user_response_json.get('id')
         email = user_response_json.get('email')
         name = user_response_json.get('name')
         profile_image = user_response_json.get('picture')
 
-        if not sns_id or not name:
-            logger.error(f"User Request Error\n"
-                         f"sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}")
+        if not AuthService._check_enough_info(sns_id, name):
+            logger.error(f'User Request Error\n'
+                         f'sns_id : {sns_id} | email : {email} | name : {name}')
             raise CustomException(ExceptionType.GOOGLE_NOT_ENOUGH_INFO)
 
         already_user = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
@@ -74,56 +38,17 @@ class AuthService:
             # JWT 발급
             return
 
-        user = AppUser(sns_id=sns_id, sns_kind=SnsKind.GOOGLE.value, email=email, username=name, profile_path=profile_image)
+        user = AppUser(sns_id=sns_id, sns_kind=SnsKind.GOOGLE.value, email=email, username=name,
+                       profile_path=profile_image)
         get_session().add(user)
         get_session().commit()
-        logger.info(f"Google Signup Success\n"
-                    f"sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}")
+        logger.info(f'Google Signup Success\n'
+                    f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}')
 
     @staticmethod
     def naver_login(code: str, state: str):
-        token_base_url = "https://nid.naver.com/oauth2.0/token"
-        user_base_url = "https://openapi.naver.com/v1/nid/me"
-        client_id = os.environ.get('NAVER_CLIENT_ID')
-        client_secret_key = os.environ.get('NAVER_SECRET_KEY')
-        redirect_uri = os.environ.get('NAVER_REDIRECT_URI')
-
-        if not client_id or not client_secret_key or not redirect_uri:
-            logger.info(f"Naver Environment Error\n"
-                        f"client_id : {client_id} | client_secret_key : {client_secret_key} | redirect_uri : {redirect_uri}")
-            raise CustomException(ExceptionType.NAVER_ENVIRONMENT_ERROR)
-
-        token_params = {
-            "code": code,
-            "client_id": client_id,
-            "client_secret": client_secret_key,
-            "grant_type": "authorization_code",
-            "state": state
-        }
-
-        token_response = requests.post(token_base_url, data=token_params)
-        token_response_json = token_response.json()
-
-        if token_response.status_code != 200:
-            logger.error(f"Token Request Error\n"
-                         f"status_code : {token_response.status_code} | response : {token_response_json}")
-            raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
-
-        access_token = token_response_json.get('access_token')
-        token_type = token_response_json.get('token_type')
-
-        if not access_token or not token_type:
-            logger.error(f"Token Request Error\n"
-                         f"access_token : {access_token} | token_type : {token_type}")
-            raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
-
-        user_response = requests.get(user_base_url, headers={"Authorization": f"{token_type} {access_token}"})
-        user_response_json = user_response.json()
-
-        if user_response.status_code != 200:
-            logger.error(f"User Request Error\n"
-                         f"status_code : {user_response.status_code} | response : {user_response_json}")
-            raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
+        access_token, token_type = NaverOAuthHandler().get_access_token(code, state=state)
+        user_response_json = NaverOAuthHandler().get_user_info(token_type, access_token)
 
         sns_id = user_response_json.get('response').get('id')
         name = user_response_json.get('response').get('name')
@@ -131,9 +56,9 @@ class AuthService:
         profile_image = user_response_json.get('response').get('profile_image')
         phone_number = str(user_response_json.get('response').get('mobile')).replace('-', '')
 
-        if not sns_id or not name:
-            logger.error(f"User Request Error\n"
-                         f"sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image} | phone_number : {phone_number}")
+        if not AuthService._check_enough_info(sns_id, name):
+            logger.error(f'User Request Error\n'
+                         f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image} | phone_number : {phone_number}')
             raise CustomException(ExceptionType.NAVER_NOT_ENOUGH_INFO)
 
         already_user = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
@@ -147,9 +72,42 @@ class AuthService:
         birth_month, birth_day = map(int, response_birthday.split('-'))
         age = get_age(int(birth_year), birth_month, birth_day)
 
-        user = AppUser(sns_id=sns_id, sns_kind=SnsKind.NAVER.value, email=email, username=name, profile_path=profile_image, phone_number=phone_number, age=age)
+        user = AppUser(sns_id=sns_id, sns_kind=SnsKind.NAVER.value, email=email, username=name,
+                       profile_path=profile_image, phone_number=phone_number, age=age)
         get_session().add(user)
         get_session().commit()
 
-        logger.info(f"Naver Signup Success\n"
-                    f"sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image} | phone_number : {phone_number} | age : {age}")
+        logger.info(f'Naver Signup Success\n'
+                    f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image} | phone_number : {phone_number} | age : {age}')
+
+    @staticmethod
+    def kakao_login(code: str, state: str):
+        access_token, token_type = KakaoOAuthHandler().get_access_token(code, state=state)
+        user_response_json = KakaoOAuthHandler().get_user_info(token_type, access_token)
+
+        sns_id = user_response_json.get('id')
+        name = user_response_json.get('properties').get('nickname')
+        profile_image = user_response_json.get('properties').get('profile_image')
+
+        if not AuthService._check_enough_info(sns_id, name):
+            logger.error(f'User Request Error\n'
+                         f'sns_id : {sns_id} | name : {name} | profile_image : {profile_image}')
+            raise CustomException(ExceptionType.KAKAO_NOT_ENOUGH_INFO)
+
+        already_user = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
+        if already_user:
+            # JWT 발급
+            return
+
+        user = AppUser(sns_id=sns_id, sns_kind=SnsKind.KAKAO.value, username=name, profile_path=profile_image)
+        get_session().add(user)
+        get_session().commit()
+        logger.info(f'Kakao Signup Success\n'
+                    f'sns_id : {sns_id} | name : {name} | profile_image : {profile_image}')
+
+    @staticmethod
+    def _check_enough_info(sns_id: str, name: str) -> bool:
+        if not sns_id or not name:
+            return False
+
+        return True
