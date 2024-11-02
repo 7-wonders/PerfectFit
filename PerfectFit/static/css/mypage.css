@@ -127,4 +127,9 @@ a {
     line-height: normal;
 }
 
+/*유저 정보 박스 테이블의 열을 맞추기 위한 css*/
+.user-information td:nth-child(2) {
+    width: 65%;
+}
+
 
