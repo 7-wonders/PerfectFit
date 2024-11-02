@@ -43,6 +43,15 @@
     line-height: normal;
 }
 
+.Medium-16 {
+    color: #222;
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
 .Medium-16-Medium {
     color: rgba(0, 0, 0, 0.70);
     font-family: "Noto Sans KR";
@@ -167,13 +176,29 @@
 .title-category {
     color : #175FE6;
     font-size : 13px;
+    -webkit-text-stroke-width: 0.3px;
+    font-style: normal;
+    font-weight : 500;
 }
 
 
+.badge-text {
+    color: #fff;
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
 
-
-
-
+.resume-write-box-header {
+    color: #000;
+    font-family: "Noto Sans KR";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
 .highlight {
     color : #E72B2B;
 }
