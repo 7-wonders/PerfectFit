@@ -3,3 +3,4 @@
 __pycache__/
 PerfectFit/.env
 .run/
+PerfectFit/logs/output/**
