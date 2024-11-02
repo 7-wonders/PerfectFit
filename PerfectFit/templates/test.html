@@ -5,9 +5,7 @@
         <title>Title</title>
     </head>
     <body>
-        <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=612257654391-u0sdoln946fed6ot6qtjvd7ghmivm1jc.apps.googleusercontent.com&redirect_uri=http://localhost:5000/auth/google&response_type=code&scope=email profile">구글 로그인</a>
-        {% if error %}
-        <h1>{error}</h1>
-        {% endif %}
+        <a href="http://localhost:5000/auth/login/google?redirect_uri=http://localhost:5000/auth/test">구글 로그인</a>
+        <a href="http://localhost:5000/auth/login/naver?redirect_uri=http://localhost:5000/auth/test">네이버 로그인</a>
     </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, send_from_directory
 from dotenv import load_dotenv
 
 from database.config import Config, db  # Config와 db를 import
@@ -7,23 +7,22 @@ from controllers.auth_controller import auth_bp
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
+from logs.log import Logger
 from utils.check_api import is_api_call
 
 load_dotenv()
 
 app = Flask(__name__)
+
 app.config.from_object(Config)  # config.py의 Config 클래스를 사용
+
+app.register_blueprint(user_bp)
+app.register_blueprint(auth_bp, url_prefix="/auth")
 
 # 데이터베이스 초기화
 db.init_app(app)
 
-# UserController의 Blueprint 등록
-app.register_blueprint(user_bp)
-app.register_blueprint(auth_bp)
-
-from flask import Flask, send_from_directory
-
-app = Flask(__name__)
+logger = Logger("exception")
 
 
 @app.route('/favicon.ico')
@@ -33,6 +32,8 @@ def favicon():
 
 @app.errorhandler(CustomException)
 def custom_exception(e: CustomException):
+    logger.error(e.__str__())
+
     if is_api_call(request):
         response = e.__to_json__()
         response.status_code = e.exception.status_code
