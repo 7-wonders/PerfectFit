@@ -1,5 +1,6 @@
 from flask import flash, abort
 from flask_sqlalchemy.pagination import Pagination
+from sqlalchemy.orm import joinedload
 
 from database.config import get_session
 from domain.models.app_user import AppUser
@@ -15,16 +16,17 @@ class UserService:
 
     @staticmethod
     def get_user(user_id: int) -> AppUser | None:
-        user: AppUser = get_session().query(AppUser).filter( ##
-            AppUser.user_id == user_id
-        ).first()
-        user.project_experience ## 이거 변수에 담아야 함 SQL Alchemy 관계설정
+        user: AppUser = get_session().query(AppUser).options(
+            joinedload(AppUser.project_experience)
+        ).filter(AppUser.user_id == user_id).first()
 
         if not user:
             raise CustomException(ExceptionType.NOT_FOUND_USER)
 
-        return user
+        # project_experience를 변수에 담기
+        project_experiences = user.project_experience  # SQLAlchemy 관계로 가져온 데이터
 
+        return user
 
 
 
