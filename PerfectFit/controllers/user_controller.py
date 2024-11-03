@@ -20,7 +20,7 @@ def get_users():
     )
 
     return render_template("users.html", users=asdict(response))
-
+    # 데이터베이스에서 가져온 사용자 목록을 users.html 템플릿에 전달하여 사용자 목록을 렌더링합니다. asdict를 통해 데이터를 딕셔너리 형태로 변환합니다.
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
