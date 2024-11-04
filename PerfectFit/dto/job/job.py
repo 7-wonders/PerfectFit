@@ -19,5 +19,17 @@ class JobDto:
             major_category: str
             sub_category: str
         @dataclass
+        class OccupationInfoWithJob:
+            occupation_id: int
+            occupation_name: str
+            major_category: str
+            sub_category: str
+            jobs: list['JobDto.Response.JobInfo'] = None
+            total: int = 0
+        @dataclass
         class Occupations:
             occupations: list['JobDto.Response.OccupationInfo']
+
+        @dataclass
+        class OccupationsWithJob:
+            occupations: list['JobDto.Response.OccupationInfoWithJob']
