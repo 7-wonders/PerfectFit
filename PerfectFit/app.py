@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 from database.config import Config, db  # Config와 db를 import
 from controllers.user_controller import user_bp
 from controllers.job_controller import job_bp
+from controllers.interview_controller import interview_bp
 from dotenv import load_dotenv
 
 from exception.custom_exception import CustomException
@@ -22,6 +23,9 @@ app.register_blueprint(user_bp)
 
 # JobController의 Blueprint 등록
 app.register_blueprint(job_bp)
+
+# InterviewController의 Blueprint 등록
+app.register_blueprint(interview_bp)
 
 
 @app.errorhandler(CustomException)

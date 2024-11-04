@@ -1,0 +1,29 @@
+from dataclasses import dataclass
+
+
+class InterviewDto:
+    class Request:
+        @dataclass
+        class postInterviewAnswer:
+            questionId: int
+            answer: str
+    class Response:
+        @dataclass
+        class interview:
+            interview_id: int
+            user_id: int
+            resume_id: int
+            job_id: int
+            company_id: int
+            title: str
+            level: str
+
+        @dataclass
+        class interviewQuestion :
+            question_id: int
+            question: str
+
+        @dataclass
+        class questions :
+            questions: list['InterviewDto.Response.interviewQuestion']
+            total : int

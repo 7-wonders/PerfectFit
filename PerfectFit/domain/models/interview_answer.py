@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class InterviewAnswer(db.Model):
     __tablename__ = "interview_answer"
 
-    improvement_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    answer_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
     question_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("interview_question.question_id", onupdate="CASCADE", ondelete="CASCADE"),
