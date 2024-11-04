@@ -6,6 +6,9 @@ class ExceptionType(Enum):
     NAVER_NOT_ENOUGH_INFO = ("400", "B40011", "필수 정보가 부족합니다. e.g. id, email, name")
     KAKAO_NOT_ENOUGH_INFO = ("400", "B40012", "필수 정보가 부족합니다. e.g. id, email, name")
 
+    EXPIRED_TOKEN = ("401", "U40110", "토큰이 만료되었습니다.")
+    INVALID_TOKEN = ("401", "U40111", "토큰이 유효하지 않습니다.")
+
     NOT_FOUND_USER = ("404", "N40410", "사용자를 찾을 수 없습니다.")
 
     INTERNAL_SERVER_ERROR = ("500", "I500", "서버 내부에서 오류가 발생하였습니다.")
