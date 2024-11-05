@@ -1,15 +1,16 @@
 import os
-from typing import Mapping
+from typing import Mapping, Optional
 
 import requests
 
 from constants.sns_kind import SnsKind
-from database.config import get_session
+from config.config_mysql import get_session
 from domain.models import AppUser
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
 from utils.age import get_age
+from utils.jwt_factory import JWTFactory
 from utils.oauth.google_oauth_handler import GoogleOAuthHandler
 from utils.oauth.kakao_oauth_handler import KakaoOAuthHandler
 from utils.oauth.naver_oauth_handler import NaverOAuthHandler
@@ -18,8 +19,10 @@ logger = Logger('auth_service')
 
 
 class AuthService:
+    _jwt_factory = JWTFactory()
+
     @staticmethod
-    def google_login(code: str):
+    def google_login(code: str) -> tuple[str, str]:
         access_token, token_type = GoogleOAuthHandler().get_access_token(code)
         user_response_json = GoogleOAuthHandler().get_user_info(token_type, access_token)
 
@@ -33,17 +36,23 @@ class AuthService:
                          f'sns_id : {sns_id} | email : {email} | name : {name}')
             raise CustomException(ExceptionType.GOOGLE_NOT_ENOUGH_INFO)
 
-        already_user = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
-        if already_user:
-            # JWT 발급
-            return
+        with get_session() as session:
+            already_user: Optional[AppUser] = session.query(AppUser).filter(AppUser.sns_id == sns_id).first()
+            if already_user:
+                return AuthService._jwt_factory.create_token(already_user.user_id)
 
-        user = AppUser(sns_id=sns_id, sns_kind=SnsKind.GOOGLE.value, email=email, username=name,
-                       profile_path=profile_image)
-        get_session().add(user)
-        get_session().commit()
-        logger.info(f'Google Signup Success\n'
-                    f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}')
+            user = AppUser(sns_id=sns_id, sns_kind=SnsKind.GOOGLE.value, email=email, username=name,
+                           profile_path=profile_image)
+            get_session().add(user)
+            get_session().flush()
+
+            logger.info(f'Google Signup Success\n'
+                        f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}')
+
+            access_token, refresh_token = AuthService._jwt_factory.create_token(user.user_id)
+
+            get_session().commit()
+            return access_token, refresh_token
 
     @staticmethod
     def naver_login(code: str, state: str):

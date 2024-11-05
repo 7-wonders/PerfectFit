@@ -1,6 +1,6 @@
 from typing import Optional, List, TYPE_CHECKING
 
-from database.config import db
+from config.config_mysql import db
 
 from sqlalchemy import CheckConstraint, func
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, TINYINT, DECIMAL, TIMESTAMP, CHAR

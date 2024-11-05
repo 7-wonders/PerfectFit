@@ -1,7 +1,7 @@
 from flask import flash, abort
 from flask_sqlalchemy.pagination import Pagination
 
-from database.config import get_session
+from config.config_mysql import get_session
 from domain.models.app_user import AppUser
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType

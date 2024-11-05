@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, url_for, send_from_directory
 from dotenv import load_dotenv
 
-from database.config import Config, db  # Config와 db를 import
+from config.config_mysql import Config, db  # Config와 db를 import
 from controllers.user_controller import user_bp
 from controllers.auth_controller import auth_bp
 
