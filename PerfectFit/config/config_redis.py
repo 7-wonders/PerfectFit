@@ -18,11 +18,27 @@ class Redis:
         self._username = os.getenv("REDIS_USERNAME")
         self._password = os.getenv("REDIS_PASSWORD")
 
-        if not all([self._hostname, self._port, self._username, self._password]):
-            logger.error("Redis 설정 중 문제가 발생하였습니다.")
+        missing_vars = [var_name for var_name, var_value in
+                        zip(["REDIS_HOST", "REDIS_PORT", "REDIS_USERNAME", "REDIS_PASSWORD"],
+                            [self._hostname, self._port, self._username, self._password]) if var_value is None]
+
+        if missing_vars:
+            logger.error(f"Missing Redis configuration: {', '.join(missing_vars)}")
             raise CustomException(ExceptionType.REDIS_CONF_ERROR)
 
-    def _get_instance(self):
+        self._connection_pool = redis.ConnectionPool(
+            host=self._hostname,
+            port=self._port,
+            username=self._username,
+            password=self._password,
+            max_connections=100,
+            socket_timeout=5,
+            socket_connect_timeout=5,
+            decode_responses=True
+        )
+        self._redis_instance = redis.Redis(connection_pool=self._connection_pool)
+
+    def get_instance(self):
         """
             Redis 객체를 반환하는 메소드
 
@@ -31,36 +47,22 @@ class Redis:
             소켓 연결 타임아웃: 5초
             반환 타입: 문자열 (UTF-8)
         """
-        try:
-            connection_pool = redis.ConnectionPool(
-                host=self._hostname,
-                port=self._port,
-                username=self._username,
-                password=self._password,
-                max_connections=100,
-                socket_timeout=5,
-                socket_connect_timeout=5,
-                decode_responses=True
-            )
-            return redis.Redis(connection_pool=connection_pool)
-        except Exception as e:
-            logger.error(f"Redis 객체 생성 중 문제가 발생하였습니다. {e}")
-            raise CustomException(ExceptionType.REDIS_CONF_ERROR)
+        return self._redis_instance
 
-    def save(self, key: str, value: str, expire_time: int):
+    def save_with_unix_timestamp(self, key: str, value: str, unix_time: int):
         """
         Redis에 데이터를 저장합니다.
-        :param expire_time: 만료 시간 설정 (초 단위: 3600 = 1시간)
+        :param unix_time: 만료 시간 설정 (Unix Timestamp)
         :param key: 식별자
         :param value: 저장할 값
         :return: None
         """
         try:
-            self._get_instance().set(key, value)
+            self.get_instance().set(key, value)
             # 만료 시간 설정 (Unix Timestamp)
-            self._get_instance().expireat(key, expire_time)
-        except Exception as e:
-            logger.error(f"Redis 데이터 저장 중 문제가 발생하였습니다. {e}")
+            self.get_instance().expireat(key, unix_time)
+        except redis.RedisError as e:
+            logger.error(f"Redis 저장 중 '{key}' key 값을 가진 데이터에서 문제가 발생하였습니다. {e}")
             raise CustomException(ExceptionType.REDIS_DATA_ERROR)
 
     def get(self, key: str):
@@ -70,9 +72,9 @@ class Redis:
         :return: 조회된 값
         """
         try:
-            return self._get_instance().get(key)
-        except Exception as e:
-            logger.error(f"Redis 데이터 조회 중 문제가 발생하였습니다. {e}")
+            return self.get_instance().get(key)
+        except redis.RedisError as e:
+            logger.error(f"Redis 데이터 조회 중 '{key}' key 값을 가진 데이터에서 문제가 발생하였습니다. {e}")
             raise CustomException(ExceptionType.REDIS_DATA_ERROR)
 
     def delete(self, key: str):
@@ -82,7 +84,7 @@ class Redis:
         :return: None
         """
         try:
-            self._get_instance().delete(key)
-        except Exception as e:
-            logger.error(f"Redis 데이터 삭제 중 문제가 발생하였습니다. {e}")
+            self.get_instance().delete(key)
+        except redis.RedisError as e:
+            logger.error(f"Redis 데이터 삭제 중 '{key}' key 값을 가진 데이터에서 문제가 발생하였습니다. {e}")
             raise CustomException(ExceptionType.REDIS_DATA_ERROR)

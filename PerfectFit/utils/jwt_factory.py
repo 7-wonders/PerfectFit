@@ -14,7 +14,6 @@ logger = Logger("jwt_factory")
 
 class JWTFactory:
     """ JWT 토큰을 생성하고, 검증하는 클래스 """
-    _redis = Redis()
     _key_refresh_token = "refreshtoken:"
 
     def __init__(self):
@@ -22,6 +21,7 @@ class JWTFactory:
         self._refresh_secret_key = os.getenv("REFRESH_TOKEN_SECRET_KEY")
         self._algorithm = os.getenv("JWT_ALGORITHM") or "HS256"
         self._issuer = os.getenv("JWT_ISSUER") or "localhost"
+        self._redis = Redis().get_instance()
 
     def create_token(self, user_id: int) -> dict:
         """
@@ -53,7 +53,7 @@ class JWTFactory:
             algorithm=self._algorithm,
         )
 
-        self._redis.save(
+        self._redis.save_with_unix_timestamp(
             f"{self._key_refresh_token}{user_id}",
             refresh_token,
             int(refresh_token_expiration.timestamp())
@@ -74,7 +74,7 @@ class JWTFactory:
         secret_key = self._access_secret_key
 
         try:
-            decoded = jwt.decode(access_token, secret_key, algorithm=self._algorithm, issuer=self._issuer)
+            decoded = jwt.decode(access_token, secret_key, algorithms=[self._algorithm], issuer=self._issuer)
             user_id = decoded.get('user_id')
 
             if user_id is None:
@@ -94,7 +94,7 @@ class JWTFactory:
         secret_key = self._refresh_secret_key
 
         try:
-            decoded = jwt.decode(refresh_token, secret_key, algorithm=self._algorithm, issuer=self._issuer)
+            decoded = jwt.decode(refresh_token, secret_key, algorithms=[self._algorithm], issuer=self._issuer)
 
             if user_id != decoded.get('user_id'):
                 raise CustomException(ExceptionType.INVALID_TOKEN)
