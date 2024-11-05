@@ -27,6 +27,19 @@ def get_questions(resume_id: int):
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
+@interview_bp.route('/interview/ispublic/<interview_id>', methods=['GET'])
+def get_is_public(interview_id: int):
+
+    interviewList = InterviewService.get_is_public(interview_id)
+    response: InterviewDto.Response.isPublicList = InterviewDto.Response.isPublicList(
+        interviews= [interview for interview in interviewList]
+    )
+
+    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+
+    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+
 @interview_bp.route('/interview', methods=['POST'])
 def post_question_answer():
 

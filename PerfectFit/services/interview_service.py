@@ -30,3 +30,16 @@ class InterviewService:
 
         get_session().add(interview_answer)
         get_session().commit()
+
+    # questionId: int
+    # title: str
+    # answer: str
+    # isPublic: bool
+    @staticmethod
+    def get_is_public(interview_id: int) -> list[InterviewDto.Response.isPublicInterview] :
+        questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
+        isPublicInterviews = []
+        for question in questions:
+            isPublicInterviewDto = InterviewDto.Response.isPublicInterview(question.question_id, question.question, question.interview_answers.answer, question.is_shared)
+            isPublicInterviews.append(isPublicInterviewDto)
+        return isPublicInterviews

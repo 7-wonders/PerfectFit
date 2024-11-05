@@ -27,3 +27,14 @@ class InterviewDto:
         class questions :
             questions: list['InterviewDto.Response.interviewQuestion']
             total : int
+
+        @dataclass
+        class isPublicInterview :
+            questionId: int
+            title: str
+            answer: str
+            isPublic: bool
+
+        @dataclass
+        class isPublicList :
+            interviews: list['InterviewDto.Response.isPublicInterview']
