@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Blueprint, render_template, request, redirect, session, make_response
 
 from exception.custom_exception import CustomException
@@ -48,7 +50,7 @@ def login_google():
 def auth_google_callback():
     code = request.args.get('code', type=str)
     error = request.args.get('error', type=str)
-    redirect_uri = session.get('redirect_uri')
+    redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
     session.pop('redirect_uri', None)
 
     if error == 'access_denied':
@@ -71,7 +73,7 @@ def auth_naver():
 def auth_naver_callback():
     code = request.args.get('code', type=str)
     state = request.args.get('state', type=str)
-    redirect_uri = session.get('redirect_uri')
+    redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
     session.pop('redirect_uri', None)
 
     if not code or not state:
@@ -93,7 +95,7 @@ def auth_kakao_callback():
     error = request.args.get('error', type=str)
     state = request.args.get('state', type=str)
 
-    redirect_uri = session.get('redirect_uri')
+    redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
     session.pop('redirect_uri', None)
 
     if error == 'access_denied':
@@ -104,3 +106,32 @@ def auth_kakao_callback():
 
     token_info = AuthService.kakao_login(code, state)
     return _create_response(redirect_uri, token_info)
+
+
+@auth_bp.route('/', methods=['POST'])
+def renew_token():
+    refresh_token = request.cookies.get('refresh_token')
+
+    if not refresh_token:
+        raise CustomException(ExceptionType.INVALID_TOKEN)
+
+    token_info = AuthService.renew_token(refresh_token)
+
+    response = make_response()
+    response.set_cookie(
+        'access_token',
+        token_info['access_token'],
+        httponly=True,
+        secure=True,
+        expires=token_info['access_token_exp']
+    )
+    response.set_cookie(
+        'refresh_token',
+        token_info['refresh_token'],
+        httponly=True,
+        secure=True,
+        expires=token_info['refresh_token_exp']
+    )
+    response.status_code = HTTPStatus.NO_CONTENT
+
+    return response

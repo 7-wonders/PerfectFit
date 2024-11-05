@@ -7,6 +7,9 @@ from datetime import datetime, timedelta, timezone
 from config.config_redis import Redis
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
+from logs.log import Logger
+
+logger = Logger("jwt_factory")
 
 
 class JWTFactory:
@@ -42,7 +45,7 @@ class JWTFactory:
         )
 
         refresh_token = jwt.encode({
-            'rand_key': str(uuid.uuid4()),
+            'user_id': user_id,
             'exp': refresh_token_expiration,
             'iss': self._issuer,
         },
@@ -92,9 +95,8 @@ class JWTFactory:
 
         try:
             decoded = jwt.decode(refresh_token, secret_key, algorithm=self._algorithm, issuer=self._issuer)
-            rand_key = decoded.get('rand_key')
 
-            if rand_key is None:
+            if user_id != decoded.get('user_id'):
                 raise CustomException(ExceptionType.INVALID_TOKEN)
 
             saved_refresh_token = self._redis.get(f"{self._key_refresh_token}{user_id}")
@@ -109,27 +111,29 @@ class JWTFactory:
             self._redis.delete(f"{self._key_refresh_token}{user_id}")
             raise CustomException(ExceptionType.INVALID_TOKEN)
 
-    def renew_access_token(self, user_id: int, access_token: str, refresh_token: str) -> dict:
+    def renew_token(self, refresh_token: str) -> dict:
         """
             AccessToken을 갱신하는 메소드 (RTR 기법)
-            갱신된 AccessToken을 반환합니다.
+            갱신된 AccessToken과 RefreshToken을 반환합니다.
         """
         try:
-            decoded_access_token = jwt.decode(access_token, self._access_secret_key, algorithm=self._algorithm,
-                                               issuer=self._issuer, options={'verify_exp': False})
-            decoded_refresh_token = jwt.decode(refresh_token, self._refresh_secret_key, algorithm=self._algorithm,
+            decoded_refresh_token = jwt.decode(refresh_token, self._refresh_secret_key, algorithms=[self._algorithm],
                                                   issuer=self._issuer, options={'verify_exp': False})
+            user_id = decoded_refresh_token.get('user_id')
 
-            if decoded_access_token.get('user_id') != user_id or decoded_refresh_token.get('rand_key') is None:
-                self._redis.delete(f"{self._key_refresh_token}{user_id}")
+            if user_id is None:
                 raise CustomException(ExceptionType.INVALID_TOKEN)
 
-            # AT와 RT의 만료시간이 지나지 않았다면
-            if datetime.utcnow() <= datetime.fromtimestamp(decoded_access_token.get('exp'))\
-                    and datetime.utcnow() <= datetime.fromtimestamp(decoded_refresh_token.get('exp')):
+            redis_refresh_token = self._redis.get(f"{self._key_refresh_token}{user_id}")
+            if redis_refresh_token is None or redis_refresh_token != refresh_token:
+                raise CustomException(ExceptionType.INVALID_TOKEN)
+
+            # RT의 만료 시간이 지났다면, 삭제 후 에러 반환
+            if datetime.utcnow() > datetime.fromtimestamp(decoded_refresh_token.get('exp')):
                 self._redis.delete(f"{self._key_refresh_token}{user_id}")
                 raise CustomException(ExceptionType.INVALID_TOKEN)
 
             return self.create_token(user_id)
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as e:
+            logger.error(f"Invalid Token {e}")
             raise CustomException(ExceptionType.INVALID_TOKEN)

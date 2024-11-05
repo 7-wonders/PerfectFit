@@ -121,3 +121,8 @@ class AuthService:
                     f'sns_id : {sns_id} | name : {name} | profile_image : {profile_image}')
 
         return _create_token(user.user_id)
+
+    @staticmethod
+    def renew_token(refresh_token: str) -> dict:
+        jwt_factory = JWTFactory()
+        return jwt_factory.renew_token(refresh_token)
