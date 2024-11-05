@@ -10,36 +10,49 @@ from domain.models.interview_question import InterviewQuestion
 from domain.models.interview_answer import InterviewAnswer
 
 class InterviewService:
+
     @staticmethod
     def get_questions(resume_id: int) -> list[InterviewDto.Response.interviewQuestion]:
-        interviews = get_session().query(Interview).filter(Interview.resume_id == resume_id).all()
+        # join을 해서 results에 일단 담기
+        results = (
+            get_session()
+            .query(InterviewQuestion)
+            .join(Interview, InterviewQuestion.interview_id == Interview.interview_id)
+            .filter(Interview.resume_id == resume_id)
+            .all()
+        )
 
-        questions = []
+        questions = [
+            InterviewDto.Response.interviewQuestion(question.question_id, question.question)
+            for question in results
+        ]
 
-        for interview in interviews:
-            interview_questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview.interview_id).all()
-            for interview_question in interview_questions:
-                questions.append(InterviewDto.Response.interviewQuestion(interview_question.question_id,interview_question.question))
-        # if not jobs :
-        #     raise CustomException(ExceptionType.NOT_FOUND_JOB)
+        if not questions :
+            raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
         return questions
 
     @staticmethod
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
         interview_answer: InterviewAnswer = InterviewAnswer(question_id=question_answer.questionId, answer=question_answer.answer)
 
-        get_session().add(interview_answer)
-        get_session().commit()
+        try:
+            get_session().add(interview_answer)
+            get_session().commit()
+        except Exception as e:
+            get_session().rollback()
+            print("Exception Cause :: ",e)
+            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
-    # questionId: int
-    # title: str
-    # answer: str
-    # isPublic: bool
     @staticmethod
     def get_is_public(interview_id: int) -> list[InterviewDto.Response.isPublicInterview] :
         questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
         isPublicInterviews = []
+
+        if not questions :
+            raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
+
         for question in questions:
-            isPublicInterviewDto = InterviewDto.Response.isPublicInterview(question.question_id, question.question, question.interview_answers.answer, question.is_shared)
-            isPublicInterviews.append(isPublicInterviewDto)
+            for answer in question.interview_answers :
+                isPublicInterviewDto = InterviewDto.Response.isPublicInterview(question.question_id, question.question, answer .answer, question.is_shared)
+                isPublicInterviews.append(isPublicInterviewDto)
         return isPublicInterviews
