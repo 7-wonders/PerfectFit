@@ -44,8 +44,7 @@ def custom_exception(e: CustomException):
 
 @app.errorhandler(Exception)
 def internal_server_error_page(e: Exception):
-    # Log로 변경 해야함.
-    print("Error : ", e.__str__())
+    logger.error(e.__str__())
 
     exception = CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 

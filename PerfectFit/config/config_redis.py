@@ -56,7 +56,9 @@ class Redis:
         :return: None
         """
         try:
-            self._get_instance().set(key, value, ex=expire_time)
+            self._get_instance().set(key, value)
+            # 만료 시간 설정 (Unix Timestamp)
+            self._get_instance().expireat(key, expire_time)
         except Exception as e:
             logger.error(f"Redis 데이터 저장 중 문제가 발생하였습니다. {e}")
             raise CustomException(ExceptionType.REDIS_DATA_ERROR)
