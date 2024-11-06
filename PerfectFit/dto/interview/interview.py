@@ -7,6 +7,10 @@ class InterviewDto:
         class postInterviewAnswer:
             questionId: int
             answer: str
+        @dataclass
+        class patchInterviewTitle:
+            interviewId: int
+            title: str
     class Response:
         @dataclass
         class interview:

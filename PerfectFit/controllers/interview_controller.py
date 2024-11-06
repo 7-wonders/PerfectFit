@@ -63,6 +63,16 @@ def post_question_answer():
 
     return Response(' ', status=201, content_type='application/json; charset=utf-8')
 
+@interview_bp.route('/interview/<interview_id>/title', methods=['PATCH'])
+def patch_title(interview_id: int):
+
+    data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
+    patch_interview_title = InterviewDto.Request.patchInterviewTitle(**data, interviewId=interview_id)
+
+    InterviewService.patch_interview_title(patch_interview_title)
+
+    return Response(' ', status=204, content_type='application/json; charset=utf-8')
+
 @interview_bp.route('/spell', methods=['GET'])
 def spell_tester() -> None:
     text = "안녕 하세요. 만나서 반갑 습니다."

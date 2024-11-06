@@ -44,6 +44,25 @@ class InterviewService:
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
+    def patch_interview_title(interview_title: InterviewDto.Request.patchInterviewTitle) -> None:
+
+        try:
+            session = get_session()
+            interview = session.query(Interview).filter_by(interview_id=interview_title.interviewId).first()
+
+            if interview is None:
+                raise CustomException(ExceptionType.NOT_FOUND_QUESTION) # interview not found로 바꾸어야함
+
+            interview.title = interview_title.title
+
+            # 변경 사항 커밋
+            session.commit()
+        except Exception as e:
+            get_session().rollback()
+            print("Exception Cause :: ",e)
+            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+
+    @staticmethod
     def get_is_public(interview_id: int) -> list[InterviewDto.Response.isPublicInterview] :
         questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
         isPublicInterviews = []
