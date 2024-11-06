@@ -79,45 +79,20 @@ class JWTFactory:
             if user_id is None:
                 raise CustomException(ExceptionType.INVALID_TOKEN)
 
-            return user_id
+            return int(user_id)
         except jwt.ExpiredSignatureError:
             raise CustomException(ExceptionType.EXPIRED_TOKEN)
         except jwt.InvalidTokenError:
             raise CustomException(ExceptionType.INVALID_TOKEN)
 
-    def verify_refresh_token(self, user_id: int, refresh_token: str) -> bool:
+    def _verify_refresh_token(self, refresh_token: str) -> int:
         """
             RefreshToken을 검증하는 메소드
             성공 여부를 반환합니다.
         """
-        secret_key = self._refresh_secret_key
-
-        try:
-            decoded = jwt.decode(refresh_token, secret_key, algorithms=[self._algorithm], issuer=self._issuer)
-
-            if user_id != decoded.get('user_id'):
-                raise CustomException(ExceptionType.INVALID_TOKEN)
-
-            saved_refresh_token = self._redis.get(f"{self._key_refresh_token}{user_id}")
-            if saved_refresh_token is None or saved_refresh_token != refresh_token:
-                raise CustomException(ExceptionType.INVALID_TOKEN)
-
-            return True
-        except jwt.ExpiredSignatureError:
-            self._redis.delete(f"{self._key_refresh_token}{user_id}")
-            raise CustomException(ExceptionType.EXPIRED_TOKEN)
-        except jwt.InvalidTokenError:
-            self._redis.delete(f"{self._key_refresh_token}{user_id}")
-            raise CustomException(ExceptionType.INVALID_TOKEN)
-
-    def renew_token(self, refresh_token: str) -> dict:
-        """
-            AccessToken을 갱신하는 메소드 (RTR 기법)
-            갱신된 AccessToken과 RefreshToken을 반환합니다.
-        """
         try:
             decoded_refresh_token = jwt.decode(refresh_token, self._refresh_secret_key, algorithms=[self._algorithm],
-                                                  issuer=self._issuer, options={'verify_exp': False})
+                                               issuer=self._issuer, options={'verify_exp': False})
             user_id = decoded_refresh_token.get('user_id')
 
             if user_id is None:
@@ -132,6 +107,21 @@ class JWTFactory:
                 self._redis.delete(f"{self._key_refresh_token}{user_id}")
                 raise CustomException(ExceptionType.INVALID_TOKEN)
 
+            return int(user_id)
+        except jwt.ExpiredSignatureError:
+            self._redis.delete(f"{self._key_refresh_token}{user_id}")
+            raise CustomException(ExceptionType.EXPIRED_TOKEN)
+        except jwt.InvalidTokenError:
+            self._redis.delete(f"{self._key_refresh_token}{user_id}")
+            raise CustomException(ExceptionType.INVALID_TOKEN)
+
+    def renew_token(self, refresh_token: str) -> dict:
+        """
+            AccessToken을 갱신하는 메소드 (RTR 기법)
+            갱신된 AccessToken과 RefreshToken을 반환합니다.
+        """
+        try:
+            user_id = self._verify_refresh_token(refresh_token)
             return self.create_token(user_id)
         except jwt.InvalidTokenError as e:
             logger.error(f"Invalid Token {e}")
