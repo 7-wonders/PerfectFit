@@ -1,5 +1,4 @@
 import os
-import uuid
 import jwt
 
 from datetime import datetime, timedelta, timezone
@@ -21,7 +20,7 @@ class JWTFactory:
         self._refresh_secret_key = os.getenv("REFRESH_TOKEN_SECRET_KEY")
         self._algorithm = os.getenv("JWT_ALGORITHM") or "HS256"
         self._issuer = os.getenv("JWT_ISSUER") or "localhost"
-        self._redis = Redis().get_instance()
+        self._redis = Redis()
 
     def create_token(self, user_id: int) -> dict:
         """
