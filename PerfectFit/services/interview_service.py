@@ -51,7 +51,7 @@ class InterviewService:
             interview = session.query(Interview).filter_by(interview_id=interview_title.interviewId).first()
 
             if interview is None:
-                raise CustomException(ExceptionType.NOT_FOUND_QUESTION) # interview not found로 바꾸어야함
+                raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
 
             interview.title = interview_title.title
 
