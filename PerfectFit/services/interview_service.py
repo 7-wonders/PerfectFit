@@ -56,3 +56,18 @@ class InterviewService:
                 isPublicInterviewDto = InterviewDto.Response.isPublicInterview(question.question_id, question.question, answer .answer, question.is_shared)
                 isPublicInterviews.append(isPublicInterviewDto)
         return isPublicInterviews
+
+    @staticmethod
+    def get_improvement(interview_id: int) -> list[InterviewDto.Response.improvement] :
+        questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
+        improvementList = []
+
+        if not questions :
+            raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
+
+        for question in questions:
+            for improvement in question.interview_improvements :
+                if improvement :
+                    improvementDto = InterviewDto.Response.improvement(improvement.improvement_id, question.question_id, improvement.answer, improvement.improvement)
+                    improvementList.append(improvementDto)
+        return improvementList

@@ -38,3 +38,14 @@ class InterviewDto:
         @dataclass
         class isPublicList :
             interviews: list['InterviewDto.Response.isPublicInterview']
+
+        @dataclass
+        class improvement:
+            improvementId: int
+            questionId: int
+            answer: str
+            improvement: str
+
+        @dataclass
+        class improvementList :
+            improvements: list['InterviewDto.Response.improvement']

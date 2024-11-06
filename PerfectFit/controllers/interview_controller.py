@@ -39,6 +39,18 @@ def get_is_public(interview_id: int):
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
+@interview_bp.route('/interview/improvement/<interview_id>', methods=['GET'])
+def get_improvement(interview_id: int):
+
+    improvementList = InterviewService.get_improvement(interview_id)
+    response: InterviewDto.Response.improvementList = InterviewDto.Response.improvementList(
+        improvements= [improvement for improvement in improvementList]
+    )
+
+    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+
+    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
 
 @interview_bp.route('/interview', methods=['POST'])
 def post_question_answer():
