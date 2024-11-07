@@ -19,13 +19,6 @@ def custom_exception(e: CustomException):
     logger.error(e.__str__())
 
     if e.exception.value == ExceptionType.INVALID_TOKEN.value or e.exception.value == ExceptionType.EXPIRED_TOKEN.value:
-        print("=========================================")
-        print(request)
-        print(is_api_call(request))
-        print(request.content_type)
-        print(request.accept_mimetypes)
-        print("=========================================")
-
         if is_api_call(request):
             response = e.__to_json__()
             response.status_code = e.exception.status_code
