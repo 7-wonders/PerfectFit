@@ -128,6 +128,15 @@
     line-height: normal;
 }
 
+.Medium-28-light {
+    color: rgba(0, 0, 0, 0.50);
+    font-family: "Noto Sans KR";
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
 .Bold-20 {
     color: #000;
     -webkit-text-stroke-width: 1px;
