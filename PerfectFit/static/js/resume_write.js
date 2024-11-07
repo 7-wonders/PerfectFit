@@ -1,5 +1,3 @@
-let sectionCount = 1;
-
 
 // 내용 길어지면 form 세로 크기 증가
 function adjustHeight(element) {
@@ -22,7 +20,7 @@ function addSection() {
     sectionCount++; // 섹션 카운트 증가
 
     // 아래 요소 제거
-    const existingButtons = document.querySelectorAll('.add-content-box button');
+    const existingButtons = document.querySelectorAll('.add-section-btn');
     existingButtons.forEach(button => button.remove());
 
     // 항상 아래에 있어야 하는 요소 제거
@@ -34,23 +32,24 @@ function addSection() {
 
     // 추가할 항목
     const newSection = document.createElement('div');
-    newSection.className = "uk-margin";
+    newSection.className = "resume-container";
+    newSection.id = `resume-write-container${sectionCount}`;
 
     newSection.innerHTML = `
         <div class="resume-write-header">
-            <label class="uk-form-label" for="resume-write-title-${sectionCount}">항목${sectionCount}</label>
+            <label class="uk-form-label" for="resume-write-title-${sectionCount}">항목${sectionCount + 1}</label>
             <button type="button" class="Regular-16-light custom-button" id="ai-resume-write-${sectionCount}" onclick="aiResumeWrite(${sectionCount})"><img src="${iconAiPath}"/>AI 작성하기</button>
         </div>
         <div class="uk-form-controls">
-            <input class="uk-input" id="resume-write-title-${sectionCount}" type="text" placeholder="제목을 입력해주세요." name="title_${sectionCount}">
+            <input class="uk-input" id="resume-write-title-${sectionCount}" type="text" placeholder="제목을 입력해주세요." name="sections[][title]">
         </div>
         <div class="uk-margin">
             <div class="uk-form-controls">
-                <textarea class="uk-textarea resume-content" id="resume-write-content-${sectionCount}" placeholder="내용을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)" name="content_${sectionCount}"></textarea>
+                <textarea class="uk-textarea resume-content" id="resume-write-content-${sectionCount}" placeholder="내용을 입력해주세요." name="sections[][content]" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)" name="content_${sectionCount}"></textarea>
             </div>
         </div>
-        <div class="add-content-box">
-            <button type="button" class="Regular-16-light" onclick="addSection()">+섹션 추가하기</button>
+        <div class="right-box">
+            <button type="button" class="Regular-16-light custom-button add-section-btn" onclick="addSection()">+섹션 추가하기</button>
         </div>
     `;
 
@@ -63,7 +62,6 @@ function addSection() {
     if (resumeSubmitBox) form.appendChild(resumeSubmitBox);
 }
 
-
 // 직군을 선택하면 그에 해당하는 직업만 나오게 하기
 function updateJobList() {
     var selectedOccupation = document.getElementById("resume-write-occupation").value;
@@ -71,15 +69,6 @@ function updateJobList() {
 
     // 직업 목록 초기화
     jobSelect.innerHTML = '';
-
-    // 선택된 직군에 맞는 직업 목록 가져오기
-    var jobList = {
-        '직군1': ['직업1-1', '직업1-2', '직업1-3'],
-        '직군2': ['직업2-1', '직업2-2'],
-        '직군3': ['직업3-1', '직업3-2', '직업3-3', '직업3-4'],
-        '직군4': ['직업4-1', '직업4-2'],
-        '직군5': ['직업5-1', '직업5-2', '직업5-3']
-    };
 
     if (selectedOccupation in jobList) {
         jobList[selectedOccupation].forEach(function(job) {
@@ -125,41 +114,36 @@ function aiResumeWrite(idNumber) {
     }
 }
 
+// 주요 키워드 뱃지 추가(뱃지 삭제 시 id값 업데이트 기능 추가)
 document.addEventListener('DOMContentLoaded', function() {
     const inputElement = document.getElementById('resume-write-keyword');
     const badgeContainer = document.querySelector('.badge-container');
     let badgeCounter = 1; // 배지 ID를 위한 카운터 초기화
 
     if (inputElement && badgeContainer) {
-        // 입력 필드의 너비를 동적으로 조정하는 함수
         function adjustInputWidth() {
-            // 임시 요소를 사용하여 텍스트의 실제 너비를 계산
             const tempSpan = document.createElement('span');
             tempSpan.style.visibility = 'hidden';
             tempSpan.style.whiteSpace = 'pre';
             tempSpan.style.fontSize = window.getComputedStyle(inputElement).fontSize;
             tempSpan.textContent = inputElement.value || inputElement.placeholder;
             document.body.appendChild(tempSpan);
-            const width = tempSpan.offsetWidth + 10; // 약간의 여유 공간 추가
+            const width = tempSpan.offsetWidth + 10;
             document.body.removeChild(tempSpan);
 
-            // 입력 필드의 너비 설정
             inputElement.style.width = `${width}px`;
         }
 
-        // 초기 너비 조정
         adjustInputWidth();
 
-        // 입력 이벤트에 너비 조정 함수 연결
         inputElement.addEventListener('input', adjustInputWidth);
 
         inputElement.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // 기본 Enter 키 동작 방지
+                event.preventDefault();
                 const text = inputElement.value.trim();
 
                 if (text) {
-                    // 입력 필드를 컨테이너에서 제거
                     badgeContainer.removeChild(inputElement);
 
                     const badge = document.createElement('div');
@@ -169,31 +153,51 @@ document.addEventListener('DOMContentLoaded', function() {
                     badgeText.className = 'badge-text';
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeText.textContent = text;
+                    badgeText.name = "keywords[]";
 
                     const badgeButton = document.createElement('button');
                     badgeButton.className = 'badge-button';
                     badgeButton.id = `badge-btn-${badgeCounter}`;
                     badgeButton.textContent = 'X';
 
-                    // 배지의 삭제 버튼에 이벤트 리스너 추가
                     badgeButton.addEventListener('click', function() {
                         badgeContainer.removeChild(badge);
+                        updateBadgeIDs(); // ID 재정렬 함수 호출
                     });
 
                     badge.appendChild(badgeText);
                     badge.appendChild(badgeButton);
                     badgeContainer.appendChild(badge);
 
-                    // 입력 필드를 컨테이너의 맨 아래에 다시 추가
                     badgeContainer.appendChild(inputElement);
 
-                    badgeCounter++; // 다음 배지를 위한 카운터 증가
-                    inputElement.value = ''; // 입력 필드 초기화
-                    adjustInputWidth(); // 초기화 후 너비 조정
-                    inputElement.focus(); // 입력 필드로 커서 이동
+                    badgeCounter++;
+                    inputElement.value = '';
+                    adjustInputWidth();
+                    inputElement.focus();
                 }
             }
         });
+
+        // 삭제 후 ID 재정렬 및 최신 badgeCounter 업데이트 함수
+        function updateBadgeIDs() {
+            const badges = badgeContainer.querySelectorAll('.badge');
+            badgeCounter = 1;
+
+            badges.forEach(badge => {
+                const badgeText = badge.querySelector('.badge-text');
+                const badgeButton = badge.querySelector('.badge-button');
+
+                if (badgeText && badgeButton) {
+                    badgeText.id = `badge-text-${badgeCounter}`;
+                    badgeButton.id = `badge-btn-${badgeCounter}`;
+                    badgeCounter++;
+                }
+            });
+
+            // badgeCounter가 마지막 배지 ID + 1로 설정되도록 조정
+            badgeCounter = badges.length + 1;
+        }
     } else {
         console.error('Element with ID "resume-write-keyword" or "badge-container" not found.');
     }
