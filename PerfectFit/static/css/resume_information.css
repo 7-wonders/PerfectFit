@@ -1,0 +1,150 @@
+.container {
+    display: flex;
+    width: 50rem;
+    flex-direction: column;
+    /*align-items: center;*/
+    font-family: 'Noto Sans KR', sans-serif;
+    margin : 30px auto;
+    gap : 45px;
+    padding : 12px 16px;
+}
+
+.uk-form-label {
+    color: #000;
+    font-family: "Noto Sans KR";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+/*인풋 박스 내용 폰트 Regular-16-light로 지정*/
+.uk-input {
+    color: rgba(0, 0, 0, 0.50);
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border : 1px solid #96C0FF;
+}
+
+.uk-select {
+    border : 1px solid #96C0FF;
+}
+
+/*여러 줄 써야하는 form 크기 조정*/
+.custom-textarea {
+    min-height : 120px;
+    border-radius: 8px;
+    border : 1px solid #96C0FF;
+}
+
+/*인풋 박스 세로 사이즈 조절하기*/
+.uk-input, .uk-select:not([multiple]):not([size]) {
+    min-height: 50px !important;
+    border-radius: 8px;
+}
+
+/*항목 추가하기 위치를 맞추기 위한 css*/
+.add-content-box {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/*섹션 추가하기 버튼 스타일 제거*/
+.add-content-box button {
+    background: none;
+    border: none;
+}
+
+/*선택 폼 화살표 모양 변경 및 위치 조정*/
+.uk-select:not([multiple]):not([size]) {
+    background-image: url("/static/img/down_arrow.svg");
+    background-position: right 20px center;
+    cursor : pointer;
+}
+
+/*키워드 div를 인풋박스로 보이게 하기*/
+.keyword-input-box {
+    background: #fff;
+    color: #666;
+    border : 1px solid #96C0FF;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    border-radius: 8px;
+}
+
+/*badge 전체를 담을 div*/
+.badge-container {
+    display: flex;
+    gap : 5px;
+    flex-wrap: wrap;
+}
+
+/*badge 한 개가 들어있는 div*/
+.badge {
+    background: #2B7FFF;
+    display: flex;
+    justify-content: space-between;
+    padding : 5px 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+/*input창은 입력 커서만 보이게 하기*/
+.keyword-input {
+    border : none;
+    outline : none;
+    display: inline-block;
+    height: 40px;
+    width : auto;
+    min-width: 50px;
+    max-width: 100%;
+}
+
+/*뱃지 삭제 버튼*/
+.badge-button {
+    margin-left: 5px;
+    pointer-events: auto; /* 버튼 클릭이 가능하도록 설정 */
+    cursor: pointer;
+    background: none;
+    border: none;
+    color : #fff;
+    font-size : 13px;
+}
+
+.submit-btn-box {
+    display: flex;
+    justify-content: space-between;
+}
+
+.resume-information-submit {
+    border-radius: 8px;
+    background-color: #FCFCFD;
+    border : 1px solid #F1F1F3;
+    color: rgba(0, 0, 0, 0.50);
+    padding : 12px 36px;
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.resume-information-back {
+    border-radius: 8px;
+    background-color: #2B7FFF;
+    border : none;
+    color: #fff;
+    padding : 12px 36px;
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
