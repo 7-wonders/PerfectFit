@@ -14,13 +14,56 @@ logger = Logger("jwt_factory")
 class JWTFactory:
     """ JWT 토큰을 생성하고, 검증하는 클래스 """
     _key_refresh_token = "refreshtoken:"
+    _conf_names = [
+        "ACCESS_TOKEN_PRIVATE_KEY_NAME",
+        "ACCESS_TOKEN_PUBLIC_KEY_NAME",
+        "REFRESH_TOKEN_PRIVATE_KEY_NAME",
+        "REFRESH_TOKEN_PUBLIC_KEY_NAME",
+    ]
+    _instance = None
+    _access_private_key = None
+    _access_public_key = None
+    _refresh_private_key = None
+    _refresh_public_key = None
+    _algorithm = None
+    _issuer = None
+    _redis = None
 
-    def __init__(self):
-        self._access_secret_key = os.getenv("ACCESS_TOKEN_SECRET_KEY")
-        self._refresh_secret_key = os.getenv("REFRESH_TOKEN_SECRET_KEY")
-        self._algorithm = os.getenv("JWT_ALGORITHM") or "HS256"
-        self._issuer = os.getenv("JWT_ISSUER") or "localhost"
-        self._redis = Redis()
+    @classmethod
+    def initialize_pool(cls):
+        if cls._instance is None:
+            cls._validate_environment_variables()
+
+            cls._access_private_key = cls._load_key(os.getenv(cls._conf_names[0]))
+            cls._access_public_key = cls._load_key(os.getenv(cls._conf_names[1]))
+            cls._refresh_private_key = cls._load_key(os.getenv(cls._conf_names[2]))
+            cls._refresh_public_key = cls._load_key(os.getenv(cls._conf_names[3]))
+
+            cls._algorithm = os.getenv("JWT_ALGORITHM") or "RS256"
+            cls._issuer = os.getenv("JWT_ISSUER") or "localhost"
+
+            cls._initialize_redis()
+            cls._instance = JWTFactory()
+
+    @classmethod
+    def _validate_environment_variables(cls):
+        missing_vars = [var for var in cls._conf_names if not os.getenv(var)]
+        if missing_vars:
+            logger.error(f"Missing JWT configuration: {', '.join(missing_vars)}")
+            raise CustomException(ExceptionType.JWT_CONF_ERROR)
+
+    @classmethod
+    def _load_key(cls, key_name):
+        try:
+            with open(key_name, "r") as f:
+                return f.read().strip()
+        except Exception as e:
+            logger.error(f"Error loading key file {key_name}: {str(e)}")
+            raise CustomException(ExceptionType.JWT_CONF_ERROR)
+
+    @classmethod
+    def _initialize_redis(cls):
+        cls._redis = Redis()
 
     def create_token(self, user_id: int) -> dict:
         """
@@ -39,7 +82,7 @@ class JWTFactory:
             'exp': access_token_expiration,
             'iss': self._issuer,
         },
-            self._access_secret_key,
+            self._access_private_key,
             algorithm=self._algorithm,
         )
 
@@ -48,7 +91,7 @@ class JWTFactory:
             'exp': refresh_token_expiration,
             'iss': self._issuer,
         },
-            self._refresh_secret_key,
+            self._refresh_private_key,
             algorithm=self._algorithm,
         )
 
@@ -70,10 +113,8 @@ class JWTFactory:
             AccessToken을 검증하는 메소드
             user_id를 반환합니다.
         """
-        secret_key = self._access_secret_key
-
         try:
-            decoded = jwt.decode(access_token, secret_key, algorithms=[self._algorithm], issuer=self._issuer)
+            decoded = jwt.decode(access_token, self._access_public_key, algorithms=[self._algorithm], issuer=self._issuer)
             user_id = decoded.get('user_id')
 
             if user_id is None:
@@ -90,8 +131,10 @@ class JWTFactory:
             RefreshToken을 검증하는 메소드
             성공 여부를 반환합니다.
         """
+        user_id = None
+
         try:
-            decoded_refresh_token = jwt.decode(refresh_token, self._refresh_secret_key, algorithms=[self._algorithm],
+            decoded_refresh_token = jwt.decode(refresh_token, self._refresh_public_key, algorithms=[self._algorithm],
                                                issuer=self._issuer, options={'verify_exp': False})
             user_id = decoded_refresh_token.get('user_id')
 
@@ -109,10 +152,12 @@ class JWTFactory:
 
             return int(user_id)
         except jwt.ExpiredSignatureError:
-            self._redis.delete(f"{self._key_refresh_token}{user_id}")
+            if user_id:
+                self._redis.delete(f"{self._key_refresh_token}{user_id}")
             raise CustomException(ExceptionType.EXPIRED_TOKEN)
         except jwt.InvalidTokenError:
-            self._redis.delete(f"{self._key_refresh_token}{user_id}")
+            if user_id:
+                self._redis.delete(f"{self._key_refresh_token}{user_id}")
             raise CustomException(ExceptionType.INVALID_TOKEN)
 
     def renew_token(self, refresh_token: str) -> dict:

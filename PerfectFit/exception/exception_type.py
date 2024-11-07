@@ -20,6 +20,7 @@ class ExceptionType(Enum):
     KAKAO_ENVIRONMENT_ERROR = ("500", "I50015", "카카오 환경 변수가 설정되지 않았습니다.")
     REDIS_CONF_ERROR = ("500", "I50020", "Redis 설정 중 문제가 발생하였습니다.")
     REDIS_DATA_ERROR = ("500", "I50021", "Redis 데이터 조작 중 오류가 발생하였습니다.")
+    JWT_CONF_ERROR = ("500", "I50030", "JWT 설정 중 문제가 발생하였습니다.")
 
     @property
     def status_code(self):

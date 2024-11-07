@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import Blueprint, render_template, request, redirect, session, make_response
+from flask import Blueprint, render_template, request, redirect, session, make_response, Response
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -15,7 +15,7 @@ auth_bp = Blueprint('auth', __name__)
 logger = Logger('auth_controller')
 
 
-def _create_response(redirect_uri: str, token_info: dict) -> make_response:
+def _create_response(redirect_uri: str, token_info: dict) -> Response:
     response = make_response(redirect(redirect_uri))
     response.set_cookie(
         'access_token',

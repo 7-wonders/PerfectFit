@@ -6,6 +6,7 @@ from config.config_redis import Redis
 from controllers.user_controller import user_bp
 from controllers.auth_controller import auth_bp
 from exception.exception_handler import eh_bp
+from utils.jwt_factory import JWTFactory
 
 load_dotenv()
 
@@ -22,6 +23,7 @@ db.init_app(app)
 
 # Redis 초기화
 Redis().initialize_pool()
+JWTFactory().initialize_pool()
 
 
 @app.route('/favicon.ico')
