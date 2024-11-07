@@ -1,0 +1,43 @@
+.container {
+    display: flex;
+    width: 90rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Sans KR', sans-serif;
+    margin : 250px auto;
+}
+
+.uk-card-body {
+    display: flow-root;
+     padding: 0 !important;
+}
+
+a {
+    text-decoration-line: none !important;
+}
+
+.resume-select-img {
+    height: 300px;
+}
+
+.select-card {
+    display: flex;
+    flex-direction: column;
+    width : auto;
+    height : auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
+}
+
+.resume-select-text {
+    padding : 50px 15px;
+}
+
+.resume-select-box {
+    gap : 60px;
+}
+
+a:hover {
+    filter: drop-shadow(0px 4px 12px #010D3E);
+}
