@@ -6,6 +6,7 @@ from config.config_redis import Redis
 from controllers.user_controller import user_bp
 from controllers.auth_controller import auth_bp
 from exception.exception_handler import eh_bp
+from middlewares.auth_middleware import authenticate_request
 from utils.jwt_factory import JWTFactory
 
 load_dotenv()
@@ -17,6 +18,8 @@ app.config.from_object(Config)  # config.py의 Config 클래스를 사용
 app.register_blueprint(eh_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(auth_bp, url_prefix="/auth")
+
+app.before_request(authenticate_request)
 
 # 데이터베이스 초기화
 db.init_app(app)
