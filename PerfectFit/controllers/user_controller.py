@@ -51,3 +51,15 @@ def get_resume_write():
 @user_bp.route('/user/resume/select')
 def get_resume_select():
     return render_template("resume_select.html")
+
+@user_bp.route('/user/resume/information/all')
+def get_resume_information_all():
+    return render_template("resume_information_all.html")
+
+@user_bp.route('/user/resume/information/part')
+def get_resume_information_part():
+    return render_template("resume_information_part.html")
+
+@user_bp.route('/user/resume/loading')
+def get_resume_load_loading():
+    return render_template("resume_loading.html")
