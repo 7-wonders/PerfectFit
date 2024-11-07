@@ -11,6 +11,14 @@ class InterviewDto:
         class patchInterviewTitle:
             interviewId: int
             title: str
+        @dataclass
+        class spellCheck:
+            content: str
+
+        @dataclass
+        class isPublicIds:
+            questionIds: list[int]
+
     class Response:
         @dataclass
         class interview:
@@ -53,3 +61,7 @@ class InterviewDto:
         @dataclass
         class improvementList :
             improvements: list['InterviewDto.Response.improvement']
+
+        @dataclass
+        class spellChecked:
+            translatedContent: str

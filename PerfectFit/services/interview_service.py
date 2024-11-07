@@ -9,6 +9,9 @@ from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
 from domain.models.interview_answer import InterviewAnswer
 
+from hanspell import spell_checker
+import re, requests
+
 class InterviewService:
 
     @staticmethod
@@ -63,6 +66,45 @@ class InterviewService:
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
+    def patch_ispublic(questionIds: list[int]) -> None:
+
+        try:
+            session = get_session()
+
+            for questionId in questionIds:
+                interview_question = session.query(InterviewQuestion).filter_by(question_id=questionId).first()
+                if interview_question is None:
+                    raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
+
+                interview_question.is_shared = True
+
+            session.commit()
+
+        except Exception as e:
+            get_session().rollback()
+            print("Exception Cause :: ",e)
+            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+
+    @staticmethod
+    def patch_ispublic_cancel(questionIds: list[int]) -> None:
+
+        try:
+            session = get_session()
+
+            for questionId in questionIds:
+                interview_question = session.query(InterviewQuestion).filter_by(question_id=questionId).first()
+                if interview_question is None:
+                    raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
+
+                interview_question.is_shared = False
+
+            session.commit()
+
+        except Exception as e:
+            get_session().rollback()
+            print("Exception Cause :: ",e)
+            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+    @staticmethod
     def get_is_public(interview_id: int) -> list[InterviewDto.Response.isPublicInterview] :
         questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
         isPublicInterviews = []
@@ -90,3 +132,40 @@ class InterviewService:
                     improvementDto = InterviewDto.Response.improvement(improvement.improvement_id, question.question_id, improvement.answer, improvement.improvement)
                     improvementList.append(improvementDto)
         return improvementList
+
+    @staticmethod
+    def spell_check(spellCheckDto: InterviewDto.Request.spellCheck) -> str:
+        text = spellCheckDto.content
+
+        try:
+            passportKey = get_passport_key()
+
+            # 맞춤법 검사 수행
+            result = spell_checker.check(text, passportKey)
+            print(result)
+            print(result.checked)
+            return result.checked
+        except Exception as e:
+            print("Error occurred:", e)
+
+
+def get_passport_key():
+    """네이버에서 '네이버 맞춤법 검사기' 페이지에서 passportKey를 획득
+
+        - 네이버에서 '네이버 맞춤법 검사기'를 띄운 후
+        html에서 passportKey를 검색하면 값을 찾을 수 있다.
+
+        - 찾은 값을 spell_checker.py 48 line에 적용한다.
+    """
+
+    url = "https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=네이버+맞춤법+검사기"
+    res = requests.get(url)
+
+    html_text = res.text
+
+    match = re.search(r'passportKey=([^&"}]+)', html_text)
+    if match:
+        passport_key = match.group(1)
+        return passport_key
+    else:
+        return False
