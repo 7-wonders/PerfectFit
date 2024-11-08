@@ -16,4 +16,3 @@ class Cookie:
     @staticmethod
     def delete(response: Response, key: str):
         response.delete_cookie(key)
-        return response
