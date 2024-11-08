@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, Response
+from flask import Flask, render_template, send_from_directory
 from dotenv import load_dotenv
 
 from config.config_mysql import Config, db  # Config와 db를 import

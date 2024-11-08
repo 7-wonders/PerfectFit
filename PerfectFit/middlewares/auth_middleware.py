@@ -1,7 +1,9 @@
-from flask import request
+from flask import request, make_response, redirect
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
+from utils.cookie import Cookie
+from utils.jwt_factory import JWTFactory
 
 auth_required_routes = {
     # 'URL명': ['HTTP 메소드1', 'HTTP 메소드2', ...],
@@ -20,4 +22,17 @@ def authenticate_request():
         access_token = request.cookies.get('access_token')
 
         if not access_token:
-            raise CustomException(ExceptionType.INVALID_TOKEN)
+            refresh_token = request.cookies.get('refresh_token')
+
+            if not refresh_token:
+                raise CustomException(ExceptionType.INVALID_TOKEN)
+
+            jwt_factory = JWTFactory()
+            token_info = jwt_factory.renew_token(refresh_token)
+            jwt_factory.delete_refresh_token(refresh_token)
+
+            response = make_response(redirect(request.url))
+            Cookie.save(response, 'access_token', token_info['access_token'], token_info['access_token_exp'])
+            Cookie.save(response, 'refresh_token', token_info['refresh_token'], token_info['refresh_token_exp'])
+
+            return response

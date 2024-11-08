@@ -7,6 +7,7 @@ from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
 from services.auth_service import AuthService
+from utils.cookie import Cookie
 from utils.oauth.google_oauth_handler import GoogleOAuthHandler
 from utils.oauth.kakao_oauth_handler import KakaoOAuthHandler
 from utils.oauth.naver_oauth_handler import NaverOAuthHandler
@@ -28,22 +29,8 @@ def _create_response(token_info: dict, redirect_uri: str | None) -> Response:
     else:
         response = make_response()
 
-    response.set_cookie(
-        'access_token',
-        token_info['access_token'],
-        httponly=True,
-        secure=True,
-        samesite='LAX',
-        expires=token_info['access_token_exp']
-    )
-    response.set_cookie(
-        'refresh_token',
-        token_info['refresh_token'],
-        httponly=True,
-        secure=True,
-        samesite='LAX',
-        expires=token_info['refresh_token_exp']
-    )
+    Cookie.save(response, 'access_token', token_info['access_token'], token_info['access_token_exp'])
+    Cookie.save(response, 'refresh_token', token_info['refresh_token'], token_info['refresh_token_exp'])
 
     return response
 
