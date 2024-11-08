@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, redirect, make_response
 
 from dto.user.user import UserDto
 from services.user_service import UserService
+from utils.jwt_factory import JWTFactory
 
 user_bp = Blueprint('user', __name__)
 
@@ -39,5 +40,10 @@ def logout():
     response = make_response(redirect(redirect_uri))
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
+
+    refresh_token = request.cookies.get('refresh_token')
+    if refresh_token:
+        jwt_factory = JWTFactory()
+        jwt_factory.delete_refresh_token(refresh_token)
 
     return response

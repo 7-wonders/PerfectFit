@@ -1,3 +1,4 @@
+import os
 from http import HTTPStatus
 
 from flask import Blueprint, render_template, request, redirect, session, make_response, Response
@@ -13,15 +14,26 @@ from utils.oauth.naver_oauth_handler import NaverOAuthHandler
 auth_bp = Blueprint('auth', __name__)
 
 logger = Logger('auth_controller')
+env = os.getenv('FLASK_ENV')
+
+if env == 'development':
+    domain = 'localhost'
+else:
+    domain = os.getenv('PRODUCTION_URL')
 
 
-def _create_response(redirect_uri: str, token_info: dict) -> Response:
-    response = make_response(redirect(redirect_uri))
+def _create_response(token_info: dict, redirect_uri: str | None) -> Response:
+    if redirect_uri:
+        response = make_response(redirect(redirect_uri))
+    else:
+        response = make_response()
+
     response.set_cookie(
         'access_token',
         token_info['access_token'],
         httponly=True,
         secure=True,
+        samesite='LAX',
         expires=token_info['access_token_exp']
     )
     response.set_cookie(
@@ -29,6 +41,7 @@ def _create_response(redirect_uri: str, token_info: dict) -> Response:
         token_info['refresh_token'],
         httponly=True,
         secure=True,
+        samesite='LAX',
         expires=token_info['refresh_token_exp']
     )
 
@@ -60,7 +73,7 @@ def auth_google_callback():
         raise CustomException(ExceptionType.GOOGLE_LOGIN_ERROR)
 
     token_info = AuthService.google_login(code)
-    return _create_response(redirect_uri, token_info)
+    return _create_response(token_info, redirect_uri)
 
 
 @auth_bp.route('/login/naver', methods=['GET'])
@@ -80,7 +93,7 @@ def auth_naver_callback():
         raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
 
     token_info = AuthService.naver_login(code, state)
-    return _create_response(redirect_uri, token_info)
+    return _create_response(token_info, redirect_uri)
 
 
 @auth_bp.route('/login/kakao', methods=['GET'])
@@ -105,7 +118,7 @@ def auth_kakao_callback():
         raise CustomException(ExceptionType.KAKAO_LOGIN_ERROR)
 
     token_info = AuthService.kakao_login(code, state)
-    return _create_response(redirect_uri, token_info)
+    return _create_response(token_info, redirect_uri)
 
 
 @auth_bp.route('/', methods=['POST'])
@@ -117,21 +130,7 @@ def renew_token():
 
     token_info = AuthService.renew_token(refresh_token)
 
-    response = make_response()
-    response.set_cookie(
-        'access_token',
-        token_info['access_token'],
-        httponly=True,
-        secure=True,
-        expires=token_info['access_token_exp']
-    )
-    response.set_cookie(
-        'refresh_token',
-        token_info['refresh_token'],
-        httponly=True,
-        secure=True,
-        expires=token_info['refresh_token_exp']
-    )
+    response = _create_response(token_info, None)
     response.status_code = HTTPStatus.NO_CONTENT
 
     return response

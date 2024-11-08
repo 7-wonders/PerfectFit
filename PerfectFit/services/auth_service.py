@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 
+from flask import request
+
 from constants.sns_kind import SnsKind
 from config.config_mysql import get_session
 from domain.models import AppUser
@@ -28,6 +30,16 @@ def _create_token(user_id: int) -> dict:
     return jwt_factory.create_token(user_id)
 
 
+def _delete_refresh_token():
+    refresh_token = request.cookies.get('refresh_token')
+
+    if not refresh_token:
+        return
+
+    jwt_factory = JWTFactory()
+    jwt_factory.delete_refresh_token(refresh_token)
+
+
 class AuthService:
     @staticmethod
     def google_login(code: str) -> dict:
@@ -46,6 +58,7 @@ class AuthService:
 
         already_user: Optional[AppUser] = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
         if already_user:
+            _delete_refresh_token()
             return _create_token(already_user.user_id)
 
         user = AppUser(sns_id=sns_id, sns_kind=SnsKind.GOOGLE.value, email=email, username=name,
@@ -56,7 +69,10 @@ class AuthService:
         logger.info(f'Google Signup Success\n'
                     f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}')
 
-        return _create_token(user.user_id)
+        token_info = _create_token(user.user_id)
+        _delete_refresh_token()
+
+        return token_info
 
     @staticmethod
     def naver_login(code: str, state: str) -> dict:
@@ -76,6 +92,7 @@ class AuthService:
 
         already_user = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
         if already_user:
+            _delete_refresh_token()
             return _create_token(already_user.user_id)
 
         # MM-DD 형식
@@ -92,7 +109,10 @@ class AuthService:
         logger.info(f'Naver Signup Success\n'
                     f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image} | phone_number : {phone_number} | age : {age}')
 
-        return _create_token(user.user_id)
+        token_info = _create_token(user.user_id)
+        _delete_refresh_token()
+
+        return token_info
 
     @staticmethod
     def kakao_login(code: str, state: str) -> dict:
@@ -111,6 +131,7 @@ class AuthService:
         already_user = get_session().query(AppUser).filter(AppUser.sns_id == sns_id).first()
 
         if already_user:
+            _delete_refresh_token()
             return _create_token(already_user.user_id)
 
         user = AppUser(sns_id=sns_id, sns_kind=SnsKind.KAKAO.value, username=name, profile_path=profile_image)
@@ -120,9 +141,15 @@ class AuthService:
         logger.info(f'Kakao Signup Success\n'
                     f'sns_id : {sns_id} | name : {name} | profile_image : {profile_image}')
 
-        return _create_token(user.user_id)
+        token_info = _create_token(user.user_id)
+        _delete_refresh_token()
+
+        return token_info
 
     @staticmethod
     def renew_token(refresh_token: str) -> dict:
         jwt_factory = JWTFactory()
-        return jwt_factory.renew_token(refresh_token)
+        token_info = jwt_factory.renew_token(refresh_token)
+        _delete_refresh_token()
+
+        return token_info
