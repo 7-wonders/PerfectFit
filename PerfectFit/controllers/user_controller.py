@@ -75,6 +75,20 @@ def get_info(user_id: int):
         ]
     )
 
-    # JSON 응답 생성
+
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+@user_bp.route('/user/profile')
+def get_profile():
+
+    user_id = request.headers.get("user_id")  # 토큰에서 user_id를 가져오는 코드입니다!
+
+    user = UserService.get_user(user_id)
+
+    response = {
+        "profilePath": user.profile_path # Response입니다.
+    }
+
+    json_response = json.dumps(response, ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
