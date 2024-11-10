@@ -1,6 +1,8 @@
+import os
 from dataclasses import asdict
 import json
-from flask import Blueprint, render_template, request, Response
+from flask import Blueprint, render_template, request, Response, current_app
+from werkzeug.utils import secure_filename
 
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
@@ -259,6 +261,79 @@ def send_verification_code():
 
     # 서비스 계층에서 이메일 인증 코드 발송을 처리
     VerificationService.send_verification_code(email)
+
+    # 성공 시 204 No Content 반환
+    return Response(status=204)
+
+@user_bp.route('/user/verify/compare', methods=['POST'])
+def verify_code():
+    # 요청 바디에서 이메일 주소와 인증 코드를 추출합니다.
+    data = request.get_json()
+    email = data.get("email")
+    verify_code = data.get("verifyCode")
+
+    # 필수 값 확인
+    if not email or not verify_code:
+        return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 서비스 계층에서 이메일 인증 코드 검증을 처리
+    is_valid = VerificationService.verify_code(email, verify_code)
+
+    if is_valid:
+        # 인증 성공 시 204 No Content 반환
+        return Response(status=204)
+    else:
+        # 인증 실패 시 400 Bad Request 반환
+        return Response(json.dumps({"error": "잘못된 인증 코드입니다."}), status=400, content_type='application/json; charset=utf-8')
+
+@user_bp.route('/user/profile', methods=['PATCH'])
+def update_profile_picture():
+    # 인증 토큰에서 사용자 ID 추출 (토큰 인증 방식에 따라 수정 가능)
+    user_id = request.headers.get("Authorization")  # 실제로는 토큰에서 사용자 ID 추출이 필요할 수 있음
+
+    # 요청 파일에서 프로필 이미지 파일 가져오기
+    if 'profile' not in request.files:
+        return Response(json.dumps({"error": "프로필 파일이 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    file = request.files['profile']
+    if file.filename == '':
+        return Response(json.dumps({"error": "유효한 파일이 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 파일명을 안전하게 처리하고, 파일 확장자 검증 (이미지 파일인지 확인)
+    filename = secure_filename(file.filename)
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+        return Response(json.dumps({"error": "지원되지 않는 파일 형식입니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 파일 저장 경로 설정
+    upload_folder = current_app.config['UPLOAD_FOLDER']  # 업로드 폴더는 config에 정의되어 있어야 함
+    file_path = os.path.join(upload_folder, filename)
+    file.save(file_path)
+
+    # 데이터베이스의 프로필 경로 업데이트
+    UserService.update_profile_picture(user_id, file_path)
+
+    # 성공 시 204 No Content 반환
+    return Response(status=204)
+
+from flask import Blueprint, request, Response, json
+from services.user_service import UserService
+
+user_bp = Blueprint('user', __name__)
+
+@user_bp.route('/user', methods=['DELETE'])
+def delete_user():
+    # 인증 토큰에서 사용자 ID 추출 (토큰 인증 방식에 따라 수정 가능)
+    user_id = request.headers.get("Authorization")  # 실제로는 토큰에서 사용자 ID 추출이 필요할 수 있음
+
+    # 필수 값 확인
+    if not user_id:
+        return Response(json.dumps({"error": "사용자 ID가 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 서비스 계층에서 사용자 삭제 처리
+    try:
+        UserService.delete_user(user_id)
+    except Exception as e:
+        return Response(json.dumps({"error": "사용자 삭제 중 오류가 발생했습니다."}), status=500, content_type='application/json; charset=utf-8')
 
     # 성공 시 204 No Content 반환
     return Response(status=204)

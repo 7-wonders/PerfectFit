@@ -238,3 +238,16 @@ class VerificationService:
         else:
             return False
 
+class UserService:
+    @staticmethod
+    def delete_user(user_id: int):
+        session = get_session()
+
+        # 사용자 조회
+        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+        if not user:
+            raise CustomException(ExceptionType.NOT_FOUND_USER)
+
+        # 사용자 삭제 (Hard Delete)
+        session.delete(user)
+        session.commit()

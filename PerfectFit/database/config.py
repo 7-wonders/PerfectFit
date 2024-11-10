@@ -18,3 +18,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:1234@localhost/perfectfit'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('FLASH_SECRET_KEY')
+
+    # 파일 업로드 폴더 설정
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
