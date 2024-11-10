@@ -166,3 +166,28 @@ def get_interviews():
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+@user_bp.route('/user/requirements', methods=['POST'])
+def create_requirements():
+    # 헤더에서 Authorization을 통해 ACCESS TOKEN을 가져옵니다
+    user_id = request.headers.get("user_id")  # 토큰에서 user_id 추출
+
+    # 요청 바디에서 데이터를 추출합니다.
+    data = request.get_json()
+    keywords = data.get("keywords", [])
+    job_id = data.get("jobId")
+    level = data.get("level")
+    pros = data.get("pros")
+    cons = data.get("cons")
+    prompt = data.get("prompt", "")  # 선택 필드
+    title = data.get("title", [])  # 선택 필드
+
+    # 필수 값 확인
+    if not keywords or job_id is None or not level or not pros or not cons:
+        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 데이터베이스에 저장하는 서비스 계층 호출
+    RequirementsService.create_requirements(user_id, keywords, job_id, level, pros, cons, prompt, title)
+
+    # 응답 생성
+    return Response(status=201)
