@@ -44,9 +44,13 @@ def get_mypage_interview():
 def get_mypage_information():
     return render_template("mypage_information.html", active_page = 'information')
 
-@user_bp.route('/user/resume/write')
-def get_resume_write():
-    return render_template("resume_write.html")
+@user_bp.route('/user/resume/write/part')
+def get_resume_write_part():
+    return render_template("resume_write_part.html")
+
+@user_bp.route('/user/resume/write/all')
+def get_resume_write_all():
+    return render_template("resume_write_all.html")
 
 @user_bp.route('/user/resume/select')
 def get_resume_select():

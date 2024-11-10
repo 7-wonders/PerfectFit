@@ -140,7 +140,7 @@ button {
     background: #2B7FFF;
     display: flex;
     justify-content: space-between;
-    padding : 5px 3px;
+    padding : 10px 10px;
     white-space: nowrap;
     flex-shrink: 0;
     align-items: center;
@@ -225,9 +225,11 @@ button {
 .save-btn {
     background-color: #fff;
     border-radius: 25px;
-    border : 1px solid #175FE6;
+    /*border : 1px solid #175FE6;*/
     padding : 0 15px;
-    color : #175FE6;
+    /*color : #175FE6;*/
+    border : 1px solid rgba(0,0,0, 0.50);
+    color: rgba(0, 0, 0, 0.50);
 }
 
 .uk-link, a {
