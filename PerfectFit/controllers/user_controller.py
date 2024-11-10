@@ -4,7 +4,8 @@ from flask import Blueprint, render_template, request, Response
 
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
-from services.user_service import UserService, ResumeService, InterviewService, RequirementsService
+from services.user_service import UserService, ResumeService, InterviewService, RequirementsService, \
+    NecessaryInfoService
 
 user_bp = Blueprint('user', __name__)
 
@@ -191,3 +192,26 @@ def create_requirements():
 
     # 응답 생성
     return Response(status=201)
+
+@user_bp.route('/user/necessary', methods=['POST'])
+def register_necessary_info():
+    # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
+    user_id = request.headers.get("user_id")
+
+    # 요청 바디에서 필수 정보 데이터를 추출합니다.
+    data = request.get_json()
+    name = data.get("name")
+    age = data.get("age")
+    email = data.get("email")
+    address = data.get("address")
+    detail_address = data.get("detailAddress")
+
+    # 필수 필드 유효성 검사를 수행합니다.
+    if not all([name, age, email, address]):
+        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
+    NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
+
+    # 응답: 성공 시 204 No Content를 반환
+    return Response(status=204)
