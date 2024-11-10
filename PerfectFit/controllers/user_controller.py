@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, Response
 
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
-from services.user_service import UserService
+from services.user_service import UserService, ResumeService
 
 user_bp = Blueprint('user', __name__)
 
@@ -95,23 +95,18 @@ def get_profile():
 
 
 @user_bp.route('/user/mypage/resume')
-def get_resumes():
-    # 페이지 번호와 개수를 쿼리 파라미터에서 가져옴
-    page = request.args.get('page', default=1, type=int)
-    count = request.args.get('count', default=10, type=int)
+def get_resumes(user_id: int):
+    page = request.args.get('page', type=int, default=1)
+    count = request.args.get('count', type=int, default=10)
 
-    # 인증된 사용자 ID 가져오기
-    user_id = request.headers.get("user_id")  # 토큰에서 사용자 ID를 추출
+    user = UserService.get_user(user_id)
+    resumes, total = ResumeService.get_resumes(user_id, page, count)
 
-    # 사용자 정보 및 이력서 목록 가져오기
-    user, resumes, total_resumes = UserService.get_user_and_resumes(user_id, page, count)
-
-    # 응답 데이터 구성
     response = {
         "user": {
-            "userId": user.user_id,
-            "username": user.username,
-            "profilePath": user.profile_path,
+            "userId": user.id,
+            "username": user.name,
+            "profilePath": user.profile_path
         },
         "resumes": [
             {
@@ -121,15 +116,15 @@ def get_resumes():
                 "likeCount": resume.like_count,
                 "occupation": {
                     "occupationId": resume.occupation_id,
-                    "occupationName": resume.occupation_name,
+                    "occupationName": resume.occupation_name
                 },
                 "job": resume.job,
                 "level": resume.level,
-                "createdTime": resume.created_time,
+                "createdTime": resume.created_time
             }
             for resume in resumes
         ],
-        "total": total_resumes
+        "total": total
     }
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)

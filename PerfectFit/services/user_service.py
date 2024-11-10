@@ -33,29 +33,31 @@ class UserService:
 
         return user
 
+class ResumeService:
     @staticmethod
-    def get_user_and_resumes(user_id: int, page: int, count: int):
+    def get_resumes(user_id: int, page: int, count: int):
         session = get_session()
 
-        # 사용자 정보를 가져옴.
-        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
-        if not user:
-            raise CustomException(ExceptionType.NOT_FOUND_USER)
-
-        # 자기소개서 목록, 전체 목록을 가져옴
+        # 자기소개서 목록을 가져오기 위한 쿼리
         resumes_query = session.query(Resume).filter(Resume.user_id == user_id)
-        total_resumes = resumes_query.count()
+        total = resumes_query.count()
 
-        resumes = resumes_query.offset((page - 1) * count).limit(count).all()
+        resumes = resumes_query.order_by(Resume.created_time.desc()) \
+                               .offset((page - 1) * count) \
+                               .limit(count) \
+                               .all()
 
-        # 조회수 및 좋아요 수 계산 후 , 반환
+        # 조회수 및 좋아요 수 계산
         for resume in resumes:
-            resume.view_count = session.query(func.count()).select_from(ResumeView).filter(
-                ResumeView.resume_id == resume.resume_id).scalar()
-            resume.like_count = session.query(func.count()).select_from(ResumeLike).filter(
-                ResumeLike.resume_id == resume.resume_id).scalar()
+            resume.view_count = session.query(func.sum(ResumeView.view_count)).filter(
+                ResumeView.resume_id == resume.resume_id
+            ).scalar() or 0
 
-        return user, resumes, total_resumes
+            resume.like_count = session.query(func.sum(ResumeLike.like_count)).filter(
+                ResumeLike.resume_id == resume.resume_id
+            ).scalar() or 0
+
+        return resumes, total
 
 
 
