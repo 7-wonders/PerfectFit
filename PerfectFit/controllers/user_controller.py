@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, Response
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
 from services.user_service import UserService, ResumeService, InterviewService, RequirementsService, \
-    NecessaryInfoService, OptionalInfoService
+    NecessaryInfoService, OptionalInfoService, VerificationService
 
 user_bp = Blueprint('user', __name__)
 
@@ -245,3 +245,20 @@ def register_optional_info():
 
     # 응답: 성공 시 201 Created를 반환
     return Response(status=201)
+
+
+@user_bp.route('/user/verify/send', methods=['POST'])
+def send_verification_code():
+    # 요청 바디에서 이메일 주소를 추출합니다.
+    data = request.get_json()
+    email = data.get("email")
+
+    # 필수 값 확인
+    if not email:
+        return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
+
+    # 서비스 계층에서 이메일 인증 코드 발송을 처리
+    VerificationService.send_verification_code(email)
+
+    # 성공 시 204 No Content 반환
+    return Response(status=204)
