@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, Response
 
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
-from services.user_service import UserService, ResumeService, InterviewService
+from services.user_service import UserService, ResumeService, InterviewService, RequirementsService
 
 user_bp = Blueprint('user', __name__)
 
