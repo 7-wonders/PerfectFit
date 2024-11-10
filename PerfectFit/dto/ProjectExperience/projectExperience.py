@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
 
-class PexDTO: # ProjectExperienceDTO를 줄여서 작성하였습니다.
+class PexDTO:  # ProjectExperienceDTO를 줄여서 작성하였습니다.
     class Response:
         @dataclass
         class WorkExperience:
@@ -24,7 +24,23 @@ class PexDTO: # ProjectExperienceDTO를 줄여서 작성하였습니다.
             project_name: str
             from_date: date
             to_date: date
-            contents: List['UserDto.Response.ProjectExperienceContent']
+            contents: List['PexDTO.Response.ProjectExperienceContent']
+
+        @dataclass
+        class Occupation:
+            occupation_id: int
+            occupation_name: str
+
+        @dataclass
+        class Resume:
+            resume_id: int
+            title: str
+            view_count: int
+            like_count: int
+            occupation: 'PexDTO.Response.Occupation'
+            job: str
+            level: str
+            created_time: datetime
 
         @dataclass
         class DetailedUser:
@@ -40,5 +56,6 @@ class PexDTO: # ProjectExperienceDTO를 줄여서 작성하였습니다.
             email: str
             phone_number: str
             profile_path: str
-            work_experiences: List['UserDto.Response.WorkExperience']
-            project_experiences: List['UserDto.Response.ProjectExperience']
+            work_experiences: List['PexDTO.Response.WorkExperience']
+            project_experiences: List['PexDTO.Response.ProjectExperience']
+            resumes: List['PexDTO.Response.Resume']

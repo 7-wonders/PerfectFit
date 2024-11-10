@@ -92,3 +92,45 @@ def get_profile():
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+
+@user_bp.route('/user/mypage/resume')
+def get_resumes():
+    # 페이지 번호와 개수를 쿼리 파라미터에서 가져옴
+    page = request.args.get('page', default=1, type=int)
+    count = request.args.get('count', default=10, type=int)
+
+    # 인증된 사용자 ID 가져오기
+    user_id = request.headers.get("user_id")  # 토큰에서 사용자 ID를 추출
+
+    # 사용자 정보 및 이력서 목록 가져오기
+    user, resumes, total_resumes = UserService.get_user_and_resumes(user_id, page, count)
+
+    # 응답 데이터 구성
+    response = {
+        "user": {
+            "userId": user.user_id,
+            "username": user.username,
+            "profilePath": user.profile_path,
+        },
+        "resumes": [
+            {
+                "resumeId": resume.resume_id,
+                "title": resume.title,
+                "viewCount": resume.view_count,
+                "likeCount": resume.like_count,
+                "occupation": {
+                    "occupationId": resume.occupation_id,
+                    "occupationName": resume.occupation_name,
+                },
+                "job": resume.job,
+                "level": resume.level,
+                "createdTime": resume.created_time,
+            }
+            for resume in resumes
+        ],
+        "total": total_resumes
+    }
+
+    json_response = json.dumps(response, ensure_ascii=False, indent=2)
+    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
