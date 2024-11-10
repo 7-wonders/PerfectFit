@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, Response
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
 from services.user_service import UserService, ResumeService, InterviewService, RequirementsService, \
-    NecessaryInfoService
+    NecessaryInfoService, OptionalInfoService
 
 user_bp = Blueprint('user', __name__)
 
@@ -215,3 +215,33 @@ def register_necessary_info():
 
     # 응답: 성공 시 204 No Content를 반환
     return Response(status=204)
+
+@user_bp.route('/user/optional', methods=['POST'])
+def register_optional_info():
+    # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
+    user_id = request.headers.get("user_id")
+
+    # 요청 바디에서 선택 정보 데이터를 추출합니다.
+    data = request.get_json()
+    major = data.get("major")
+    university = data.get("university")
+    university_status = data.get("universityStatus")
+    grade = data.get("grade")
+    project_experiences = data.get("projectExperiences", [])
+    work_experiences = data.get("workExperiences", [])
+    phone_number = data.get("phoneNumber")
+
+    # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
+    OptionalInfoService.register_info(
+        user_id=user_id,
+        major=major,
+        university=university,
+        university_status=university_status,
+        grade=grade,
+        project_experiences=project_experiences,
+        work_experiences=work_experiences,
+        phone_number=phone_number
+    )
+
+    # 응답: 성공 시 201 Created를 반환
+    return Response(status=201)
