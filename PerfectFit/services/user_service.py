@@ -3,7 +3,7 @@ from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy.orm import joinedload
 
 from database.config import get_session
-from domain.models import ResumeLike
+from domain.models import ResumeLike, Interview
 from domain.models.app_user import AppUser
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -58,6 +58,34 @@ class ResumeService:
             ).scalar() or 0
 
         return resumes, total
+
+class InterviewService:
+    @staticmethod
+    def get_interviews(user_id: int, page: int, count: int):
+        session = get_session()
+
+        # 면접 데이터를 가져오는 쿼리 정의
+        interviews_query = session.query(Interview).filter(Interview.user_id == user_id)
+        total = interviews_query.count()
+
+        interviews = interviews_query.order_by(Interview.created_time.desc()) \
+            .offset((page - 1) * count) \
+            .limit(count) \
+            .all()
+
+        # 조회수 및 좋아요 수 계산
+        for interview in interviews:
+            interview.view_count = session.query(func.sum(ResumeView.view_count)).filter(
+                ResumeView.resume_id == interview.interview_id
+            ).scalar() or 0
+
+            interview.like_count = session.query(func.sum(ResumeLike.like_count)).filter(
+                ResumeLike.resume_id == interview.interview_id
+            ).scalar() or 0
+
+        return interviews, total
+
+
 
 
 

@@ -4,33 +4,37 @@ from flask import Blueprint, render_template, request, Response
 
 from dto.ProjectExperience.projectExperience import PexDTO
 from dto.user.user import UserDto
-from services.user_service import UserService, ResumeService
+from services.user_service import UserService, ResumeService, InterviewService
 
 user_bp = Blueprint('user', __name__)
 
+def get_pagination_params():
+    """공통적으로 페이지네이션 파라미터를 가져오는 함수"""
+    page = request.args.get('page', default=1, type=int)
+    count = request.args.get('count', default=10, type=int)
+    return page, count
+
 @user_bp.route('/users')
 def get_users():
-    page = request.args.get('page', default=1, type=int) # 현재 페이지 번호. 기본값은 1
-    count = request.args.get('count', default=10, type=int) # 한 페이지에 보여줄 사용자 수. 기본값은 10
+    page, count = get_pagination_params()  # 페이지네이션 파라미터 함수 사용
 
-    paginate_user = UserService.get_users(page, count) #서비스 계층에서 사용자 목록을 가져옵니다. 페이지와 사용자 수를 기준으로 데이터베이스에서 사용자 정보를 읽어옵니다.
-    response: UserDto.Response.Users = UserDto.Response.Users( #사용자의 정보를 UserDto 데이터 구조에 맞게 변환하여 users와 pages 필드에 담습니다.
+    paginate_user = UserService.get_users(page, count)
+    response: UserDto.Response.Users = UserDto.Response.Users(
         users=[UserDto.Response.IntroUser(user.user_id, user.username) for user in paginate_user.items],
         pages=paginate_user.pages,
     )
 
     return render_template("users.html", users=asdict(response))
-    # 데이터베이스에서 가져온 사용자 목록을 users.html 템플릿에 전달하여 사용자 목록을 렌더링합니다. asdict를 통해 데이터를 딕셔너리 형태로 변환합니다.
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
-
     return render_template("user.html", user=response)
 
 @user_bp.route('/user/mypage/info')
-def get_info(user_id: int):
+def get_info():
+    user_id = request.headers.get("user_id")
     user = UserService.get_user(user_id)
 
     response: PexDTO.Response.DetailedUser = PexDTO.Response.DetailedUser(
@@ -75,29 +79,25 @@ def get_info(user_id: int):
         ]
     )
 
-
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
 @user_bp.route('/user/profile')
 def get_profile():
-
-    user_id = request.headers.get("user_id")  # 토큰에서 user_id를 가져오는 코드입니다!
-
+    user_id = request.headers.get("user_id")  # 헤더에서 user_id 가져오기
     user = UserService.get_user(user_id)
 
     response = {
-        "profilePath": user.profile_path # Response입니다.
+        "profilePath": user.profile_path
     }
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
-
 @user_bp.route('/user/mypage/resume')
-def get_resumes(user_id: int):
-    page = request.args.get('page', type=int, default=1)
-    count = request.args.get('count', type=int, default=10)
+def get_resumes():
+    user_id = request.headers.get("user_id")
+    page, count = get_pagination_params()
 
     user = UserService.get_user(user_id)
     resumes, total = ResumeService.get_resumes(user_id, page, count)
@@ -123,6 +123,43 @@ def get_resumes(user_id: int):
                 "createdTime": resume.created_time
             }
             for resume in resumes
+        ],
+        "total": total
+    }
+
+    json_response = json.dumps(response, ensure_ascii=False, indent=2)
+    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+@user_bp.route('/user/mypage/interview')
+def get_interviews():
+    user_id = request.headers.get("user_id")
+    page, count = get_pagination_params()
+
+    user = UserService.get_user(user_id)
+    interviews, total = InterviewService.get_interviews(user_id, page, count)
+
+    response = {
+        "user": {
+            "userId": user.id,
+            "username": user.name,
+            "profilePath": user.profile_path
+        },
+        "interviews": [
+            {
+                "interviewId": interview.interview_id,
+                "title": interview.title,
+                "isPublic": interview.is_public,
+                "viewCount": interview.view_count,
+                "likeCount": interview.like_count,
+                "occupation": {
+                    "occupationId": interview.occupation_id,
+                    "occupationName": interview.occupation_name
+                },
+                "job": interview.job,
+                "level": interview.level,
+                "createdTime": interview.created_time
+            }
+            for interview in interviews
         ],
         "total": total
     }
