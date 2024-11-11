@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 
-from database.config import db
+from config.config_mysql import db
 
 from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
 from sqlalchemy import ForeignKey, func
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class ResumeView(db.Model):
     __tablename__ = "resume_view"
 
-    view_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    view_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),

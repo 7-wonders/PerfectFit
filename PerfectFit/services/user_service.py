@@ -2,16 +2,14 @@ from flask import flash, abort
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy.orm import joinedload
 from sqlalchemy.testing.requirements import Requirements
-
-from database.config import get_session
+from sqlalchemy.sql import func
 from domain.models import ResumeLike, Interview, ProjectExperience, WorkExperience
 from domain.models.app_user import AppUser
-from exception.custom_exception import CustomException
-from exception.exception_type import ExceptionType
-
-from sqlalchemy.sql import func
 from domain.models.resume import Resume
 from domain.models.resume_view import ResumeView
+from exception.custom_exception import CustomException
+from exception.exception_type import ExceptionType
+from config.config_mysql import get_session
 
 
 class UserService:

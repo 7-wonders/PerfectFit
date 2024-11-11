@@ -3,11 +3,12 @@ from dataclasses import asdict
 import json
 from flask import Blueprint, render_template, request, Response, current_app
 from werkzeug.utils import secure_filename
-
 from dto.ProjectExperience.projectExperience import PexDTO
-from dto.user.user import UserDto
 from services.user_service import UserService, ResumeService, InterviewService, RequirementsService, \
     NecessaryInfoService, OptionalInfoService, VerificationService
+from flask import Blueprint, render_template, request, redirect, make_response
+from dto.user.user import UserDto
+from utils.jwt_factory import JWTFactory
 
 user_bp = Blueprint('user', __name__)
 
@@ -336,3 +337,21 @@ def delete_user():
 
     # 성공 시 204 No Content 반환
     return Response(status=204)
+
+
+@user_bp.route('/user/logout', methods=['POST'])
+def logout():
+    redirect_uri = request.args.get('redirect_uri')
+    if redirect_uri is None:
+        redirect_uri = request.headers.get('Referer') or 'http://localhost:5000/'
+
+    response = make_response(redirect(redirect_uri))
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+
+    refresh_token = request.cookies.get('refresh_token')
+    if refresh_token:
+        jwt_factory = JWTFactory()
+        jwt_factory.delete_refresh_token(refresh_token)
+
+    return response
