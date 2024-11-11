@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, ARRAY
-from database.config import Base
+from config.config_mysql import Base
 
 class Requirements(Base):
     __tablename__ = 'requirements'
