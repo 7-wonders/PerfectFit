@@ -34,12 +34,6 @@ def _create_response(token_info: dict, redirect_uri: str | None) -> Response:
 
     return response
 
-
-@auth_bp.route('/test', methods=['GET'])
-def test():
-    return render_template("test.html")
-
-
 @auth_bp.route('/login/google', methods=['GET'])
 def login_google():
     session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
