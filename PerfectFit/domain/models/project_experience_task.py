@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 
-from database.config import db
+from config.config_mysql import db
 
 from sqlalchemy.dialects.mysql import INTEGER, TEXT, TIMESTAMP
 from sqlalchemy import ForeignKey, func
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class ProjectExperienceTask(db.Model):
     __tablename__ = "project_experience_task"
 
-    project_experience_task_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    project_experience_task_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     project_experience_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("project_experience.project_experience_id", onupdate="CASCADE", ondelete="CASCADE"),

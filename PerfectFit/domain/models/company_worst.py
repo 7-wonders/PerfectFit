@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 
-from database.config import db
+from config.config_mysql import db
 
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, TIMESTAMP
 from sqlalchemy import ForeignKey, func
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class CompanyWorst(db.Model):
     __tablename__ = "company_worst"
 
-    worst_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    worst_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     company_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("company.company_id", onupdate="CASCADE", ondelete="CASCADE"),
