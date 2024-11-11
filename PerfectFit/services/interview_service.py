@@ -1,16 +1,16 @@
-from flask import flash, abort
-from flask_sqlalchemy.pagination import Pagination
+from config.config_mysql import get_session
 
-from database.config import get_session
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from dto.interview.interview import InterviewDto
+
 from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
 from domain.models.interview_answer import InterviewAnswer
 
-from hanspell import spell_checker
+#from hanspell import spell_checker
 import re, requests
+
 
 class InterviewService:
 
@@ -141,10 +141,11 @@ class InterviewService:
             passportKey = get_passport_key()
 
             # 맞춤법 검사 수행
-            result = spell_checker.check(text, passportKey)
-            print(result)
-            print(result.checked)
-            return result.checked
+            # result = spell_checker.check(text, passportKey)
+            # print(result)
+            # print(result.checked)
+            #return result.checked
+            return "str"
         except Exception as e:
             print("Error occurred:", e)
 

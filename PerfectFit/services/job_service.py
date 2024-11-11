@@ -1,9 +1,8 @@
-from flask import flash, abort
-from flask_sqlalchemy.pagination import Pagination
+from config.config_mysql import get_session
 
-from database.config import get_session
 from domain.models import Job, Occupation
 from dto.job.job import JobDto
+
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 

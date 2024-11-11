@@ -1,8 +1,6 @@
 
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, send_from_directory
 
-from database.config import Config, db  # Config와 db를 import
-from controllers.user_controller import user_bp
 from controllers.job_controller import job_bp
 from controllers.interview_controller import interview_bp
 
