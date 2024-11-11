@@ -87,7 +87,7 @@ def get_info():
 
 @user_bp.route('/user/profile')
 def get_profile():
-    user_id = request.headers.get("user_id")  # 헤더에서 user_id 가져오기
+    user_id = request.headers.get("user_id")
     user = UserService.get_user(user_id)
 
     response = {
@@ -172,7 +172,6 @@ def get_interviews():
 
 @user_bp.route('/user/requirements', methods=['POST'])
 def create_requirements():
-    # 헤더에서 Authorization을 통해 ACCESS TOKEN을 가져옵니다
     user_id = request.headers.get("user_id")  # 토큰에서 user_id 추출
 
     # 요청 바디에서 데이터를 추출합니다.
@@ -276,12 +275,12 @@ def verify_code():
     if not email or not verify_code:
         return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
 
-    # 서비스 계층에서 이메일 인증 코드 검증을 처리
-    is_valid = VerificationService.verify_code(email, verify_code)
+
+    is_valid = VerificationService.verify_code(email, verify_code) # 서비스 계층에서 이메일 인증 코드 검증을 처리
 
     if is_valid:
-        # 인증 성공 시 204 No Content 반환
-        return Response(status=204)
+
+        return Response(status=204) # 인증 성공 시 204 No Content 반환
     else:
         # 인증 실패 시 400 Bad Request 반환
         return Response(json.dumps({"error": "잘못된 인증 코드입니다."}), status=400, content_type='application/json; charset=utf-8')
@@ -322,8 +321,8 @@ user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/user', methods=['DELETE'])
 def delete_user():
-    # 인증 토큰에서 사용자 ID 추출 (토큰 인증 방식에 따라 수정 가능)
-    user_id = request.headers.get("Authorization")  # 실제로는 토큰에서 사용자 ID 추출이 필요할 수 있음
+
+    user_id = request.headers.get("Authorization")
 
     # 필수 값 확인
     if not user_id:

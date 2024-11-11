@@ -183,7 +183,7 @@ class OptionalInfoService:
 import smtplib
 from email.mime.text import MIMEText
 import random
-import redis  ## Redis 쓰신다고 하셨던 것이 기억나서, Redis 사용하는 방향으로 한번 작성해보았습니다!
+import redis  # Redis 쓰신다고 하셨던 것이 기억나서, Redis 사용하는 방향으로 한번 작성해보았습니다!
 
 # Redis 클라이언트 초기화
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
