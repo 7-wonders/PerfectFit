@@ -1,4 +1,6 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, requestm, send_from_directory
+from database.config import Config, db  # Config와 db를 import
+from controllers.user_controller import user_bp
 from dotenv import load_dotenv
 
 from config.config_mysql import Config, db  # Config와 db를 import
@@ -28,11 +30,9 @@ db.init_app(app)
 Redis().initialize_pool()
 JWTFactory().initialize_pool()
 
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
 
 @app.route('/')
 def index():

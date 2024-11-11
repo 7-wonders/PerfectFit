@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import List, Optional
+from datetime import date
 
 
 class UserDto:
@@ -10,5 +12,7 @@ class UserDto:
 
         @dataclass
         class Users:
-            users: list['UserDto.Response.IntroUser']
+            users: List['UserDto.Response.IntroUser']
             pages: int
+
+
