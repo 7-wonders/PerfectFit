@@ -1,4 +1,11 @@
-from flask import Flask, render_template, send_from_directory
+
+from flask import Flask, render_template, request, send_from_directory
+
+from database.config import Config, db  # Config와 db를 import
+from controllers.user_controller import user_bp
+from controllers.job_controller import job_bp
+from controllers.interview_controller import interview_bp
+
 from dotenv import load_dotenv
 
 from config.config_mysql import Config, db  # Config와 db를 import
@@ -17,6 +24,8 @@ app.config.from_object(Config)  # config.py의 Config 클래스를 사용
 
 app.register_blueprint(eh_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(job_bp)
+app.register_blueprint(interview_bp)
 app.register_blueprint(auth_bp, url_prefix="/auth")
 
 app.before_request(authenticate_request)

@@ -14,5 +14,3 @@ class UserDto:
         class Users:
             users: List['UserDto.Response.IntroUser']
             pages: int
-
-
