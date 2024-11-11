@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 
-from database.config import db
+from config.config_mysql import db
 
 from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
 from sqlalchemy import ForeignKey, func
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class InterviewLike(db.Model):
     __tablename__ = "interview_like"
 
-    like_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True)
+    like_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     interview_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("interview.interview_id", onupdate="CASCADE", ondelete="CASCADE"),

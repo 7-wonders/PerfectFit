@@ -1,60 +1,48 @@
-from flask import Flask, render_template, request
+
+from flask import Flask, render_template, request, send_from_directory
 
 from database.config import Config, db  # Config와 db를 import
 from controllers.user_controller import user_bp
 from controllers.job_controller import job_bp
 from controllers.interview_controller import interview_bp
+
 from dotenv import load_dotenv
 
-from exception.custom_exception import CustomException
-from exception.exception_type import ExceptionType
-from utils.check_api import is_api_call
+from config.config_mysql import Config, db  # Config와 db를 import
+from config.config_redis import Redis
+from controllers.user_controller import user_bp
+from controllers.auth_controller import auth_bp
+from exception.exception_handler import eh_bp
+from middlewares.auth_middleware import authenticate_request
+from utils.jwt_factory import JWTFactory
 
 load_dotenv()
 
 app = Flask(__name__)
+
 app.config.from_object(Config)  # config.py의 Config 클래스를 사용
+
+app.register_blueprint(eh_bp)
+app.register_blueprint(user_bp)
+app.register_blueprint(job_bp)
+app.register_blueprint(interview_bp)
+app.register_blueprint(auth_bp, url_prefix="/auth")
+
+app.before_request(authenticate_request)
 
 # 데이터베이스 초기화
 db.init_app(app)
 
-# UserController의 Blueprint 등록
-app.register_blueprint(user_bp)
+# Redis 초기화
+Redis().initialize_pool()
+JWTFactory().initialize_pool()
 
-# JobController의 Blueprint 등록
-app.register_blueprint(job_bp)
-
-# InterviewController의 Blueprint 등록
-app.register_blueprint(interview_bp)
-
-
-@app.errorhandler(CustomException)
-def custom_exception(e: CustomException):
-    if is_api_call(request):
-        response = e.__to_json__()
-        response.status_code = e.exception.status_code
-        return response
-    else:
-        return render_template("error_page.html", error=e), e.exception.status_code
-
-
-@app.errorhandler(Exception)
-def internal_server_error_page(e: Exception):
-    # Log로 변경 해야함.
-    print("Error : ", e.__str__())
-
-    exception = CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
-
-    if is_api_call(request):
-        response = exception.__to_json__()
-        response.status_code = exception.exception.status_code
-        return response
-    else:
-        return render_template("error_page.html", error=exception), 500
-
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
-def hello_world():
+def index():
     return render_template("main.html")
 
 
