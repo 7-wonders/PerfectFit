@@ -1,0 +1,96 @@
+{% extends "index.html" %}
+
+{% block styles  %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_list.css') }}" />
+{% endblock %}
+
+{% set occupations = [
+    {
+        "occupationId": 1,
+        "occupationName": "직군1",
+        "majorCategory": "대분류 아이디1",
+        "subCategory": "소분류 아이디1"
+    },
+    {
+        "occupationId": 2,
+        "occupationName": "직군2",
+        "majorCategory": "대분류 아이디2",
+        "subCategory": "소분류 아이디2"
+    },
+    {
+        "occupationId": 3,
+        "occupationName": "직군3",
+        "majorCategory": "대분류 아이디3",
+        "subCategory": "소분류 아이디3"
+    },
+    {
+        "occupationId": 4,
+        "occupationName": "직군4",
+        "majorCategory": "대분류 아이디4",
+        "subCategory": "소분류 아이디4"
+    },
+    {
+        "occupationId": 5,
+        "occupationName": "직군5",
+        "majorCategory": "대분류 아이디5",
+        "subCategory": "소분류 아이디5"
+    },
+]%}
+
+{% set jobs = {
+        '직군1': ['직업1-1', '직업1-2', '직업1-3'],
+        '직군2': ['직업2-1', '직업2-2'],
+        '직군3': ['직업3-1', '직업3-2', '직업3-3', '직업3-4'],
+        '직군4': ['직업4-1', '직업4-2'],
+        '직군5': ['직업5-1', '직업5-2', '직업5-3']
+}%}
+
+{% block content %}
+    {% include 'components/header.html' %}
+    <div class = "container">
+        <p class = "Bold-30">카테고리 선택</p>
+        <ul class="uk-subnav uk-subnav-pill search-filter-wrapper" uk-switcher>
+            <li>
+                <a href="#" class = "Regular-16-light search-box">
+                    <span id = "occupation">직군 선택</span>
+                    <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
+                </a>
+            </li>
+            <li>
+                <a href="#" class = "Regular-16-light search-box">
+                    <span>직업 선택</span>
+                    <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
+                </a>
+            </li>
+            <li>
+                <a href="#" class = "Regular-16-light search-box">
+                    <span>경력 선택</span>
+                    <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
+                </a>
+            </li>
+        </ul>
+
+        <div class="uk-switcher uk-margin">
+            <div class = "search-content">
+                <table class="uk-table">
+                    <tbody>
+                        {% if occupations %}
+                            {% for occupation in occupations %}
+                                <tr>
+                                    {% for occupation in occupations %}
+                                        <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light">{{ occupation.occupationName }}</button></td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <p class = "Bold-24">직군이 없습니다.</p>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class = "search-content">Hello again!</div>
+            <div class = "search-content">Bazinga!</div>
+        </div>
+    </div>
+{% endblock %}

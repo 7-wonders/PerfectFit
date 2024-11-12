@@ -67,3 +67,7 @@ def get_resume_information_part():
 @user_bp.route('/user/resume/loading')
 def get_resume_load_loading():
     return render_template("resume_loading.html")
+
+@user_bp.route('/user/resume/list')
+def get_resume_list():
+    return render_template("resume_list.html")
