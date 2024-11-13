@@ -46,10 +46,32 @@
         '직군5': ['직업5-1', '직업5-2', '직업5-3']
 }%}
 
+{% set resumes = [
+    {
+        "resumeId": 1,
+        "title": "자기소개서 제목",
+        "occupation" : "직군",
+        "job": "직업",
+        "level": "신입",
+        "user": {
+            "username": "한정석",
+            "profilePath": url_for('static', filename='img/logo.svg')
+        },
+        "viewCount": 32,
+        "likeCount": 16,
+        "createdTime": "2024-02-02"
+    }
+]%}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/resume_list.js') }}"></script>
+{% endblock %}
+
 {% block content %}
     {% include 'components/header.html' %}
     <div class = "container">
         <p class = "Bold-30">카테고리 선택</p>
+        {# =========================== 검색 필터 부분 ================================ #}
         <ul class="uk-subnav uk-subnav-pill search-filter-wrapper" uk-switcher>
             <li>
                 <a href="#" class = "Regular-16-light search-box">
@@ -70,7 +92,9 @@
                 </a>
             </li>
         </ul>
+        {# =========================== 검색 필터 부분 끝 ================================ #}
 
+        {# ====================== 필터에 해당하는 내용 부분 ================================ #}
         <div class="uk-switcher uk-margin">
             <div class = "search-content">
                 <table class="uk-table">
@@ -90,7 +114,53 @@
                 </table>
             </div>
             <div class = "search-content">Hello again!</div>
-            <div class = "search-content">Bazinga!</div>
+            <div class = "search-content-level">Bazinga!</div>
         </div>
+        {# ====================== 필터에 해당하는 내용 부분 끝 ================================ #}
+
+        {# ============================ 게시물 부분 ================================== #}
+        {% for i in range(5) %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
+            <div class = "resume-list">
+                {#게시물 왼쪽 부분#}
+                <div>
+                    <div class = "resume-title">
+                        <span class = "title-category">{{ resumes[0].occupation }}{{ i + 1 }} |</span>
+                        <span class = "title-category">{{ resumes[0].job }}{{ i + 1 }} |</span>
+                        <span class = "title-category">{{ resumes[0].level }}</span>
+                        <a href = "#" class = "resume-link"><span class = Medium-20>{{ resumes[0].title }}{{ i + 1 }}</span></a>
+                    </div>
+                    <div style = "margin-top: 10px;">
+                        <img src="{{ resumes[0].user.profilePath }}" class = "user-profile" />
+                        <span class = "Regular-16" style = "margin-left : 5px">{{ resumes[0].user.username }}</span>
+                        <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ resumes[0].createdTime }}</span>
+                    </div>
+                </div>
+                <div class = "resume-list-Engagement">
+                    <div style = "margin-right: 10px;">
+                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                        <span class = "Regular-16-light">{{ resumes[0].viewCount }}</span>
+                    </div>
+                    <div>
+                        <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                        <span class = "Regular-16-light">{{ resumes[0].likeCount }}</span>
+                    </div>
+                </div>
+            </div>
+            <hr>
+        {% endfor %}
+        {# ========================== 게시물 부분 끝 ================================= #}
+
+        {# 페이지네이션 #}
+        <nav aria-label="Pagination">
+            <ul class="uk-pagination uk-flex-center" uk-margin>
+                <li><a href="#"><span uk-pagination-previous></span></a></li>
+                <li class="uk-active"><span aria-current="page">1</span></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">5</a></li>
+                <li><a href="#"><span uk-pagination-next></span></a></li>
+            </ul>
+        </nav>
     </div>
 {% endblock %}

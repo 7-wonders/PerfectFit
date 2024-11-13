@@ -9,6 +9,10 @@
     padding : 12px 16px;
 }
 
+button {
+    cursor : pointer;
+}
+
 .uk-form-label {
     color: #000;
     font-family: "Noto Sans KR";
@@ -90,7 +94,7 @@
     background: #2B7FFF;
     display: flex;
     justify-content: space-between;
-    padding : 5px 3px;
+    padding : 0 12px;
     white-space: nowrap;
     flex-shrink: 0;
     align-items: center;

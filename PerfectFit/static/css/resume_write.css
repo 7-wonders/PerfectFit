@@ -175,8 +175,6 @@ button {
     vertical-align: middle;
 }
 
-.ai-write-button
-
 /*큰 인풋박스 placeholder 위치 조정*/
 .uk-select[multiple], .uk-select[size], .uk-textarea {
     padding-top: 10px;

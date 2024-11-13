@@ -5,7 +5,7 @@
     /*align-items: center;*/
     font-family: 'Noto Sans KR', sans-serif;
     margin : 0 auto;
-    gap : 30px;
+    gap : 15px;
 }
 
 /* 검색 필터 3개 묶는 css */
@@ -38,9 +38,22 @@
 }
 
 .search-content {
+    display: none;
+    margin-top : 5px;
     width : 90rem;
     border-radius: 8px;
     box-shadow : 0 4px 12px 0 rgba(1, 13, 62, 0.20);
+}
+
+.search-content-level {
+    display : flex;
+    margin-top : 5px;
+    width : 430px;
+    border-radius: 8px;
+    box-shadow : 0 4px 12px 0 rgba(1, 13, 62, 0.20);
+    justify-content: flex-end;
+    margin-right: 30px;
+    margin-left : auto;
 }
 
 .none-style-btn {
@@ -51,3 +64,31 @@
 .list-array {
     text-align: center;
 }
+
+/*자기소개서 목록 관련 css 코드*/
+.resume-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.resume-list {
+    display: flex;
+    position: relative;
+}
+
+.resume-list-Engagement {
+    position: absolute;
+    display : flex;
+    right: 0;
+    bottom: 0;
+    margin-bottom: 10px;
+}
+
+.resume-profile {
+    width : 45px;
+    height : 45px;
+    border-radius: 70%;
+}
+/*자기소개서 목록 관련 css 코드 끝*/
