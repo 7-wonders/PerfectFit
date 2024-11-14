@@ -63,6 +63,9 @@
     }
 ]%}
 
+{% set nowPage = 1 %}
+{% set pageRange = 5 %}
+
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_list.js') }}"></script>
 {% endblock %}
@@ -70,9 +73,9 @@
 {% block content %}
     {% include 'components/header.html' %}
     <div class = "container">
-        <p class = "Bold-30">카테고리 선택</p>
+        <p class = "Bold-30-none-weight" style = "margin-top: 45px">카테고리 선택</p>
         {# =========================== 검색 필터 부분 ================================ #}
-        <ul class="uk-subnav uk-subnav-pill search-filter-wrapper" uk-switcher>
+        <ul class="uk-subnav uk-subnav-pill search-filter-wrapper" uk-switcher style = "margin-top: 20px !important">
             <li>
                 <a href="#" class = "Regular-16-light search-box">
                     <span id = "occupation">직군 선택</span>
@@ -81,13 +84,13 @@
             </li>
             <li>
                 <a href="#" class = "Regular-16-light search-box">
-                    <span>직업 선택</span>
+                    <span id = "job">직업 선택</span>
                     <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
                 </a>
             </li>
             <li>
                 <a href="#" class = "Regular-16-light search-box">
-                    <span>경력 선택</span>
+                    <span id = "level">경력 선택</span>
                     <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
                 </a>
             </li>
@@ -96,14 +99,14 @@
 
         {# ====================== 필터에 해당하는 내용 부분 ================================ #}
         <div class="uk-switcher uk-margin">
-            <div class = "search-content">
+            <div class = "search-content" id = "occupation-list-box">
                 <table class="uk-table">
                     <tbody>
                         {% if occupations %}
                             {% for occupation in occupations %}
                                 <tr>
                                     {% for occupation in occupations %}
-                                        <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light">{{ occupation.occupationName }}</button></td>
+                                        <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light" id = "select-occupation" onclick="showJobList(this)">{{ occupation.occupationName }}</button></td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -113,12 +116,41 @@
                     </tbody>
                 </table>
             </div>
-            <div class = "search-content">Hello again!</div>
-            <div class = "search-content-level">Bazinga!</div>
+            <div class = "search-content" id = "job-list-box">
+                <p class = "Bold-24-none-weight" style = "padding : 50px">직군을 선택해주세요.</p>
+            </div>
+            <div class = "search-content-level" id = "level-list-box">
+                 <table class="uk-table">
+                    <tbody>
+                       <tr>
+                           <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light" id = "select-level" onclick = "setLevel('신입')">신입</button></td>
+                       </tr>
+                        <tr>
+                           <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light" id = "select-level" onclick = "setLevel('경력')">경력</button></td>
+                       </tr>
+                        <tr>
+                           <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light" id = "select-level" onclick = "setLevel('무관')">무관</button></td>
+                       </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         {# ====================== 필터에 해당하는 내용 부분 끝 ================================ #}
 
+        {# ======================= 최신, 인기순, 검색창 ============================= #}
+        <div class="array-and-search">
+            <div class="recent-or-popular">
+                <button type="button" class="none-style-btn Regular-16 selected select-array" onclick="setArray('최신순')">최신순</button>
+                <button type="button" class="none-style-btn Regular-16 select-array" onclick="setArray('인기순')">인기순</button>
+            </div>
+            <div class="search-space" id="search-space">
+                <img src="{{ url_for('static', filename='img/search_icon.svg') }}" width="20px" height="20px" />
+                <input class="search-input Regular-16-light" id="search-input" type="text" placeholder="검색어 입력" style="margin-left: 5px" />
+            </div>
+        </div>
+
         {# ============================ 게시물 부분 ================================== #}
+        <p class = "Bold-30-none-weight" style = "margin-top: 30px !important;">자기소개서 목록</p>
         {% for i in range(5) %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
             <div class = "resume-list">
                 {#게시물 왼쪽 부분#}
@@ -152,14 +184,35 @@
 
         {# 페이지네이션 #}
         <nav aria-label="Pagination">
-            <ul class="uk-pagination uk-flex-center" uk-margin>
-                <li><a href="#"><span uk-pagination-previous></span></a></li>
-                <li class="uk-active"><span aria-current="page">1</span></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">5</a></li>
-                <li><a href="#"><span uk-pagination-next></span></a></li>
+           <ul class="uk-pagination uk-flex-center" uk-margin>
+                {# Previous 버튼 #}
+                <li class="{% if page == 1 %}uk-disabled{% endif %}">
+                    <a href="{% if page > 1 %}/user/resume/list/{{ page - 1 }}{% else %}#{% endif %}">
+                        <span class="Regular-20-light" uk-pagination-previous></span>
+                    </a>
+                </li>
+
+                {# 표시할 페이지 범위 계산 #}
+                {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
+                {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
+
+                {# 페이지 번호 생성 #}
+                {% for pageNum in range(startPage, endPage + 1) %}
+                    <li class="{% if pageNum == page %}uk-active{% endif %}">
+                        {% if pageNum == page %}
+                            <span class="Regular-20-light" aria-current="page">{{ pageNum }}</span>
+                        {% else %}
+                            <a href="/user/resume/list/{{ pageNum }}" class="Regular-20-light">{{ pageNum }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+
+                {# Next 버튼 #}
+                <li class="{% if page == totalPages %}uk-disabled{% endif %}">
+                    <a href="{% if page < totalPages %}/user/resume/list/{{ page + 1 }}{% else %}#{% endif %}">
+                        <span class="Regular-20-light" uk-pagination-next></span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

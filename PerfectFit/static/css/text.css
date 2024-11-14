@@ -160,6 +160,16 @@
     line-height: normal;
 }
 
+.Bold-24-none-weight {
+    color: #000;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #000;
+    font-family: "Noto Sans KR";
+    font-size: 24px;
+    font-style: normal;
+    line-height: normal;
+}
+
 .Bold-30 {
     color: #000;
     -webkit-text-stroke-width: 1px;
@@ -168,6 +178,16 @@
     font-size: 30px;
     font-style: normal;
     font-weight: 700;
+    line-height: normal;
+}
+
+.Bold-30-none-weight {
+    color: #000;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #000;
+    font-family: "Noto Sans KR";
+    font-size: 30px;
+    font-style: normal;
     line-height: normal;
 }
 
@@ -183,11 +203,11 @@
 }
 
 .title-category {
-    color : #175FE6;
+    color : #2B7FFF;
     font-size : 13px;
-    -webkit-text-stroke-width: 0.3px;
+    -webkit-text-stroke-width: 0.2px;
     font-style: normal;
-    font-weight : 500;
+    font-weight : 300;
 }
 
 

@@ -5,14 +5,13 @@
     /*align-items: center;*/
     font-family: 'Noto Sans KR', sans-serif;
     margin : 0 auto;
-    gap : 15px;
+    /*gap : 10px;*/
 }
 
 /* 검색 필터 3개 묶는 css */
 .search-filter-wrapper {
     display : flex;
     justify-content: space-between;
-    margin-top : 30px;
 }
 
 /*검색 필터 box*/
@@ -28,6 +27,8 @@
 
 }
 
+
+/*테이블 내용 텍스트 css*/
 .uk-subnav-pill>.uk-active>a {
     background: none;
     color: rgba(0, 0, 0, 0.50);
@@ -35,6 +36,20 @@
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+}
+
+*+.uk-margin {
+    margin-top : 0 !important;
+}
+
+/*검색 필터 margin-top 삭제 */
+*+address, *+dl, *+fieldset, *+figure, *+ol, *+p, *+pre, *+ul {
+    margin-top: 0 !important;
+}
+
+/*현재 페이지 색 표시*/
+.uk-pagination>.uk-active>* {
+    color: #2B7FFF;
 }
 
 .search-content {
@@ -56,14 +71,59 @@
     margin-left : auto;
 }
 
+/*테이블 내용 정렬 및 hover 효과*/
 .none-style-btn {
     border : none;
     background: none;
+    width: 100%;
+    height: 100%;
 }
-
+button {
+    cursor : pointer;
+}
+a {
+    text-decoration-line: none !important;
+}
+.none-style-btn.selected {
+    color: #2B7FFF;
+    font-family: "Noto Sans KR";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
 .list-array {
     text-align: center;
 }
+.list-array:hover {
+    background-color: #f8f8f8;
+}
+.list-array:hover .none-style-btn {
+    color: #666;
+}
+
+/* 최신순, 인기순, 검색창 열 css */
+.array-and-search {
+    display : flex;
+    justify-content: space-between;
+}
+.search-space {
+    display: flex;
+    border: 1px solid rgba(34, 34, 34, 0.15);
+    padding : 5px 16px;
+}
+.search-space:focus-within {
+    border-color: #39f; /* 포커스 시 테두리 색상 */
+}
+.search-input {
+    border: none;
+    outline: none;
+}
+.recent-or-popular {
+    display : flex;
+    gap : 5px;
+}
+
 
 /*자기소개서 목록 관련 css 코드*/
 .resume-title {
@@ -76,6 +136,7 @@
 .resume-list {
     display: flex;
     position: relative;
+    margin-top : 30px;
 }
 
 .resume-list-Engagement {

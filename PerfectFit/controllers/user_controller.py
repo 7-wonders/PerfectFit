@@ -68,6 +68,9 @@ def get_resume_information_part():
 def get_resume_load_loading():
     return render_template("resume_loading.html")
 
-@user_bp.route('/user/resume/list')
-def get_resume_list():
-    return render_template("resume_list.html")
+@user_bp.route('/user/resume/list/<int:page>')
+def get_resume_list(page):
+    totalItems = 100  # 예시: 전체 항목의 수
+    pageRange = 5  # 한 번에 표시할 페이지 범위
+    totalPages = (totalItems + pageRange - 1) // pageRange  # 전체 페이지 수 계산
+    return render_template("resume_list.html", page=page, totalPages=totalPages, pageRange=pageRange)
