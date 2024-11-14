@@ -4,6 +4,9 @@ import os
 import requests
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM,pipeline
+from openai import OpenAI
+from config.config_mysql import get_session
+from domain.models import Resume
 
 # OpenAI API 키 가져오기
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -32,6 +35,42 @@ def get_dinner_recommendation():
         return result
     else:
         return f"Error: {response.status_code}, {response.text}"
+
+
+def make_interview_based_on_resume(resume_id: int):
+    resume = get_session().query(Resume).filter_by(resume_id=resume_id).first()
+    client = OpenAI(api_key=f'{OPENAI_API_KEY}')
+
+    resume_section = [
+        {"title": "성장과정", "content": "자소서 내용 쓰기2"},
+        {"title": "지원동기", "content": "자소서 내용 쓰기쓰기"},
+    ]
+
+
+    resume_section_content = "\n".join([f"{section['title']}: {section['content']}" for section in resume_section])
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        response_format={"type": "json_object"},
+        temperature=0.7,
+        messages=[
+            {"role": "system",
+             "content": f"You are an Interviewer, related on {resume.job}. Please return the response as a JSON object with 10 'Question' and 'Best Answer' pairs."},
+            {"role": "user", "content": "당신은 직업 : {resume.job}에 관한 선임자이며 오랜 경력의 전문가입니다. 해당 직무 관련 신입 채용을 위해 면접을 진행해야합니다."},
+            {"role": "user",
+             "content": "당신은 지금부터 면접을 진행해야 해야합니다. 지원자의 자기소개서 내용을 기반으로 수행 해야 합니다."},
+            {"role": "user", "content": "이 아래부터는 자기소개서 내용들입니다. 이를 기반으로 한국어로 면접을 진행해주세요."},
+            {"role": "user", "content": resume_section_content}
+        ]
+    )
+    try:
+        print(response)
+        result = response['choices'][0].message.content.strip()
+        print(result)
+        return result
+    except KeyError as e:
+        print(f"Error: {e}")
+        return None
 
 
 # Llama API 키 가져오기 (가정)
