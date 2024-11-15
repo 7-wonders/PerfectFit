@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_select.css') }}" />
+{% endblock %}
+
+{% block content %}
+     <div class="container">
+         <div class="uk-grid-small uk-child-width-expand@s uk-text-center resume-select-box" uk-grid>
+            <a href = "http://127.0.0.1:5000/user/resume/information/all">
+                <div class="uk-card uk-card-default uk-card-body select-card">
+                    <img src="{{ url_for('static', filename='img/resume_select_all.svg') }}" class = "resume-select-img" alt="resume"/>
+                    <div class = "resume-select-text">
+                        <p class = "Medium-22">AI 자기소개서 전체 작성</p>
+                        <p class = "Regular-20-light">AI가 당신이 입력한 정보를 바탕으로 자기소개서를 완성합니다.</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href = "http://127.0.0.1:5000/user/resume/information/part">
+                <div class="uk-card uk-card-default uk-card-body select-card">
+                    <div class = "resume-select-img">
+                        <img src="{{ url_for('static', filename='img/resume_select_part.svg') }}" class = "resume-select-img" alt="interview"/>
+                    </div>
+                    <div class = "resume-select-text">
+                        <p class = "Medium-22">AI 자기소개서 부분 작성</p>
+                        <p class = "Regular-20-light">AI와 당신의 힘을 합쳐 보다 완벽한 자기소개서를 작성하세요.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+     </div>
+{% endblock %}

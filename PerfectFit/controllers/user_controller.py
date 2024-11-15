@@ -31,3 +31,46 @@ def get_user(user_id: int):
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
 
     return render_template("user.html", user=response)
+
+@user_bp.route('/user/mypage/resume')
+def get_mypage_resume():
+    return render_template("mypage_resume.html", active_page = 'resume')
+
+@user_bp.route('/user/mypage/interview')
+def get_mypage_interview():
+    return render_template("mypage_interview.html", active_page = 'interview')
+
+@user_bp.route('/user/mypage/information')
+def get_mypage_information():
+    return render_template("mypage_information.html", active_page = 'information')
+
+@user_bp.route('/user/resume/write/part')
+def get_resume_write_part():
+    return render_template("resume_write_part.html")
+
+@user_bp.route('/user/resume/write/all')
+def get_resume_write_all():
+    return render_template("resume_write_all.html")
+
+@user_bp.route('/user/resume/select')
+def get_resume_select():
+    return render_template("resume_select.html")
+
+@user_bp.route('/user/resume/information/all')
+def get_resume_information_all():
+    return render_template("resume_information_all.html")
+
+@user_bp.route('/user/resume/information/part')
+def get_resume_information_part():
+    return render_template("resume_information_part.html")
+
+@user_bp.route('/user/resume/loading')
+def get_resume_load_loading():
+    return render_template("resume_loading.html")
+
+@user_bp.route('/user/resume/list/<int:page>')
+def get_resume_list(page):
+    totalItems = 100  # 예시: 전체 항목의 수
+    pageRange = 5  # 한 번에 표시할 페이지 범위
+    totalPages = (totalItems + pageRange - 1) // pageRange  # 전체 페이지 수 계산
+    return render_template("resume_list.html", page=page, totalPages=totalPages, pageRange=pageRange)

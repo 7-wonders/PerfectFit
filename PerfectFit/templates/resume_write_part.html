@@ -1,0 +1,229 @@
+{% extends "index.html" %}
+
+{% block styles  %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_write.css') }}" />
+{% endblock %}
+
+{% set level = "경력" %}
+{% set pros = "전 밥을 잘먹습니다." %}
+{% set cons = "밥을 잘먹어서 살이 많이 쪘습니다." %}
+{% set keywords = ['성실', '근면', '정직'] %}
+{% set directional = "제가 대식가인걸 강조해줬으면 합니다." %}
+
+{% set jobs = {
+        '직군1': ['직업1-1', '직업1-2', '직업1-3'],
+        '직군2': ['직업2-1', '직업2-2'],
+        '직군3': ['직업3-1', '직업3-2', '직업3-3', '직업3-4'],
+        '직군4': ['직업4-1', '직업4-2'],
+        '직군5': ['직업5-1', '직업5-2', '직업5-3']
+    } %}
+{% set occupation = "직군3" %}
+{% set job = "직업3-1" %}
+{% set occupationList = ['직군1', '직군2', '직군3', '직군4', '직군5' ] %}
+{% set resumes = [
+    {
+        "resumeId": 1,
+        "title": "자기소개서 제목1",
+        "createdTime": "2024-10-04 02:17:32"
+    },
+    {
+        "resumeId": 2,
+        "title": "자기소개서 제목2",
+        "createdTime": "2024-10-04 02:17:32"
+    },
+    {
+        "resumeId": 3,
+        "title": "자기소개서 제목3",
+        "createdTime": "2024-10-04 02:17:32"
+    },
+    {
+        "resumeId": 4,
+        "title": "자기소개서 제목4",
+        "createdTime": "2024-10-04 02:17:32"
+    }
+]%}
+
+{% set Total = resumes | length %}
+
+{% block scripts %}
+    <script>const iconAiPath = "{{url_for('static', filename = 'img/icon_ai.svg')}}";</script>
+    <script>const iconRemovePath = "{{url_for('static', filename = 'img/remove.svg')}}";</script>
+    <script src="{{ url_for('static', filename='js/resume_write.js') }}"></script>
+    <script>let sectionCount = 0;</script>
+    <script>var jobList = {{ jobs | tojson }};</script>
+    <script>let badgeCounter = {{ keywords | length }};</script>
+{% endblock %}
+
+{% block content %}
+    {% include 'components/header.html' %}
+
+    <div class="container">
+        <div class ="saved-resume-box">
+             <ul uk-accordion>
+                <li>
+                    <a class="uk-accordion-title" href>임시저장 목록({{ Total }}/10)</a>
+                    <div class="uk-accordion-content">
+                        <table class="uk-table saved-resume-content">
+                            <tbody>
+                                {% if resumes %}
+                                    <tr>
+                                        <td class = "Medium-16">번호</td>
+                                        <td class = "Medium-16">제목</td>
+                                        <td class = "Medium-16">저장일시</td>
+                                        <td class = "Medium-16">삭제</td>
+                                    </tr>
+                                    {% for resume in resumes %}
+                                        <tr id="resume-{{ resume.resumeId }}">
+                                            <td class = "Medium-16">{{ resume.resumeId }}</td>
+                                            <td class = "Medium-16"><button class="custom-button Medium-16" onclick="loadResumeData('{{ resume.resumeId }}')">{{ resume.title }}</button></td>
+                                            <td class = "Medium-16">{{ resume.createdTime }}</td>
+                                            <td><button type="button" class = "custom-button" onclick="removeResumeData('{{ resume.resumeId }}')"><img src="{{ url_for('static', filename='img/remove.svg') }}"/></button></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class = "Bold-24">임시저장 된 목록이 없습니다.</p>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class = "resume-write-box">
+            <p class = "Medium-22">자기소개서 작성</p>
+            <form class="uk-form-stacked" id="resume_write_form">
+                {# 제목 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-main-title">제목</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="resume-write-main-title" type="text" name="title" placeholder="제목을 입력해주세요.">
+                    </div>
+                </div>
+
+                 {# 직군 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-occupation">직군</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="resume-write-occupation" name="occupation" onchange = "updateJobList()">
+                            <option selected>{{ occupation }}</option>
+                            {% for occupationList in occupationList %}
+                                {% if occupationList != occupation %}
+                                    <option value="{{ occupationList }}">{{ occupationList }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {# 직업 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-job">직업</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="resume-write-job" name = "jobName">
+                            <option value = "{{ job }}" selected>{{ job }}</option>
+                            {% for jobList in jobs[occupation] %}
+                                {% if jobList != job %}
+                                    <option value="{{ jobList }}">{{ jobList }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                 {# 경력 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-experience">경력 여부</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="resume-write-experience" name = "level">
+                            {% if level == "신입" %}
+                                <option selected>{{ level }}</option>
+                                <option>경력</option>
+                            {% else %}
+                                <option selected>{{ level }}</option>
+                                <option>신입</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+
+                {# 장점 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-merit">장점</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-merit" name="pros" placeholder="장점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ pros }}</textarea>
+                    </div>
+                </div>
+
+                {# 단점 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-disadvantage">단점</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-disadvantage" name="cons" placeholder="단점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ cons }}</textarea>
+                    </div>
+                </div>
+
+                {# 주요 키워드 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-keyword">주요 키워드</label>
+                    <div class="keyword-input-box">
+                        <div class = "badge-container">
+                            {% for keyword in keywords %}
+                                <div class = "badge">
+                                    <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
+                                    <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
+                                </div>
+                            {% endfor %}
+                            <input class="keyword-input Regular-16" id="resume-write-keyword" type="text">
+                        </div>
+                    </div>
+                </div>
+
+
+                {# 방향성 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-write-directionality">방향성(선택 사항)</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-directionality" placeholder="AI가 참고할 방향성에 대해 적어주세요." name = "directional" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ directional }}</textarea>
+                    </div>
+                </div>
+
+                <div class = "resume-container" id = "resume-write-container-0">
+                    {# 항목 #}
+                    <div class="uk-margin">
+                        <div class = "resume-write-header">
+                            <label class="uk-form-label" for="resume-write-title-0">항목1</label>
+                            <button type="button" uk-tooltip="AI 작성하기" class ="Regular-16-light custom-button" id="ai-resume-write-0" onclick="aiResumeWrite(0)"><img src="{{ url_for('static', filename='img/icon_ai.svg') }}"/></button>
+                        </div>
+                        <div class="uk-form-controls">
+                            <input class="uk-input" id="resume-write-title-0" name="sections[][title]" type="text" placeholder="제목을 입력해주세요.">
+                        </div>
+                    </div>
+                    {# 내용 #}
+                    <div class="uk-margin">
+                        <div class="uk-form-controls">
+                            <textarea class="uk-textarea resume-content" id="resume-write-content-0" name="sections[][content]" placeholder="내용을 입력해주세요."  style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "right-box">
+                    <button type="button" class = "Regular-16-light custom-button add-section-btn" id = "add-section-btn" onclick="addSection()">+섹션 추가하기</button>
+                </div>
+
+                <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid public-check-box">
+                    <label class="Regular-16 public-radio"><input class="uk-radio" type="radio" value = "true" name="isPublic">공개</label>
+                    <label class = "Regular-16"><input class="uk-radio" type="radio" value = "false" name="isPublic" checked>비공개</label>
+                </div>
+
+                <div class = "resume-submit-box">
+                    <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "submit">임시저장</button>
+                    <button class = "save-btn Medium-18" id = "resume-write-submit" type="submit">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+{% endblock %}

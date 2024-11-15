@@ -1,0 +1,21 @@
+{% extends "index.html" %}
+
+{% block styles  %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_loading.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        setTimeout(function() {
+            window.location.href = "http://127.0.0.1:5000/user/resume/write"; // 10초 후 리디렉션
+        }, 10000); // 10000ms = 10초
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <img src="{{ url_for('static', filename='img/resume_loading.gif') }}" />
+        <p class = "Medium-28-light loading-text">AI가 자기소개서를 작성하고 있습니다...</p>
+    </div>
+{% endblock %}
