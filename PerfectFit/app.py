@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template
 
 from controllers.interview_controller import interview_bp
+from controllers.resume_controller import resume_bp
 from database.config import Config, db  # Config와 db를 import
 from controllers.user_controller import user_bp
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ db.init_app(app)
 # UserController의 Blueprint 등록
 app.register_blueprint(user_bp)
 app.register_blueprint(interview_bp, url_prefix="/interview")
-
+app.register_blueprint(resume_bp, url_prefix="/resume")
 
 @app.route('/')
 def loading_create():

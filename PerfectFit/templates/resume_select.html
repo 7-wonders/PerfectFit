@@ -10,7 +10,7 @@
 {% block content %}
      <div class="container">
          <div class="uk-grid-small uk-child-width-expand@s uk-text-center resume-select-box" uk-grid>
-            <a href = "http://127.0.0.1:5000/user/resume/information/all">
+            <a href = "http://127.0.0.1:5000/resume/information/all">
                 <div class="uk-card uk-card-default uk-card-body select-card">
                     <img src="{{ url_for('static', filename='img/resume_select_all.svg') }}" class = "resume-select-img" alt="resume"/>
                     <div class = "resume-select-text">
@@ -20,7 +20,7 @@
                 </div>
             </a>
 
-            <a href = "http://127.0.0.1:5000/user/resume/information/part">
+            <a href = "http://127.0.0.1:5000/resume/information/part">
                 <div class="uk-card uk-card-default uk-card-body select-card">
                     <div class = "resume-select-img">
                         <img src="{{ url_for('static', filename='img/resume_select_part.svg') }}" class = "resume-select-img" alt="interview"/>

@@ -215,7 +215,7 @@ function handleButtonClick() {
     const button = document.getElementById("resume-information-submit");
     button.addEventListener("click", function () {
         if (!button.disabled) {
-            window.location.href = "http://127.0.0.1:5000/user/resume/select"; // 링크로 이동
+            window.location.href = "http://127.0.0.1:5000/resume/select"; // 링크로 이동
         }
     });
 }
