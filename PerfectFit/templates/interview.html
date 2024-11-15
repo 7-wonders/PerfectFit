@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 인터뷰 화면</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview.css') }}">
+</head>
+<body>
+
+<div class="uk-container uk-margin-large-top question-section" id="question-section">
+    <div class="question-header">
+        <span class="uk-text-large uk-text-muted">Q.</span>
+        <span id="timer" class="uk-align-right uk-text-primary">01:00</span>
+    </div>
+    <div id="question-text" class="uk-text-bold uk-text-large"></div>
+
+    <div class="answer-section">
+        <span class="uk-text-large uk-text-muted">A.</span>
+        <textarea class="uk-textarea" id="answer-input" rows="5" placeholder="답변을 입력해 주세요."></textarea>
+    </div>
+
+    <div class="navigation">
+        <span id="question-number" class="page-indicator">1/10</span>
+        <button class="uk-button uk-button-default" id="next-button">→</button>
+    </div>
+</div>
+
+<!-- 공개 여부 확인 모달 -->
+<div id="confirmation-modal" class="uk-modal" uk-modal>
+    <div class="uk-modal-dialog">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <div class="uk-modal-header">
+            <h3 class="uk-heading-line-omit"><span>공개 여부 확인</span></h3>
+            <p>자신의 질문과 개선사항을 공개해, 다른 사용자에게 도움을 줄 수 있습니다.</p>
+        </div>
+        <div class="uk-modal-body question-list" id="question-list">
+            <!-- 질문과 답변 목록이 여기에 추가됩니다 -->
+        </div>
+        <div class="uk-modal-footer confirmation-buttons" style="display: flex; justify-content: flex-end;">
+            <button class="uk-button uk-button-default" id="cancel-button">공개 안함</button>
+            <button class="uk-button uk-button-primary" id="confirm-button">공개</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit-icons.min.js"></script>
+<script src="{{ url_for('static', filename='js/interview.js') }}"></script>
+</body>
+</html>

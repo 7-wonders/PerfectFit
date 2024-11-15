@@ -1,0 +1,135 @@
+/* 전체 레이아웃 */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: "Noto Sans KR", sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* 제목 및 수정 버튼 */
+.title-section {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.edit-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+/* 제목 수정 입력란 */
+.edit-section {
+    display: none;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#edit-title-input {
+    width: 300px;
+    padding: 5px;
+    border: 1px solid #87CEFA;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+}
+
+.save-button {
+    margin-left: 5px;
+    padding: 5px 10px;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* 내용 섹션 */
+.content-section {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+/* 질문 및 답변 스타일 */
+.left-panel {
+    flex: 1;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    padding: 20px;
+    background-color: #fff;
+    width: 600px;
+    height: 500px;
+}
+
+.question {
+    margin-bottom: 30px; /* 질문 블록 간 간격 */
+}
+
+.question-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 15px; /* 질문과 답변 사이의 간격을 넓힘 */
+}
+
+.answer {
+    font-size: 14px;
+    line-height: 1.6; /* 답변 줄 간격 */
+    color: #333;
+}
+
+/* 개선 사항 확인 버튼 */
+.check-button {
+    padding: 5px 15px;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* 개선 사항 박스 */
+.right-panel {
+    flex: 1;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    padding: 20px;
+    width: 600px;
+    height: 500px;
+}
+
+.result-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.result-content {
+    font-size: 16px;
+    color: #333;
+}
+
+/* 가운데 화살표 스타일 */
+.arrow-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+    margin: 0 10px;
+}

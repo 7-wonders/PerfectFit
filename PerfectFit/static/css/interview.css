@@ -1,0 +1,152 @@
+/* 전체 페이지 스타일 */
+body {
+    font-family: "Noto Sans KR", sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+/* 메인 질문 컨테이너 */
+.question-section {
+    width: 60%;
+    max-width: 800px;
+    margin-top: 20px;
+    padding-bottom: 40px;
+}
+
+/* 질문 헤더 */
+.question-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.question-header span.uk-text-large {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#timer {
+    font-size: 16px;
+    color: #0065FF;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+#timer::before {
+    content: "⏱️  ";
+    font-size: 16px;
+}
+
+/* 질문 텍스트 */
+#question-text {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 5px;
+    line-height: 1.4;
+    margin-bottom: 30px;
+    color: #000000;
+}
+
+/* 답변 섹션 */
+.answer-section {
+    margin-top: 140px;
+}
+
+.answer-section span {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+#answer-input {
+    width: 100%;
+    height: 150px;
+    font-size: 16px;
+    padding: 10px;
+    border: 2px solid #96C0FF;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+/* 페이지 번호 및 네비게이션 */
+.navigation {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 15px;
+    gap: 8px;
+}
+
+.page-indicator {
+    font-size: 14px;
+    color: #22222280;
+}
+
+/* 질문 목록 스타일 */
+.question-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+}
+
+/* 체크박스 스타일 */
+.question-checkbox {
+    margin-right: 10px;
+}
+
+/* 화살표 아이콘 스타일 */
+.toggle-arrow {
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.3s ease; /* 회전 애니메이션 */
+    margin-left: 8px;
+}
+
+/* 화살표가 열릴 때 위로 회전 */
+.question-item.open .toggle-arrow {
+    transform: rotate(180deg);
+}
+
+
+/* 질문 텍스트 스타일 */
+.question-item-content {
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+/* 답변 텍스트 스타일 */
+.answer-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    padding-left: 25px;
+    display: none;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+/* 모달 버튼 스타일 */
+#confirm-button, #cancel-button {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #ccc;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#confirm-button:hover, #cancel-button:hover {
+    background-color: #0056b3;
+    color: #ffffff;
+}
+
+/* 모달 크기 조정 */
+.uk-modal-dialog {
+    width: 70%;
+    max-width: 900px;
+}

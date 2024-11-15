@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>AI 로딩 화면</title>
+  <!-- UIKit CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/css/uikit.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/loading-analyze.css') }}">
+</head>
+<body>
+
+  <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
+    <div class="container uk-text-center">
+      <!-- 로봇 로딩 GIF 이미지 -->
+      <div class="loading-robot">
+        <img src="{{ url_for('static', filename='img/loading-robot.gif') }}" alt="Loading Robot" style="width: 300px; height: 300px;">
+      </div>
+      <!-- 로딩 텍스트 -->
+      <p class="loading-text">AI가 면접 답변에 대해서 분석 중입니다<span id="dots"></span></p>
+    </div>
+  </div>
+
+<!-- UIKit JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit-icons.min.js"></script>
+
+  <!-- 점점이 애니메이션을 위한 JavaScript -->
+  <script>
+    const dots = document.getElementById("dots");
+    let dotCount = 0;
+
+    setInterval(() => {
+      dotCount = (dotCount + 1) % 4; // 0, 1, 2, 3 반복
+      dots.textContent = ".".repeat(dotCount); // 점의 개수에 따라 텍스트 변경
+    }, 500); // 0.5초마다 업데이트
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+.container {
+  text-align: center;
+}
+
+.loading-text {
+  color: gray;
+  font-size: 14px;
+}
+
+/* 점점이 애니메이션 */
+@keyframes loadingDots {
+  0% { content: ""; }
+  33% { content: "."; }
+  66% { content: ".."; }
+  100% { content: "..."; }
+}
+
+.dots::after {
+  content: "";
+  animation: loadingDots 1.5s infinite;
+}
