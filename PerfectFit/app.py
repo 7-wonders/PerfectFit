@@ -19,7 +19,7 @@ app.register_blueprint(user_bp)
 
 @app.route('/')
 def loading_create():
-    return render_template("Loading-create.html")
+    return render_template("main.html")
 @app.route('/loading-analyze')
 def loading_analyze():
     return render_template("Loading-analyze.html")
