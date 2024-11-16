@@ -1,4 +1,7 @@
+from sqlalchemy import func
+
 from config.config_mysql import get_session
+from domain.models import ResumeView, ResumeLike
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -149,6 +152,43 @@ class InterviewService:
         except Exception as e:
             print("Error occurred:", e)
 
+    @staticmethod
+    def get_interviews(user_id: int, page: int, count: int) -> tuple[list[InterviewDto.Response.interviewSummary], int]:
+        session = get_session()
+
+        # 면접 데이터를 가져오는 쿼리 정의
+        interviews_query = session.query(Interview).filter(Interview.user_id == user_id)
+        total = interviews_query.count()
+
+        interviews = (
+            interviews_query.order_by(Interview.created_time.desc())
+            .offset((page - 1) * count)
+            .limit(count)
+            .all()
+        )
+
+        # 조회수 및 좋아요 수 계산
+        interview_summaries = []
+        for interview in interviews:
+            view_count = session.query(func.sum(ResumeView.view_count)).filter(
+                ResumeView.resume_id == interview.interview_id
+            ).scalar() or 0
+
+            like_count = session.query(func.sum(ResumeLike.like_count)).filter(
+                ResumeLike.resume_id == interview.interview_id
+            ).scalar() or 0
+
+            summary = InterviewDto.Response.interviewSummary(
+                interview_id=interview.interview_id,
+                title=interview.title,
+                created_time=interview.created_time,
+                view_count=view_count,
+                like_count=like_count,
+            )
+            interview_summaries.append(summary)
+
+        return interview_summaries, total
+
 
 def get_passport_key():
     """네이버에서 '네이버 맞춤법 검사기' 페이지에서 passportKey를 획득
@@ -170,3 +210,5 @@ def get_passport_key():
         return passport_key
     else:
         return False
+
+
