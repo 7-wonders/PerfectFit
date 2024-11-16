@@ -32,62 +32,6 @@ class UserService:
 
         return user
 
-class ResumeService:
-    @staticmethod
-    def get_resumes(user_id: int, page: int, count: int):
-        session = get_session()
-
-        # 자기소개서 목록을 가져오기 위한 쿼리
-        resumes_query = session.query(Resume).filter(Resume.user_id == user_id)
-        total = resumes_query.count()
-
-        resumes = resumes_query.order_by(Resume.created_time.desc()) \
-                               .offset((page - 1) * count) \
-                               .limit(count) \
-                               .all()
-
-        # 조회수 및 좋아요 수 계산
-        for resume in resumes:
-            resume.view_count = session.query(func.sum(ResumeView.view_count)).filter(
-                ResumeView.resume_id == resume.resume_id
-            ).scalar() or 0
-
-            resume.like_count = session.query(func.sum(ResumeLike.like_count)).filter(
-                ResumeLike.resume_id == resume.resume_id
-            ).scalar() or 0
-
-        return resumes, total
-
-
-class NecessaryInfoService:
-    @staticmethod
-    def register_info(user_id: int, name: str, age: int, email: str, address: str, detail_address: str):
-        session = get_session()
-
-        # 사용자의 필수 정보를 업데이트 또는 삽입합니다.
-        necessary_info = session.query(AppUser).filter(AppUser.user_id == user_id).first()
-
-        if necessary_info:
-            # 정보가 이미 존재하는 경우 업데이트
-            necessary_info.name = name
-            necessary_info.age = age
-            necessary_info.email = email
-            necessary_info.address = address
-            necessary_info.detail_address = detail_address
-        else:
-            # 새로운 사용자 정보를 추가
-            new_info = AppUser(
-                user_id=user_id,
-                name=name,
-                age=age,
-                email=email,
-                address=address,
-                detail_address=detail_address
-            )
-            session.add(new_info)
-
-        session.commit()
-
 class OptionalInfoService:
     @staticmethod
     def register_info(user_id: int, major: str, university: str, university_status: str,
