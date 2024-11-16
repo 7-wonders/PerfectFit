@@ -24,7 +24,7 @@ def get_pagination_params():
 
 @user_bp.route('/users')
 def get_users():
-    page, count = get_pagination_params()  # 페이지네이션 파라미터 함수 사용
+    page, count = get_pagination_params()  # 페이지네이션 파라미터 함수 사용 // 테스트
 
     paginate_user = UserService.get_users(page, count)
     response: UserDto.Response.Users = UserDto.Response.Users(
