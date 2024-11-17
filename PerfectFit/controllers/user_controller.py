@@ -49,10 +49,23 @@ def get_user(user_id: int):
 
 @user_bp.route('/user/mypage/info')
 def get_info():
-    user_id = request.headers.get("user_id")
+    try:
+        # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
+        access_token = request.cookies.get('access_token')
+        if not access_token:
+            raise ValueError("Access token이 없습니다.")
+        jwt_factory = JWTFactory()
+        user_id = jwt_factory.verify_access_token(access_token)
+    except ValueError as e:
+        return Response(
+            json.dumps({"error": str(e)}),
+            status=401,
+            content_type='application/json; charset=utf-8'
+        )
+
     user = UserService.get_user(user_id)
 
-    response: DetailedUserDTO.Response.DetailedUser = DetailedUserDTO.Response.DetailedUser(
+    response = DetailedUserDTO.Response.DetailedUser(
         user_id=user.id,
         username=user.name,
         age=user.age,
@@ -94,8 +107,7 @@ def get_info():
         ]
     )
 
-    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    return render_template("user.html", user=response) ## 페이지를 그리기위한 데이터들은 모두 이렇게 변경.
+    return render_template("user.html", user=asdict(response))  # JSON 데이터 전달
 
 @user_bp.route('/user/profile')
 def get_profile():
@@ -143,8 +155,6 @@ def get_resumes():
         total=total
     )
 
-    # JSON 응답 생성 및 반환
-    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
     return render_template("user.html", user=response)
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
@@ -168,7 +178,6 @@ def get_interviews():
         ]
     )
 
-    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
     return render_template("user.html", user=response)
 
 @user_bp.route('/user/requirements', methods=['POST'])
