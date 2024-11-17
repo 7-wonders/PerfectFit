@@ -5,6 +5,11 @@ class ExceptionType(Enum):
     GOOGLE_NOT_ENOUGH_INFO = ("400", "B40010", "필수 정보가 부족합니다. e.g. id, email, name")
     NAVER_NOT_ENOUGH_INFO = ("400", "B40011", "필수 정보가 부족합니다. e.g. id, email, name")
     KAKAO_NOT_ENOUGH_INFO = ("400", "B40012", "필수 정보가 부족합니다. e.g. id, email, name")
+    REQUIRED_KEYWORDS = ("400", "B40020", "중요 키워드는 필수입니다.")
+    REQUIRED_JOB = ("400", "B40021", "직업는 필수입니다.")
+    REQUIRED_LEVEL = ("400", "B40022", "경력은 필수입니다.")
+    REQUIRED_PROS = ("400", "B40023", "장점은 필수입니다.")
+    REQUIRED_CONS = ("400", "B40024", "단점은 필수입니다.")
 
     EXPIRED_TOKEN = ("401", "U40110", "토큰이 만료되었습니다.")
     INVALID_TOKEN = ("401", "U40111", "토큰이 유효하지 않습니다.")
@@ -26,6 +31,7 @@ class ExceptionType(Enum):
     REDIS_CONF_ERROR = ("500", "I50020", "Redis 설정 중 문제가 발생하였습니다.")
     REDIS_DATA_ERROR = ("500", "I50021", "Redis 데이터 조작 중 오류가 발생하였습니다.")
     JWT_CONF_ERROR = ("500", "I50030", "JWT 설정 중 문제가 발생하였습니다.")
+    GPT_CONF_ERROR = ("500", "I50040", "GPT 설정 중 문제가 발생하였습니다.")
 
     @property
     def status_code(self):
