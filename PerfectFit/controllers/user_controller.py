@@ -199,8 +199,16 @@ def create_requirements():
         title=request_dto.title
     )
 
-    # 응답 생성
-    return Response(status=201)
+    # Redis에 데이터 저장
+    from config.config_redis import Redis
+    redis_instance = Redis()  # Redis 인스턴스 생성
+    redis_key = f"user:{user_id}:requirements"
+    redis_value = json.dumps(data, ensure_ascii=False)
+
+    redis_instance.save(redis_key, redis_value)
+
+    # 리다이렉션으로 응답 반환
+    return redirect("/requirements/success")
 
 @user_bp.route('/user/necessary', methods=['POST'])
 def register_necessary_info():
@@ -227,7 +235,7 @@ def register_necessary_info():
 
 @user_bp.route('/user/optional', methods=['POST'])
 def register_optional_info():
-    # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
+    # 헤더에서 사용자 ID 추출
     user_id = request.headers.get("user_id")
 
     # 요청 바디에서 선택 정보 데이터를 추출합니다.
@@ -240,7 +248,27 @@ def register_optional_info():
     work_experiences = data.get("workExperiences", [])
     phone_number = data.get("phoneNumber")
 
-    # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
+    # Redis에 저장할 데이터 생성
+    redis_data = {
+        "user_id": user_id,
+        "major": major,
+        "university": university,
+        "university_status": university_status,
+        "grade": grade,
+        "project_experiences": project_experiences,
+        "work_experiences": work_experiences,
+        "phone_number": phone_number,
+    }
+
+    # Redis에 데이터 저장
+    from config.config_redis import Redis
+    redis_handler = Redis()
+    redis_key = f"user:{user_id}:optional_info"
+    redis_value = json.dumps(redis_data, ensure_ascii=False)
+
+    redis_handler.save(redis_key, redis_value)
+
+    # 데이터베이스에 저장하기 위해 서비스 계층 호출
     OptionalInfoService.register_info(
         user_id=user_id,
         major=major,
@@ -252,8 +280,9 @@ def register_optional_info():
         phone_number=phone_number
     )
 
-    # 응답: 성공 시 201 Created를 반환
-    return Response(status=201)
+    # 성공 시 리다이렉션
+    redirect_uri = "/optional-info/success"
+    return redirect(redirect_uri)
 
 
 @user_bp.route('/user/verify/send', methods=['POST'])
