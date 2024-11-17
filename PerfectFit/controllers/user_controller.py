@@ -10,6 +10,7 @@ from flask import Blueprint, render_template, request, redirect, make_response
 
 from dto.Resume.resume import ResumeDTO
 from dto.WorkExperience.work_experience import WorkExperienceDTO
+from dto.interview.interview import InterviewDto
 from dto.user.user import UserDto
 from services.interview_service import InterviewService
 from services.necessaryinfo_service import NecessaryInfoService
@@ -151,10 +152,24 @@ def get_interviews():
     user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
 
+    # 사용자 및 인터뷰 데이터 조회
     user = UserService.get_user(user_id)
     interviews, total = InterviewService.get_interviews(user_id, page, count)
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
+    # DTO를 사용하여 응답 생성
+    response = InterviewDto.Response.isPublicList(
+        interviews=[
+            InterviewDto.Response.isPublicInterview(
+                questionId=interview.question_id,
+                title=interview.title,
+                answer=interview.answer,
+                isPublic=interview.is_public
+            )
+            for interview in interviews
+        ]
+    )
+
+    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
 @user_bp.route('/user/requirements', methods=['POST'])
