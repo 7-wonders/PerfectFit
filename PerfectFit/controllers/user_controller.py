@@ -8,6 +8,7 @@ from dto.DetailedUser.detailed_user import DetailedUserDTO
 from dto.ProjectExperience.project_experience import PexDTO
 from flask import Blueprint, render_template, request, redirect, make_response
 
+from dto.Resume.resume import ResumeDTO
 from dto.WorkExperience.work_experience import WorkExperienceDTO
 from dto.user.user import UserDto
 from services.interview_service import InterviewService
@@ -111,35 +112,38 @@ def get_resumes():
     user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
 
+    # 사용자 및 이력서 데이터 조회
     user = UserService.get_user(user_id)
     resumes, total = ResumeService.get_resumes(user_id, page, count)
 
-    response = {
-        "user": {
-            "userId": user.id,
-            "username": user.name,
-            "profilePath": user.profile_path
-        },
-        "resumes": [
-            {
-                "resumeId": resume.resume_id,
-                "title": resume.title,
-                "viewCount": resume.view_count,
-                "likeCount": resume.like_count,
-                "occupation": {
-                    "occupationId": resume.occupation_id,
-                    "occupationName": resume.occupation_name
-                },
-                "job": resume.job,
-                "level": resume.level,
-                "createdTime": resume.created_time
-            }
+    # DTO를 사용하여 응답 생성
+    response = ResumeDTO.Response(
+        user=ResumeDTO.User(
+            user_id=user.id,
+            username=user.name,
+            profile_path=user.profile_path
+        ),
+        resumes=[
+            ResumeDTO.Resume(
+                resume_id=resume.resume_id,
+                title=resume.title,
+                view_count=resume.view_count,
+                like_count=resume.like_count,
+                occupation=PexDTO.Response.Occupation(
+                    occupation_id=resume.occupation_id,
+                    occupation_name=resume.occupation_name
+                ),
+                job=resume.job,
+                level=resume.level,
+                created_time=resume.created_time
+            )
             for resume in resumes
         ],
-        "total": total
-    }
+        total=total
+    )
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
+    # JSON 응답 생성 및 반환
+    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
 @user_bp.route('/user/mypage/interview')
@@ -149,32 +153,6 @@ def get_interviews():
 
     user = UserService.get_user(user_id)
     interviews, total = InterviewService.get_interviews(user_id, page, count)
-
-    response = {
-        "user": {
-            "userId": user.id,
-            "username": user.name,
-            "profilePath": user.profile_path
-        },
-        "interviews": [
-            {
-                "interviewId": interview.interview_id,
-                "title": interview.title,
-                "isPublic": interview.is_public,
-                "viewCount": interview.view_count,
-                "likeCount": interview.like_count,
-                "occupation": {
-                    "occupationId": interview.occupation_id,
-                    "occupationName": interview.occupation_name
-                },
-                "job": interview.job,
-                "level": interview.level,
-                "createdTime": interview.created_time
-            }
-            for interview in interviews
-        ],
-        "total": total
-    }
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
