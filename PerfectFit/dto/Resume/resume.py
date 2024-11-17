@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 
-class Resume:
+class ResumeDTO:
     @dataclass
     class Resume:
         resume_id: int
