@@ -95,7 +95,7 @@ def get_info():
     )
 
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return render_template("user.html", user=response) ## 페이지를 그리기위한 데이터들은 모두 이렇게 변경.
 
 @user_bp.route('/user/profile')
 def get_profile():
@@ -107,16 +107,15 @@ def get_profile():
     }
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return render_template("user.html", user=response)
 
 @user_bp.route('/user/mypage/resume')
 def get_resumes():
     user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
 
-    # 사용자 및 이력서 데이터 조회
-    user = UserService.get_user(user_id)
-    resumes, total = ResumeService.get_resumes(user_id, page, count)
+    # get_user 하지말고 get_user with resumes 메소드를 만들어서 컨트롤러에 대응하는 서비스 만들고. user랑 resumes를 join시켰습니다
+    user, resumes, total = UserService.get_user_with_resumes(user_id, page, count)
 
     # DTO를 사용하여 응답 생성
     response = ResumeDTO.Response(
@@ -146,8 +145,7 @@ def get_resumes():
 
     # JSON 응답 생성 및 반환
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
-
+    return render_template("user.html", user=response)
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
     user_id = request.headers.get("user_id")
@@ -171,7 +169,7 @@ def get_interviews():
     )
 
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return render_template("user.html", user=response)
 
 @user_bp.route('/user/requirements', methods=['POST'])
 def create_requirements():
