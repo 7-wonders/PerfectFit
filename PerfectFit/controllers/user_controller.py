@@ -3,8 +3,12 @@ from dataclasses import asdict
 import json
 from flask import current_app
 from werkzeug.utils import secure_filename
-from dto.ProjectExperience.projectExperience import PexDTO
+
+from dto.DetailedUser.detailed_user import DetailedUserDTO
+from dto.ProjectExperience.project_experience import PexDTO
 from flask import Blueprint, render_template, request, redirect, make_response
+
+from dto.WorkExperience.work_experience import WorkExperienceDTO
 from dto.user.user import UserDto
 from services.interview_service import InterviewService
 from services.necessaryinfo_service import NecessaryInfoService
@@ -45,7 +49,7 @@ def get_info():
     user_id = request.headers.get("user_id")
     user = UserService.get_user(user_id)
 
-    response: PexDTO.Response.DetailedUser = PexDTO.Response.DetailedUser(
+    response: DetailedUserDTO.Response.DetailedUser = DetailedUserDTO.Response.DetailedUser(
         user_id=user.id,
         username=user.name,
         age=user.age,
@@ -59,7 +63,7 @@ def get_info():
         phone_number=user.phone_number,
         profile_path=user.profile_path,
         work_experiences=[
-            PexDTO.Response.WorkExperience(
+            WorkExperienceDTO.Response.WorkExperience(
                 work_experience_id=exp.work_experience_id,
                 from_date=exp.from_date,
                 to_date=exp.to_date,
