@@ -1,0 +1,105 @@
+.container {
+    display: flex;
+    width: 90rem;
+    flex-direction: column;
+    /*align-items: center;*/
+    font-family: 'Noto Sans KR', sans-serif;
+    margin : 0 auto;
+    /*gap : 10px;*/
+}
+
+/*==================== 자기소개서 상세보기 관련 CSS ========================*/
+/*자기소개서 카테고리,제목 관련 css 코드*/
+.resume-detail-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+/*자기소개서 상세보기의 시작을 45px만큼 떨어뜨림*/
+.resume-detail-header-wrapper {
+    margin-top : 45px;
+}
+/* 자기소개서 제목, 수정 버튼에 관한 css */
+.resume-detail-title-and-edit {
+    display: flex;
+    justify-content: space-between;
+}
+/*수정 버튼 관련 css */
+.uk-button {
+    border:none !important;
+    background-image : url('/static/img/edit_button_icon.svg');
+     background-repeat: no-repeat; /* 이미지 반복 금지 */
+    width : 35px;
+    height: 35px;
+}
+
+/* 수정 버튼 드롭다운 관련 css */
+.resume-detail-title-and-edit .uk-link,
+.resume-detail-title-and-edit a {
+    color: rgba(0, 0, 0, 0.50);
+    text-decoration: none;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+}
+
+.resume-detail-title-and-edit a:hover {
+    color: #222;
+    text-decoration: underline;
+}
+
+.resume-detail-title-and-edit .uk-dropdown {
+    min-width: 10px !important;
+    padding: 10px !important;
+}
+
+.resume-detail-title-and-edit .uk-drop.uk-open {
+    display: block;
+    top: 20px !important;
+    left: -20px !important;
+}
+
+/*자기소개서 내용 wrapper 공간 여유 css*/
+.resume-detail-content-wrapper {
+    margin-top : 45px;
+}
+/* 자기소개서 내용 섹션별 공간 여유 css */
+.resume-detail-content {
+    padding : 10px 0;
+}
+/* 좋아요, 조회수 */
+.resume-detail-Engagement {
+    display : flex;
+    justify-content: flex-end;
+    margin-bottom : 20px;
+}
+
+/*=================자기소개서 목록 관련 css 코드==============*/
+.resume-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.resume-list {
+    display: flex;
+    position: relative;
+    margin-top : 30px;
+}
+
+.resume-list-Engagement {
+    position: absolute;
+    display : flex;
+    right: 0;
+    bottom: 0;
+    margin-bottom: 10px;
+}
+
+.resume-profile {
+    width : 45px;
+    height : 45px;
+    border-radius: 70%;
+}
