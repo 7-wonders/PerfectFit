@@ -1,11 +1,10 @@
-from dataclasses import asdict
-
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify, redirect
 
 from dto.resume.resume import ResumeDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from services.resume_service import ResumeService
+from tasks import add_resume_task
 
 resume_bp = Blueprint('resume', __name__)
 
@@ -26,4 +25,16 @@ def create_resume():
     elif not request_resume.cons:
         return CustomException(ExceptionType.REQUIRED_CONS)
 
-    return asdict(ResumeService.add_resume(request_resume))
+    task = ResumeService.add_resume(request_resume)
+
+    return redirect(f"/resume/waiting?task_id={task.id}")
+
+
+@resume_bp.route('/task/<task_id>', methods=['POST'])
+def get_task(task_id):
+    task = add_resume_task.AsyncResult(task_id)
+
+    if task.state == 'SUCCESS':
+        return jsonify(task.get())
+    else:
+        return jsonify({"status": "running"})

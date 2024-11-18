@@ -1,4 +1,4 @@
-from flask import g, request
+from flask import request
 from sqlalchemy.orm import joinedload
 
 from config.config_mysql import get_session
@@ -8,27 +8,10 @@ from dto.resume.resume_gpt import ResumeGPT
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from utils.jwt_factory import JWTFactory
-from utils.openai.resume.full_resume_strategy import FullResumeStrategy
-from utils.openai.resume.resume_helper import ResumeHelper
+from tasks import add_resume_task
 
 
 class ResumeService:
-    @staticmethod
-    def _add_resume_with_gpt(job_name: str, user: AppUser, resume: ResumeDto.Request.CreateFullResume) -> None:
-        resume_helper = ResumeHelper(strategy=FullResumeStrategy(resume=ResumeGPT.Request.CreateResume(
-            keywords=resume.keywords,
-            job_name=job_name,
-            level=resume.level,
-            pros=resume.pros,
-            cons=resume.cons,
-            directional=resume.directional,
-            chapter=resume.chapter,
-            work_experiences=user.work_experiences,
-            project_experiences=user.project_experiences
-        )))
-
-        return resume_helper.get_answer()
-
     @staticmethod
     def add_resume(resume: ResumeDto.Request.CreateFullResume) -> ResumeGPT.Response.Resume:
         jwt_factory = JWTFactory()
@@ -56,3 +39,11 @@ class ResumeService:
 
         if not user:
             raise CustomException(ExceptionType.NOT_FOUND_USER)
+
+        task = add_resume_task.apply_async(kwargs={
+            "job_name": job.job_name,
+            "user": user,
+            "resume": resume
+        })
+
+        return task
