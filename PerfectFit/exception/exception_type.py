@@ -10,6 +10,7 @@ class ExceptionType(Enum):
     REQUIRED_LEVEL = ("400", "B40022", "경력은 필수입니다.")
     REQUIRED_PROS = ("400", "B40023", "장점은 필수입니다.")
     REQUIRED_CONS = ("400", "B40024", "단점은 필수입니다.")
+    INVALID_JOB_ID = ("400", "B40030", "유효하지 않은 직업 ID입니다.")
 
     EXPIRED_TOKEN = ("401", "U40110", "토큰이 만료되었습니다.")
     INVALID_TOKEN = ("401", "U40111", "토큰이 유효하지 않습니다.")

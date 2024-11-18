@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 
@@ -11,8 +11,8 @@ class ResumeDto:
             level: int
             pros: str
             cons: str
-            directional: Optional[str]
-            chapter: Optional[str]
+            directional: Optional[str] = field(default=None)
+            chapter: Optional[str] = field(default=None)
 
         @dataclass
         class CreatePartialResume:

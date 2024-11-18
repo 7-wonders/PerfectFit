@@ -5,9 +5,7 @@ from flask import Blueprint, request
 from dto.resume.resume import ResumeDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
-from utils.openai.resume.full_resume_strategy import FullResumeStrategy
-from utils.openai.resume.resume_helper import ResumeHelper
-from utils.openai.resume.resume_strategy import CreateResume
+from services.resume_service import ResumeService
 
 resume_bp = Blueprint('resume', __name__)
 
@@ -28,14 +26,4 @@ def create_resume():
     elif not request_resume.cons:
         return CustomException(ExceptionType.REQUIRED_CONS)
 
-    helper = ResumeHelper(strategy=FullResumeStrategy(resume=CreateResume(
-        keywords=request_resume.keywords,
-        job_name='백엔드 개발자',
-        level=request_resume.level,
-        pros=request_resume.pros,
-        cons=request_resume.cons,
-        directional='',
-        chapter=''
-    )))
-
-    return asdict(helper.get_answer())
+    return asdict(ResumeService.add_resume(request_resume))

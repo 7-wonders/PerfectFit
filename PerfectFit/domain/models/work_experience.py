@@ -27,4 +27,4 @@ class WorkExperience(db.Model):
     responsibility: Mapped[str] = mapped_column(VARCHAR(500), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    user: Mapped["AppUser"] = db.relationship("AppUser", back_populates="work_experience")
+    user: Mapped["AppUser"] = db.relationship("AppUser", back_populates="work_experiences")

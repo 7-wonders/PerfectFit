@@ -1,4 +1,4 @@
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from config.config_mysql import db
 
@@ -40,8 +40,8 @@ class AppUser(db.Model):
     profile_type: Mapped[Optional[str]] = mapped_column(VARCHAR(10))
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    work_experience: Mapped[List["WorkExperience"]] = db.relationship("WorkExperience", back_populates="user")
-    project_experience: Mapped[List["ProjectExperience"]] = db.relationship("ProjectExperience", back_populates="user")
+    work_experiences: Mapped[list["WorkExperience"]] = db.relationship("WorkExperience", back_populates="user")
+    project_experiences: Mapped[list["ProjectExperience"]] = db.relationship("ProjectExperience", back_populates="user")
     resumes: Mapped[list["Resume"]] = db.relationship("Resume", back_populates="user")
     resume_likes: Mapped[list["ResumeLike"]] = db.relationship("ResumeLike", back_populates="user")
     resume_views: Mapped[list["ResumeView"]] = db.relationship("ResumeView", back_populates="user")

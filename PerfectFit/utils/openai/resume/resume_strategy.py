@@ -1,30 +1,7 @@
 from abc import ABC
-from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from utils.openai.chat_gpt import ChatGPT
-
-
-@dataclass
-class CreateResume:
-    keywords: List[str]
-    job_name: str
-    level: int
-    pros: str
-    cons: str
-    directional: Optional[str]
-    chapter: Optional[str]
-
-
-@dataclass
-class Resume:
-
-    @dataclass
-    class Section:
-        title: str
-        content: str
-
-    sections: List[Section]
 
 
 class ResumeStrategy(ChatGPT, ABC):
