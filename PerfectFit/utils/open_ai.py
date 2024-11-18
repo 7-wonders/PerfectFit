@@ -6,7 +6,8 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM,pipeline
 from openai import OpenAI
 from config.config_mysql import get_session
-from domain.models import Resume
+from domain.models import Resume, ResumeSection, WorkExperience, ProjectExperience, Interview, InterviewQuestion, \
+    InterviewAnswer, Job
 
 # OpenAI API 키 가져오기
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -37,40 +38,153 @@ def get_dinner_recommendation():
         return f"Error: {response.status_code}, {response.text}"
 
 
-def make_interview_based_on_resume(resume_id: int):
+def make_interview_based_on_resume(resume_id: int, level: str):
     resume = get_session().query(Resume).filter_by(resume_id=resume_id).first()
+    resume_section = get_session().query(ResumeSection).filter_by(resume_id=resume_id).all()
+    work_experience = get_session().query(WorkExperience).filter_by(user_id=resume.user_id).all()
+    project_experience = get_session().query(ProjectExperience).filter_by(user_id=resume.user_id).all()
+
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
 
-    resume_section = [
-        {"title": "성장과정", "content": "자소서 내용 쓰기2"},
-        {"title": "지원동기", "content": "자소서 내용 쓰기쓰기"},
-    ]
 
 
-    resume_section_content = "\n".join([f"{section['title']}: {section['content']}" for section in resume_section])
+    resume_section_content = "\n".join([f"{section.title}: {section.content}" for section in resume_section])
+
+    work_experience_content = "\n".join([
+        f"회사명: {exp.company_name} \n"
+        f"입사일: {exp.from_date} \n"
+        f"퇴사일: {exp.to_date} \n"
+        f"퇴사 이유: {exp.reason} \n"
+        f"직급/직업: {exp.position} \n"
+        f"업무: {exp.responsibility} \n"
+        for exp in work_experience
+    ])
+
+    project_experience_content = "\n".join([
+        f"프로젝트명: {exp.project_name} \n"
+        f"프로젝트 시작일: {exp.from_date} \n"
+        f"프로젝트 종료일: {exp.to_date} \n"
+        f"프로젝트 내용: {{"
+        + ", ".join(
+            [f"프로젝트 내용{i + 1}: {task.content}" for i, task in enumerate(exp.tasks)]
+        ) + "} \n"
+        for exp in project_experience
+    ])
 
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         response_format={"type": "json_object"},
         temperature=0.7,
         messages=[
             {"role": "system",
-             "content": f"You are an Interviewer, related on {resume.job}. Please return the response as a JSON object with 10 'Question' and 'Best Answer' pairs."},
-            {"role": "user", "content": "당신은 직업 : {resume.job}에 관한 선임자이며 오랜 경력의 전문가입니다. 해당 직무 관련 신입 채용을 위해 면접을 진행해야합니다."},
+             "content": f"You are an interviewer related to {resume.job}. Please ensure to return the response as a JSON object with exactly 10 'Question' and 'Best Answer' pairs, wrapped under the key 'InterviewQuestions'."},
+            {"role": "user", "content": f"당신은 직업 : {resume.job}에 관한 선임자이며 오랜 경력의 전문가입니다. 해당 직무 관련 신입 채용을 위해 면접을 진행해야합니다."},
             {"role": "user",
-             "content": "당신은 지금부터 면접을 진행해야 해야합니다. 지원자의 자기소개서 내용을 기반으로 수행 해야 합니다."},
+             "content": "당신은 지금부터 면접을 진행해야 해야합니다. 지원자의 자기소개서 내용을 기반으로 수행을 하되, 내용 기반으로 파생적인 내용을 질문을 해도 괜찮습니다."},
+            {"role": "user",
+             "content": "자기소개서 내용이 여러개 일 경우, 질문 개수를 가능한 균등하게 분할해주세요."},
             {"role": "user", "content": "이 아래부터는 자기소개서 내용들입니다. 이를 기반으로 한국어로 면접을 진행해주세요."},
-            {"role": "user", "content": resume_section_content}
+            {"role": "user", "content": resume_section_content},
+            {"role": "user", "content": "========================================="},
+            {"role": "user", "content": "이 아래부터는 지원자의 경력 사항입니다. 공란일 수 있습니다."},
+            {"role": "user", "content": work_experience_content},
+            {"role": "user", "content": "이 아래부터는 지원자의 프로젝트 경험 사항입니다. 공란일 수 있습니다."},
+            {"role": "user", "content": project_experience_content}
         ]
     )
     try:
-        print(response)
-        result = response['choices'][0].message.content.strip()
+        result = response.choices[0].message.content.strip()
         print(result)
+
+        new_interview = Interview(user_id=resume.user_id, resume_id=resume_id, job_id=resume.job_id, company=None, title="더미 제목", level = level)
+        get_session().add(new_interview)
+        get_session().flush()
+
+        interview_id = new_interview.interview_id
+        interview_data = json.loads(result)
+        interview_questions = interview_data.get("InterviewQuestions", [])
+
+        for item in interview_questions:
+            question_text = item.get("Question")
+            answer_text = item.get("Best Answer")
+
+            # 질문 저장
+            new_question = InterviewQuestion(interview_id=interview_id, question=question_text)
+            get_session().add(new_question)
+            get_session().flush()
+
+            # 답변 저장
+            new_answer = InterviewAnswer(question_id=new_question.question_id, answer=answer_text)
+            get_session().add(new_answer)
+
+        # 5. 트랜잭션 커밋
+        get_session().commit()
+        print("Data successfully inserted into the database!")
+
         return result
     except KeyError as e:
+        get_session().rollback()
         print(f"Error: {e}")
         return None
+
+def make_interview_based_on_job(job_id: int, user_id: int, level: str):
+    job = get_session().query(Job).filter_by(job_id=job_id).first()
+    print("asdasd")
+    client = OpenAI(api_key=f'{OPENAI_API_KEY}')
+
+    print("asdasd")
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_format={"type": "json_object"},
+        temperature=0.7,
+        messages=[
+            {"role": "system",
+             "content": f"You are an interviewer related to {job.job_name}. Please ensure to return the response as a JSON object with exactly 10 'Question' and 'Best Answer' pairs, wrapped under the key 'InterviewQuestions'."},
+            {"role": "user", "content": f"당신은 직업 : {job.job_name}에 관한 선임자이며 오랜 경력의 전문가입니다. 해당 직무 관련 신입 채용을 위해 면접을 진행해야합니다."},
+            {"role": "user",
+             "content": "당신은 지금부터 면접을 진행해야 해야합니다. 지원 전공 관련 심화 내용을 위주로 질문해주세요. 이 면접은 직무 면접입니다."},
+            {"role": "user",
+             "content": f"지원자는 {level}자 입니다."},
+
+        ]
+    )
+    try:
+        result = response.choices[0].message.content.strip()
+        print(result)
+
+        new_interview = Interview(user_id=user_id, resume_id=None, job_id=job.job_id, company=None, title="더미 제목", level = level)
+        get_session().add(new_interview)
+        get_session().flush()
+
+        interview_id = new_interview.interview_id
+        interview_data = json.loads(result)
+        interview_questions = interview_data.get("InterviewQuestions", [])
+
+        for item in interview_questions:
+            question_text = item.get("Question")
+            answer_text = item.get("Best Answer")
+
+            # 질문 저장
+            new_question = InterviewQuestion(interview_id=interview_id, question=question_text)
+            get_session().add(new_question)
+            get_session().flush()
+
+            # 답변 저장
+            new_answer = InterviewAnswer(question_id=new_question.question_id, answer=answer_text)
+            get_session().add(new_answer)
+
+        # 5. 트랜잭션 커밋
+        get_session().commit()
+        print("Data successfully inserted into the database!")
+
+        return result
+    except KeyError as e:
+        get_session().rollback()
+        print(f"Error: {e}")
+        return None
+
+
+
 
 
 # Llama API 키 가져오기 (가정)

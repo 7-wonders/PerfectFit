@@ -7,7 +7,7 @@ from dto.interview.interview import InterviewDto
 
 from services.interview_service import InterviewService
 
-from utils.open_ai import make_interview_based_on_resume
+from utils.open_ai import make_interview_based_on_resume, make_interview_based_on_job
 interview_bp = Blueprint('interview', __name__)
 
 
@@ -115,4 +115,8 @@ def spell_check():
 
 @interview_bp.route('/testGPT',methods=['GET'])
 def gpt():
-    make_interview_based_on_resume(1)
+    make_interview_based_on_resume(1,"신입")
+
+@interview_bp.route('/testGPT2', methods=['GET'])
+def gpt2():
+    make_interview_based_on_job(254, 1,"경력")
