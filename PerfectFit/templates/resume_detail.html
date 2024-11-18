@@ -7,11 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_detail.css') }}" />
 {% endblock %}
 
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/resume_detail.js') }}"></script>
-{% endblock %}
-
 {% set nowUserId = "testId" %}
+
+{% set isLike = false %}
+{% set isView = false %}
 
 {% set resumes = [
     {
@@ -72,6 +71,12 @@
 }
 ]%}
 
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/resume_detail.js') }}"></script>
+    <script>let isLike = {{ isLike | tojson }};</script>
+    <script>let likeCount = {{ response[0].likeCount | tojson }};</script>
+{% endblock %}
+
 
 {% block content %}
     <div class = "container">
@@ -114,8 +119,8 @@
                     <span uk-icon="icon: eye; ratio: 1.4;"></span>
                     <span class = "Regular-20-light">{{ response[0].viewCount }}</span>
                 </div>
-                <div>
-                    <button id="like-button" uk-icon="icon: heart; ratio: 1.4;" class="none-style-btn" onclick="actionLike()"></button>
+                <div style = "display : flex; align-items: center;">
+                    <button id="like-button" class="like-btn" onclick="actionLike()"></button>
                     <span id="like-count" class="Regular-20-light">{{ response[0].likeCount }}</span>
                 </div>
             </div>
@@ -145,8 +150,8 @@
                         <span class = "Regular-16-light">{{ resumes[0].viewCount }}</span>
                     </div>
                     <div>
-                        <button id="like-button" uk-icon="icon: heart; ratio: 1.4;" class="none-style-btn" onclick="actionLike()"></button>
-                        <span id="like-count" class="Regular-20-light">{{ response[0].likeCount }}</span>
+                        <button id="like-button" uk-icon="icon: heart; ratio: 1.0;" class="none-style-btn" onclick="actionLike()"></button>
+                        <span id="like-count" class="Regular-16-light">{{ response[0].likeCount }}</span>
                     </div>
                 </div>
             </div>

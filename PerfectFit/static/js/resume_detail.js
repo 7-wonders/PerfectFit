@@ -1,42 +1,55 @@
-let isLiked = false; // 현재 유저가 좋아요를 눌렀는지 여부를 서버에서 받아와야 함
-let likeCountValue = parseInt(document.getElementById('like-count').textContent, 10);
-
 function actionLike() {
-    const likeButton = document.getElementById('like-button');
-    const likeCount = document.getElementById('like-count');
+    const likeButton = document.getElementById("like-button");
+    const likeCountSpan = document.getElementById("like-count");
 
-    // 좋아요 상태 변경
-    isLiked = !isLiked; // 현재 상태 반대로 토글
-    likeCountValue = isLiked ? likeCountValue + 1 : likeCountValue - 1;
+    // isLike 상태를 토글
+    isLike = !isLike;
 
-    // UI 업데이트
-    likeButton.classList.toggle('liked', isLiked); // liked 클래스 추가/제거
-    likeButton.textContent = "안녕하세용?"
-    likeCount.textContent = likeCountValue;
+    // UI 상태 업데이트
+    if (isLike) {
+        likeButton.classList.add("liked");
+        likeCount += 1; // 좋아요 증가
+    } else {
+        likeButton.classList.remove("liked");
+        likeCount -= 1; // 좋아요 감소
+    }
 
-    // 서버에 상태 전송
-    // fetch('/update-like-status', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
+    // 좋아요 수 업데이트
+    likeCountSpan.textContent = likeCount;
+
+    // // API 요청을 위한 데이터 준비
+    // const requestData = {
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //         "Authorization": "Bearer your-auth-token" // 실제 Authorization 토큰으로 대체
+    //     },
     //     body: JSON.stringify({
-    //         userId: 'currentUserId', // 실제 유저 ID로 교체해야 함
-    //         resumeId: 'resumeId',   // 실제 이력서 ID로 교체해야 함
-    //         isLiked: isLiked        // 현재 좋아요 상태 전달
-    //     })
-    // })
-    // .then(response => {
-    //     if (!response.ok) {
-    //         throw new Error('좋아요 상태를 업데이트하는 데 실패했습니다.');
-    //     }
-    //     return response.json();
-    // })
-    // .catch(error => {
-    //     console.error('에러 발생:', error);
+    //         isLike: isLike
+    //     }),
+    //     method: "POST"
+    // };
     //
-    //     // 에러 발생 시 UI를 롤백
-    //     isLiked = !isLiked; // 상태 다시 원래대로
-    //     likeCountValue = isLiked ? likeCountValue + 1 : likeCountValue - 1;
-    //     likeButton.classList.toggle('liked', isLiked);
-    //     likeCount.textContent = likeCountValue;
-    // });
+    // // API 호출
+    // fetch("/like-api-endpoint", requestData)
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error("API 요청 실패");
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(data => {
+    //         console.log("API 요청 성공:", data);
+    //     })
+    //     .catch(error => {
+    //         console.error("API 요청 중 오류 발생:", error);
+    //
+    //         // 오류가 발생하면 상태 롤백
+    //         isLike = !isLike;
+    //         if (isLike) {
+    //             likeButton.classList.add("liked");
+    //         } else {
+    //             likeButton.classList.remove("liked");
+    //         }
+    //     });
 }
+

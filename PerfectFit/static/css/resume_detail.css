@@ -30,7 +30,7 @@
 .uk-button {
     border:none !important;
     background-image : url('/static/img/edit_button_icon.svg');
-     background-repeat: no-repeat; /* 이미지 반복 금지 */
+    background-repeat: no-repeat; /* 이미지 반복 금지 */
     width : 35px;
     height: 35px;
 }
@@ -107,8 +107,30 @@
 .uk-pagination>.uk-active>* {
     color: #2B7FFF;
 }
+.like-btn {
+    border:none !important;
+    background-image : url('/static/img/like_icon.svg');
+    width : 28px;
+    height: 28px;
+    background-repeat: no-repeat;
+    background-size : 28px 28px !important;
+    background-color: transparent !important;
+    background-position: center;
+    cursor : pointer;
+}
 /* 좋아요가 활성화된 상태 */
-.none-style-btn.liked {
-    background-color: red; /* 버튼의 배경을 빨간색으로 */
-    color: white; /* 버튼 텍스트/아이콘 색상 */
+.like-btn.liked {
+    border:none !important;
+    background-image : url('/static/img/like_icon_color.svg');
+    width : 28px;
+    height: 28px;
+    background-repeat: no-repeat;
+    background-size : 24px 24px !important;
+    background-color: transparent !important;
+    background-position: center;
+    cursor : pointer;
+}
+
+.like-btn, .like-btn.liked {
+    background-size: contain; /* 이미지 크기를 버튼 내부에 맞춤 */
 }
