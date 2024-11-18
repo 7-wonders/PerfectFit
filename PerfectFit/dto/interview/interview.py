@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from pydantic import BaseModel
+from typing import List, Optional
 
 
 class InterviewDto:
@@ -65,3 +67,10 @@ class InterviewDto:
         @dataclass
         class spellChecked:
             translatedContent: str
+
+        class InterviewQuestionAnswer(BaseModel):
+            Question: str
+            BestAnswer: str
+
+        class InterviewResponse(BaseModel):
+            InterviewQuestions: List['InterviewDto.Response.InterviewQuestionAnswer']

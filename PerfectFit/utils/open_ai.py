@@ -3,11 +3,15 @@ import os
 
 import requests
 import torch
+from pydantic import ValidationError
 from transformers import AutoTokenizer, AutoModelForCausalLM,pipeline
 from openai import OpenAI
 from config.config_mysql import get_session
 from domain.models import Resume, ResumeSection, WorkExperience, ProjectExperience, Interview, InterviewQuestion, \
     InterviewAnswer, Job
+from exception.custom_exception import CustomException
+from exception.exception_type import ExceptionType
+from dto.interview.interview import InterviewDto
 
 # OpenAI API 키 가져오기
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -39,10 +43,22 @@ def get_dinner_recommendation():
 
 
 def make_interview_based_on_resume(resume_id: int, level: str):
+
     resume = get_session().query(Resume).filter_by(resume_id=resume_id).first()
+    if resume is None:
+        raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW) ### resume not found error 추가 요망
+
     resume_section = get_session().query(ResumeSection).filter_by(resume_id=resume_id).all()
+    if resume_section is None:
+        raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW) ### resume_section not found error 추가 요망
+
     work_experience = get_session().query(WorkExperience).filter_by(user_id=resume.user_id).all()
+    if work_experience is None:
+        raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW) ### work_experience not found error 추가 요망
+
     project_experience = get_session().query(ProjectExperience).filter_by(user_id=resume.user_id).all()
+    if project_experience is None:
+        raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW) ### project_experience not found error 추가 요망
 
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
 
@@ -96,13 +112,16 @@ def make_interview_based_on_resume(resume_id: int, level: str):
         result = response.choices[0].message.content.strip()
         print(result)
 
+        interview_data_dict = json.loads(result)
+        interview_data = InterviewDto.Response.InterviewResponse.model_validate(interview_data_dict)
+        interview_questions = interview_data.InterviewQuestions
+
         new_interview = Interview(user_id=resume.user_id, resume_id=resume_id, job_id=resume.job_id, company=None, title="더미 제목", level = level)
         get_session().add(new_interview)
         get_session().flush()
 
         interview_id = new_interview.interview_id
-        interview_data = json.loads(result)
-        interview_questions = interview_data.get("InterviewQuestions", [])
+
 
         for item in interview_questions:
             question_text = item.get("Question")
@@ -119,20 +138,17 @@ def make_interview_based_on_resume(resume_id: int, level: str):
 
         # 5. 트랜잭션 커밋
         get_session().commit()
-        print("Data successfully inserted into the database!")
 
         return result
-    except KeyError as e:
+    except (KeyError, ValidationError) as e:
         get_session().rollback()
         print(f"Error: {e}")
         return None
 
 def make_interview_based_on_job(job_id: int, user_id: int, level: str):
     job = get_session().query(Job).filter_by(job_id=job_id).first()
-    print("asdasd")
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
 
-    print("asdasd")
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         response_format={"type": "json_object"},
@@ -157,8 +173,11 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str):
         get_session().flush()
 
         interview_id = new_interview.interview_id
-        interview_data = json.loads(result)
-        interview_questions = interview_data.get("InterviewQuestions", [])
+        # interview_data = json.loads(result)
+        # interview_questions = interview_data.get("InterviewQuestions", [])
+        interview_data_dict = json.loads(result)
+        interview_data = InterviewDto.Response.InterviewResponse.model_validate(interview_data_dict)
+        interview_questions = interview_data.InterviewQuestions
 
         for item in interview_questions:
             question_text = item.get("Question")
