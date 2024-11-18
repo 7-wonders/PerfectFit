@@ -39,13 +39,13 @@ def get_users():
         pages=paginate_user.pages,
     )
 
-    return render_template("users.html", users=asdict(response))
+    return render_template("testusers.html", users=asdict(response))
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
-    return render_template("user.html", user=response)
+    return render_template("testusers.html", user=response)
 
 @user_bp.route('/user/mypage/info')
 def get_info():
@@ -107,7 +107,7 @@ def get_info():
         ]
     )
 
-    return render_template("user.html", user=asdict(response))  # JSON 데이터 전달
+    return render_template("testusers.html", user=asdict(response))  # JSON 데이터 전달
 
 @user_bp.route('/user/profile')
 def get_profile():
@@ -119,7 +119,7 @@ def get_profile():
     }
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return render_template("user.html", user=response)
+    return render_template("testusers.html", user=response)
 
 @user_bp.route('/user/mypage/resume')
 def get_resumes():
@@ -155,7 +155,7 @@ def get_resumes():
         total=total
     )
 
-    return render_template("user.html", user=response)
+    return render_template("testusers.html", user=response)
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
     user_id = request.headers.get("user_id")
@@ -178,7 +178,7 @@ def get_interviews():
         ]
     )
 
-    return render_template("user.html", user=response)
+    return render_template("testusers.html", user=response)
 
 @user_bp.route('/user/requirements', methods=['POST'])
 def create_requirements():
