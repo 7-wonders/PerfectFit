@@ -103,3 +103,12 @@
     height : 45px;
     border-radius: 70%;
 }
+/* 페이지네이션 현재 페이지 섹상 */
+.uk-pagination>.uk-active>* {
+    color: #2B7FFF;
+}
+/* 좋아요가 활성화된 상태 */
+.none-style-btn.liked {
+    background-color: red; /* 버튼의 배경을 빨간색으로 */
+    color: white; /* 버튼 텍스트/아이콘 색상 */
+}

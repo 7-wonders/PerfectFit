@@ -394,6 +394,7 @@ function addSectionIfNeeded(requiredCount) {
     }
 }
 
+// 임시 저장 목록 불러오기
 function loadResumeData(resumeId) {
     const sampleData = {
         title: "수정된 제목 예시",
