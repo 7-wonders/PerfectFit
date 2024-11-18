@@ -5,6 +5,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_list.css') }}" />
 {% endblock %}
 
+{% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
+{% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
+
 {% set occupations = [
     {
         "occupationId": 1,
@@ -183,18 +186,16 @@
         {# ========================== 게시물 부분 끝 ================================= #}
 
         {# 페이지네이션 #}
-        <nav aria-label="Pagination">
-           <ul class="uk-pagination uk-flex-center" uk-margin>
-                {# Previous 버튼 #}
-                <li class="{% if page == 1 %}uk-disabled{% endif %}">
-                    <a href="{% if page > 1 %}/user/resume/list/{{ page - 1 }}{% else %}#{% endif %}">
-                        <span class="Regular-20-light" uk-pagination-previous></span>
-                    </a>
-                </li>
-
-                {# 표시할 페이지 범위 계산 #}
-                {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
-                {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
+       <nav aria-label="Pagination">
+            <ul class="uk-pagination uk-flex-center" uk-margin>
+                {# Previous 버튼 렌더링 조건 #}
+                {% if startPage > 1 %}
+                    <li>
+                        <a href="/resume/list/{{ startPage - 1 }}">
+                            <span class="Regular-20-light" uk-pagination-previous></span>
+                        </a>
+                    </li>
+                {% endif %}
 
                 {# 페이지 번호 생성 #}
                 {% for pageNum in range(startPage, endPage + 1) %}
@@ -202,18 +203,21 @@
                         {% if pageNum == page %}
                             <span class="Regular-20-light" aria-current="page">{{ pageNum }}</span>
                         {% else %}
-                            <a href="/user/resume/list/{{ pageNum }}" class="Regular-20-light">{{ pageNum }}</a>
+                            <a href="/resume/list/{{ pageNum }}" class="Regular-20-light">{{ pageNum }}</a>
                         {% endif %}
                     </li>
                 {% endfor %}
 
-                {# Next 버튼 #}
-                <li class="{% if page == totalPages %}uk-disabled{% endif %}">
-                    <a href="{% if page < totalPages %}/user/resume/list/{{ page + 1 }}{% else %}#{% endif %}">
-                        <span class="Regular-20-light" uk-pagination-next></span>
-                    </a>
-                </li>
+                {# Next 버튼 렌더링 조건 #}
+                {% if endPage < totalPages %}
+                    <li>
+                        <a href="/resume/list/{{ endPage + 1 }}">
+                            <span class="Regular-20-light" uk-pagination-next></span>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
-        </nav>
+
+       </nav>
     </div>
 {% endblock %}
