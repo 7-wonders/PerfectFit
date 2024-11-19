@@ -266,7 +266,7 @@ function submitInformation() {
     }
     // Badge가 없는 경우 경고
     if (!hasBadges) {
-        alert("키워드를 추가해주세요.");
+        alert("주요 키워드를 추가해주세요.");
         event.preventDefault();
         return; // 함수 종료
     }
