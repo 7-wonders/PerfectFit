@@ -173,6 +173,7 @@
                                 <div class = "badge">
                                     <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
                                     <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
+                                    <input type = "hidden" name = "keywords" value="{{ keyword }}" />
                                 </div>
                             {% endfor %}
                             <input class="keyword-input Regular-16" id="resume-write-keyword" type="text">
@@ -219,7 +220,7 @@
 
                 <div class = "resume-submit-box">
                     <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "submit">임시저장</button>
-                    <button class = "save-btn Medium-18" id = "resume-write-submit" type="submit">저장</button>
+                    <button class = "save-btn Medium-18" id = "resume-write-submit" type="submit" onclick = "submitResume()">저장</button>
                 </div>
             </form>
         </div>

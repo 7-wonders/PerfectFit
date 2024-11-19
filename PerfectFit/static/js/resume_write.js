@@ -1,4 +1,3 @@
-
 // 내용 길어지면 form 세로 크기 증가
 function adjustHeight(element) {
     // 초기 높이를 설정 (240px 또는 50px)
@@ -130,12 +129,6 @@ function deleteSection(sectionId) {
     checkFormCompletion();
 }
 
-
-
-
-
-
-
 // 직군을 선택하면 그에 해당하는 직업만 나오게 하기
 function updateJobList() {
     var selectedOccupation = document.getElementById("resume-write-occupation").value;
@@ -205,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const badgeText = document.createElement('span');
                     badgeText.className = 'badge-text';
                     badgeText.id = `badge-text-${badgeCounter}`;
-                    badgeText.name = "keywords[]";
                     badgeText.textContent = text;
 
                     const badgeButton = document.createElement('button');
@@ -213,15 +205,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     badgeButton.id = `badge-btn-${badgeCounter}`;
                     badgeButton.textContent = 'X';
 
+                    const badgeInput = document.createElement('input');
+                    badgeInput.id = `badge-input-${badgeCounter}`;
+                    badgeInput.type = 'hidden';
+                    badgeInput.name = 'keywords[]';
+                    badgeInput.value = text;
+
                     badgeButton.addEventListener('click', function() {
                         badgeContainer.removeChild(badge);
+                        badgeContainer.removeChild(badgeInput);
                         updateBadgeIDs();
                     });
 
                     badge.appendChild(badgeText);
                     badge.appendChild(badgeButton);
                     badgeContainer.appendChild(badge);
-
+                    badgeContainer.appendChild(badgeInput);
                     badgeContainer.appendChild(inputElement);
 
                     badgeCounter++;
@@ -240,10 +239,12 @@ document.addEventListener('DOMContentLoaded', function() {
             badges.forEach(badge => {
                 const badgeText = badge.querySelector('.badge-text');
                 const badgeButton = badge.querySelector('.badge-button');
+                const badgeInput = badge.querySelector('.badge-input');
 
-                if (badgeText && badgeButton) {
+                if (badgeText && badgeButton && badgeInput) {
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeButton.id = `badge-btn-${badgeCounter}`;
+                    badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeCounter++;
                 }
             });
@@ -340,28 +341,32 @@ function checkFormCompletion() {
         return input && (input.tagName === "SELECT" ? input.value : input.value.trim() !== "");
     });
 
+    // 경력 선택 여부 확인
+    const experience = document.getElementById("resume-write-experience").value;
+    let selectExperience;
+    if(experience === "신입" || experience === "경력") selectExperience = true
+
     // badge 클래스가 있는 div가 존재하는지 확인
     const hasBadges = document.querySelectorAll("div.badge").length > 0;
 
-    // 버튼 스타일 변경 및 활성화/비활성화 처리
-    if (allFilled && hasBadges) {
+    // 입력 필드에 따른 버튼 스타일 변경
+    if (allFilled && hasBadges && selectExperience) {
         button.style.color = "#175FE6";
         button.style.border = "1px solid #175FE6";
-        button.disabled = false; // 버튼 활성화
     } else {
         button.style.color = ""; // 기본 색상으로 복귀
         button.style.border = "1px solid rgba(0,0,0, 0.50)";
-        button.disabled = true; // 버튼 비활성화
     }
 }
 
-// 모든 필드에 이벤트 리스너 추가 (동적으로 추가된 섹션에도 적용되도록 수정)
+// 입력 필드에 이벤트 리스너 추가 (입력 필드에 따른 저장 버튼 style 변경을 위해 필요)
 function setupEventListeners() {
     const form = document.getElementById('resume_write_form');
 
     // form 내에서 input과 textarea에 대한 이벤트 리스너를 동적으로 추가
     form.addEventListener('input', function(event) {
-       if (event.target && (event.target.id.startsWith("resume-write-content-") || event.target.id.startsWith("resume-write-title-") || event.target.id === "resume-write-main-title")) {
+       if (event.target && (event.target.id.startsWith("resume-write-content-") || event.target.id.startsWith("resume-write-title-")
+           || event.target.id === "resume-write-main-title" ||  event.target.id === "resume-write-merit" ||  event.target.id === "resume-write-disadvantage")) {
             checkFormCompletion();
         }
     });
@@ -381,13 +386,15 @@ function setupEventListeners() {
     handleButtonClick();
 }
 
+
 // 페이지 로드 시 초기 버튼 상태 설정 및 이벤트 리스너 추가
 window.onload = () => {
     checkFormCompletion();
     setupEventListeners();
 };
 
-// 필요한 섹션 수에 맞춰 섹션 추가
+
+// 필요한 섹션 수에 맞춰 섹션 추가(임시 저장 목록 불러오기에 필요한 함수)
 function addSectionIfNeeded(requiredCount) {
     while (sectionCount < requiredCount) {
         addSection();
@@ -474,9 +481,16 @@ function loadResumeData(resumeId) {
         badgeButton.id = `badge-btn-${index}`;
         badgeButton.textContent = 'X';
 
+        const badgeInput = document.createElement('input');
+        badgeInput.id = `badge-input-${index}`;
+        badgeInput.type = 'hidden';
+        badgeInput.name = 'keywords[]';
+        badgeInput.value = keyword;
+
         badge.appendChild(badgeText);
         badge.appendChild(badgeButton);
         badgeContainer.appendChild(badge);
+        badgeContainer.appendChild(badgeInput);
 
         // 버튼 클릭 시 배지 삭제
         badgeButton.addEventListener('click', function() {
@@ -523,7 +537,6 @@ function loadResumeData(resumeId) {
                 const badgeText = document.createElement('span');
                 badgeText.className = 'badge-text';
                 badgeText.id = `badge-text-${badgeCounter}`;
-                badgeText.name = "keywords[]";
                 badgeText.textContent = text;
 
                 const badgeButton = document.createElement('button');
@@ -531,15 +544,22 @@ function loadResumeData(resumeId) {
                 badgeButton.id = `badge-btn-${badgeCounter}`;
                 badgeButton.textContent = 'X';
 
+                const badgeInput = document.createElement('input');
+                badgeInput.id = `badge-input-${badgeCounter}`;
+                badgeInput.type = 'hidden';
+                badgeInput.name = 'keywords[]';
+                badgeInput.value = text;
+
                 badgeButton.addEventListener('click', function() {
                     badgeContainer.removeChild(badge);
+                    badgeContainer.removeChild(badgeInput);
                     updateBadgeIDs();
                 });
 
                 badge.appendChild(badgeText);
                 badge.appendChild(badgeButton);
                 badgeContainer.appendChild(badge);
-
+                badgeContainer.appendChild(badgeInput);
                 badgeContainer.appendChild(inputElement);
 
                 badgeCounter++;
@@ -557,10 +577,12 @@ function loadResumeData(resumeId) {
             badges.forEach(badge => {
                 const badgeText = badge.querySelector('.badge-text');
                 const badgeButton = badge.querySelector('.badge-button');
+                const badgeInput = badge.querySelector('.badge-input');
 
                 if (badgeText && badgeButton) {
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeButton.id = `badge-btn-${badgeCounter}`;
+                    badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeCounter++;
                 }
             });
@@ -571,6 +593,7 @@ function loadResumeData(resumeId) {
     checkFormCompletion(); // 폼 완료 여부 체크
 }
 
+// 임시 저장 목록 삭제
 function removeResumeData(resumeId) {
     // 콘솔에 resumeId를 출력해서 확인 (테스트 용도)
     console.log(`Removing resume with ID: ${resumeId}`);
@@ -587,6 +610,93 @@ function removeResumeData(resumeId) {
     // 여기에 AJAX 요청을 추가하여 서버와 통신을 할 수 있습니다.
 }
 
+// 자기소개서 "저장" 버튼 클릭 시 동작
+function submitResume() {
+    // 자기소개서 항목 및 내용
+    const contentInputs = document.querySelectorAll('[id^="resume-write-content-"]');
+    const titleInputs = document.querySelectorAll('[id^="resume-write-title-"]');
 
+    // 경력 필드
+    const experience = document.getElementById("resume-write-experience").value;
+    let selectExperience = false;
 
+    // 고정 입력 필드 목록
+    const inputs = [
+        {
+            element: document.getElementById("resume-write-main-title"),
+            name: "제목"
+        },
+        {
+            element: document.getElementById("resume-write-occupation"),
+            name: "직군"
+        },
+        {
+            element: document.getElementById("resume-write-job"),
+            name: "직업"
+        },
+        {
+            element: document.getElementById("resume-write-merit"),
+            name: "장점"
+        },
+        {
+            element: document.getElementById("resume-write-disadvantage"),
+            name: "단점"
+        }
+    ];
+
+    // 주요 키워드 배지 확인
+    const hasBadges = document.querySelectorAll("div.badge").length > 0;
+
+    // 고정 필드 입력 확인
+    for (const input of inputs) {
+        const value = input.element.tagName === "SELECT" ? input.element.value : input.element.value.trim();
+        if (!value || (input.element.tagName === "SELECT" && value === "직군을 선택해주세요")) {
+            alert(`${input.name}을(를) 채워주세요.`);
+            input.element.focus(); // 해당 입력 필드로 포커스 이동
+            event.preventDefault();
+            return; // 함수 종료
+        }
+    }
+
+    // 경력 필드 확인
+    if (experience === "신입" || experience === "경력") {
+        selectExperience = true;
+    }
+    if (!selectExperience) {
+        alert("경력을 선택해주세요.");
+        document.getElementById("resume-write-experience").focus();
+        event.preventDefault();
+        return;
+    }
+
+    // 자기소개서 항목 및 내용 확인
+    for (let i = 0; i < titleInputs.length; i++) {
+        const title = titleInputs[i].value.trim();
+        const content = contentInputs[i]?.value.trim();
+
+        if (!title) {
+            alert(`자기소개서 항목${i + 1}을(를) 채워주세요.`);
+            titleInputs[i].focus();
+            event.preventDefault();
+            return;
+        }
+
+        if (!content) {
+            alert(`자기소개서 내용${i + 1}을(를) 채워주세요.`);
+            contentInputs[i]?.focus();
+            event.preventDefault();
+            return;
+        }
+    }
+
+    // 키워드 배지 확인
+    if (!hasBadges) {
+        alert("주요 키워드를 추가해주세요.");
+        event.preventDefault();
+        return;
+    }
+
+    // 모든 조건이 충족되면 제출
+    alert("자기소개서가 제출되었습니다.");
+}
 
