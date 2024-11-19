@@ -109,15 +109,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     badgeButton.id = `badge-btn-${badgeCounter}`;
                     badgeButton.textContent = 'X';
 
+                    const badgeInput = document.createElement('input');
+                    badgeInput.id = `badge-input-${badgeCounter}`;
+                    badgeInput.type = 'hidden';
+                    badgeInput.name = 'keywords[]';
+                    badgeInput.value = text;
+
                     badgeButton.addEventListener('click', function() {
                         badgeContainer.removeChild(badge);
+                        badgeContainer.removeChild(badgeInput);
                         updateBadgeIDs(); // ID 재정렬 함수 호출
                     });
 
                     badge.appendChild(badgeText);
                     badge.appendChild(badgeButton);
                     badgeContainer.appendChild(badge);
-
+                    badgeContainer.appendChild(badgeInput);
                     badgeContainer.appendChild(inputElement);
 
                     badgeCounter++;
@@ -136,10 +143,12 @@ document.addEventListener('DOMContentLoaded', function() {
             badges.forEach(badge => {
                 const badgeText = badge.querySelector('.badge-text');
                 const badgeButton = badge.querySelector('.badge-button');
+                const badgeInput = badge.querySelector('.badge-input');
 
-                if (badgeText && badgeButton) {
+                if (badgeText && badgeButton && badgeInput) {
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeButton.id = `badge-btn-${badgeCounter}`;
+                    badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeCounter++;
                 }
             });
@@ -185,7 +194,6 @@ function checkFormCompletion() {
     const inputs = [
         document.getElementById("resume-information-occupation"),
         document.getElementById("resume-information-job"),
-        document.getElementById("resume-information-experience"),
         document.getElementById("resume-information-merit"),
         document.getElementById("resume-information-disadvantage")
     ];
@@ -198,7 +206,13 @@ function checkFormCompletion() {
     // badge 클래스가 있는 div가 존재하는지 확인
     const hasBadges = document.querySelectorAll("div.badge").length > 0;
 
-    if (allFilled && hasBadges) {
+    // 경력 선택 여부 확인
+    const experience = document.getElementById("resume-information-experience").value;
+    let selectExperience;
+    if(experience === "신입" || experience === "경력") selectExperience = true
+
+
+    if (allFilled && hasBadges && selectExperience) {
         button.style.backgroundColor = "#2B7FFF";
         button.style.color = "#fff";
     } else {
@@ -209,6 +223,8 @@ function checkFormCompletion() {
 
 // submit 버튼 클릭 시 동작
 function submitInformation() {
+    const experience = document.getElementById("resume-information-experience").value;
+    let selectExperience;
     const inputs = [
         {
             element: document.getElementById("resume-information-occupation"),
@@ -217,10 +233,6 @@ function submitInformation() {
         {
             element: document.getElementById("resume-information-job"),
             name: "직업"
-        },
-        {
-            element: document.getElementById("resume-information-experience"),
-            name: "경력"
         },
         {
             element: document.getElementById("resume-information-merit"),
@@ -245,7 +257,13 @@ function submitInformation() {
             return; // 함수 종료
         }
     }
-
+    // 경력 선택 여부 확인 후 경고
+    if(experience === "신입" || experience === "경력") selectExperience = true
+    if(!selectExperience) {
+        alert("경력을 선택해주세요.");
+        event.preventDefault();
+        return;
+    }
     // Badge가 없는 경우 경고
     if (!hasBadges) {
         alert("키워드를 추가해주세요.");
@@ -256,32 +274,6 @@ function submitInformation() {
     // 모든 조건이 충족되면 폼 제출 (추가적인 동작이 필요하면 여기에 작성)
     alert("자기소개서를 작성하기 위한 제출되었습니다.");
 }
-
-// 이벤트 리스너 추가 (HTML에 직접 변경할 필요 없음)
-document.addEventListener("DOMContentLoaded", () => {
-    const inputs = [
-        "resume-information-occupation",
-        "resume-information-job",
-        "resume-information-experience",
-        "resume-information-merit",
-        "resume-information-disadvantage"
-    ];
-
-    // 각 입력 필드에 적절한 이벤트 리스너 연결
-    inputs.forEach(id => {
-        const inputElement = document.getElementById(id);
-        if (inputElement) {
-            if (inputElement.tagName === "SELECT") {
-                inputElement.addEventListener("change", checkFormCompletion);
-            } else {
-                inputElement.addEventListener("input", checkFormCompletion);
-            }
-        }
-    });
-
-    // 처음 로딩 시 버튼 상태 확인
-    checkFormCompletion();
-});
 
 // 모든 필드에 이벤트 리스너 추가
 function setupEventListeners() {
