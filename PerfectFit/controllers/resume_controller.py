@@ -11,6 +11,10 @@ def get_resume_write_part():
 def get_resume_write_all():
     return render_template("resume_write_all.html")
 
+@resume_bp.route('/write/update')
+def get_resume_write_update():
+    return render_template("resume_write_update.html")
+
 @resume_bp.route('/select')
 def get_resume_select():
     return render_template("resume_select.html")
