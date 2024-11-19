@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify, Response
 from dto.interview.interview import InterviewDto
 
 from services.interview_service import InterviewService
+from utils.jwt_factory import JWTFactory
 
 from utils.open_ai import make_interview_based_on_resume, make_interview_based_on_job
 interview_bp = Blueprint('interview', __name__)
@@ -13,6 +14,9 @@ interview_bp = Blueprint('interview', __name__)
 
 @interview_bp.route('/interview/<resume_id>', methods=['GET'])
 def get_questions(resume_id: int):
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     questions = InterviewService.get_questions(resume_id)
     response: InterviewDto.Response.questions = InterviewDto.Response.questions(
@@ -29,6 +33,9 @@ def get_questions(resume_id: int):
 @interview_bp.route('/interview/ispublic/<interview_id>', methods=['GET'])
 def get_is_public(interview_id: int):
 
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
     interviewList = InterviewService.get_is_public(interview_id)
     response: InterviewDto.Response.isPublicList = InterviewDto.Response.isPublicList(
         interviews= [interview for interview in interviewList]
@@ -40,6 +47,9 @@ def get_is_public(interview_id: int):
 
 @interview_bp.route('/interview/improvement/<interview_id>', methods=['GET'])
 def get_improvement(interview_id: int):
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     improvementList = InterviewService.get_improvement(interview_id)
     response: InterviewDto.Response.improvementList = InterviewDto.Response.improvementList(
@@ -54,16 +64,23 @@ def get_improvement(interview_id: int):
 @interview_bp.route('/interview', methods=['POST'])
 def post_question_answer():
 
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
     post_answer_request = InterviewDto.Request.postInterviewAnswer(**data)
 
     InterviewService.post_question_answer(post_answer_request)
 
+    # 여기서 개선사항 도출해야함.
 
     return Response(' ', status=201, content_type='application/json; charset=utf-8')
 
 @interview_bp.route('/interview/ispublic', methods=['PATCH'])
 def patch_is_public():
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
     print(data)
@@ -76,6 +93,9 @@ def patch_is_public():
 @interview_bp.route('/interview/ispublic/cancel', methods=['PATCH'])
 def patch_is_public_cancel():
 
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
     print(data)
     questionIds: list[int] = data.get('questionIds')
@@ -86,6 +106,9 @@ def patch_is_public_cancel():
     return Response(' ', status=204, content_type='application/json; charset=utf-8')
 @interview_bp.route('/interview/<interview_id>/title', methods=['PATCH'])
 def patch_title(interview_id: int):
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
     patch_interview_title = InterviewDto.Request.patchInterviewTitle(**data, interviewId=interview_id)
@@ -103,13 +126,10 @@ def spell_check():
 
     translatedContent = InterviewService.spell_check(spellCheckDto)
 
-    print("###", translatedContent)
     response: InterviewDto.Response.spellChecked = InterviewDto.Response.spellChecked(
         translatedContent= translatedContent
     )
-    print("###", response)
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    print("###2", json_response)
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 

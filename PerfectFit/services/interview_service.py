@@ -38,6 +38,10 @@ class InterviewService:
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
         interview_answer: InterviewAnswer = InterviewAnswer(question_id=question_answer.questionId, answer=question_answer.answer)
 
+        # 개선사항 도출 로직 여기다가 적어야함;.
+        # QuestionId와 Answer가 넘어오는데 여기서 answer는 사용자가 작성한 답변이다.
+        
+
         try:
             get_session().add(interview_answer)
             get_session().commit()

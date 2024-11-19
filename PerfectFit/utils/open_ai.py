@@ -93,7 +93,7 @@ def make_interview_based_on_resume(resume_id: int, level: str):
         temperature=0.7,
         messages=[
             {"role": "system",
-             "content": f"You are an interviewer related to {resume.job}. Please ensure to return the response as a JSON object with exactly 10 'Question' and 'Best Answer' pairs, wrapped under the key 'InterviewQuestions'."},
+             "content": f"You are an interviewer related to {resume.job}. Please ensure to return the response as a JSON object with exactly 10 'Question' and 'BestAnswer' pairs, wrapped under the key 'InterviewQuestions'."},
             {"role": "user", "content": f"당신은 직업 : {resume.job}에 관한 선임자이며 오랜 경력의 전문가입니다. 해당 직무 관련 신입 채용을 위해 면접을 진행해야합니다."},
             {"role": "user",
              "content": "당신은 지금부터 면접을 진행해야 해야합니다. 지원자의 자기소개서 내용을 기반으로 수행을 하되, 내용 기반으로 파생적인 내용을 질문을 해도 괜찮습니다."},
@@ -124,8 +124,8 @@ def make_interview_based_on_resume(resume_id: int, level: str):
 
 
         for item in interview_questions:
-            question_text = item.get("Question")
-            answer_text = item.get("Best Answer")
+            question_text = item.Question
+            answer_text = item.BestAnswer
 
             # 질문 저장
             new_question = InterviewQuestion(interview_id=interview_id, question=question_text)
