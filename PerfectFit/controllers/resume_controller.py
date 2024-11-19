@@ -11,7 +11,7 @@ from tasks import add_resume_task
 resume_bp = Blueprint('resume', __name__)
 
 
-@resume_bp.route('/write/all', methods=['GET'])
+@resume_bp.route('/write', methods=['GET'])
 def render_write():
     task_id = request.args.get('task_id')
 
@@ -29,7 +29,7 @@ def render_write():
         return redirect('/resume')
 
 
-@resume_bp.route('/all', methods=['POST'])
+@resume_bp.route('/write/all', methods=['POST'])
 def create_resume():
     data = request.get_json()
     request_resume = ResumeDto.Request.CreateFullResume(**data)
