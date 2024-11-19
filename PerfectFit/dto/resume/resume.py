@@ -8,7 +8,7 @@ class ResumeDto:
         class CreateFullResume:
             keywords: List[str]
             job_id: int
-            level: int
+            level: str
             pros: str
             cons: str
             directional: Optional[str] = field(default=None)
@@ -18,7 +18,7 @@ class ResumeDto:
         class CreatePartialResume:
             keywords: List[str]
             job_id: int
-            level: int
+            level: str
             pros: str
             cons: str
             directional: Optional[str]

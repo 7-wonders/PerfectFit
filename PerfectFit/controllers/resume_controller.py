@@ -1,4 +1,6 @@
-from flask import Blueprint, request, jsonify, redirect
+from http import HTTPStatus
+
+from flask import Blueprint, request, jsonify, redirect, session, render_template
 
 from dto.resume.resume import ResumeDto
 from exception.custom_exception import CustomException
@@ -9,7 +11,25 @@ from tasks import add_resume_task
 resume_bp = Blueprint('resume', __name__)
 
 
-@resume_bp.route('/', methods=['POST'])
+@resume_bp.route('/write/all', methods=['GET'])
+def render_write():
+    task_id = request.args.get('task_id')
+
+    if task_id is None:
+        return redirect('/resume')
+
+    task = add_resume_task.AsyncResult(task_id)
+    state = task.state.lower()
+
+    if state == 'success':
+        response = task.get()
+        # 전체 작성 페이지 HTMl 변경 요망
+        return render_template("test.html", response=response)
+    else:
+        return redirect('/resume')
+
+
+@resume_bp.route('/all', methods=['POST'])
 def create_resume():
     data = request.get_json()
     request_resume = ResumeDto.Request.CreateFullResume(**data)
@@ -33,8 +53,11 @@ def create_resume():
 @resume_bp.route('/task/<task_id>', methods=['POST'])
 def get_task(task_id):
     task = add_resume_task.AsyncResult(task_id)
+    state = task.state.lower()
 
-    if task.state == 'SUCCESS':
-        return jsonify(task.get())
+    if state == 'success':
+        return redirect(f'/resume/write/all?task_id={task_id}')
+    elif state == 'failure':
+        raise CustomException(ExceptionType.CELERY_ERROR)
     else:
-        return jsonify({"status": "running"})
+        return jsonify({"status": "running"}), HTTPStatus.ACCEPTED

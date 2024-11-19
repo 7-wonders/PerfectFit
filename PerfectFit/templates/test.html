@@ -62,5 +62,9 @@
             <button onclick="handleSubmit()">재갱신</button>
             <button onclick="handleLogout()">로그아웃</button>
         </div>
+
+        {% if response %}
+            {{ response }}
+        {% endif %}
     </body>
 </html>

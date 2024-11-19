@@ -1,10 +1,10 @@
 import os
-import time
 
 from celery import Celery
 from dotenv import load_dotenv
 
-from domain.models import AppUser
+from domain.models import AppUser, Job
+from dto.job.job import JobDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
 from utils.openai.resume.full_resume_strategy import FullResumeStrategy
@@ -33,10 +33,10 @@ app.conf.update(
 
 
 @app.task
-def add_resume_task(job_name: str, user: AppUser, resume: ResumeDto.Request.CreateFullResume):
-    resume_helper = ResumeHelper(strategy=FullResumeStrategy(resume=ResumeGPT.Request.CreateResume(
+def add_resume_task(job: Job, user: AppUser, resume: ResumeDto.Request.CreateFullResume):
+    resume_helper = ResumeHelper(strategy=FullResumeStrategy(resume=ResumeGPT.Request.FullResume.Create(
         keywords=resume.keywords,
-        job_name=job_name,
+        job_name=job.job_name,
         level=resume.level,
         pros=resume.pros,
         cons=resume.cons,
@@ -46,4 +46,15 @@ def add_resume_task(job_name: str, user: AppUser, resume: ResumeDto.Request.Crea
         project_experiences=user.project_experiences
     )))
 
-    return resume_helper.get_answer()
+    answer: ResumeGPT.Response.FullResume.Answer = resume_helper.get_answer()
+
+    return ResumeGPT.Response.FullResume.Resume(
+        job=JobDto.Response.JobInfo(job_id=job.job_id, job_name=job.job_name),
+        chapter=resume.chapter,
+        keywords=resume.keywords,
+        directional=resume.directional,
+        cons=resume.cons,
+        pros=resume.pros,
+        level=resume.level,
+        sections=answer.sections,
+    )

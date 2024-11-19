@@ -33,6 +33,7 @@ class ExceptionType(Enum):
     REDIS_DATA_ERROR = ("500", "I50021", "Redis 데이터 조작 중 오류가 발생하였습니다.")
     JWT_CONF_ERROR = ("500", "I50030", "JWT 설정 중 문제가 발생하였습니다.")
     GPT_CONF_ERROR = ("500", "I50040", "GPT 설정 중 문제가 발생하였습니다.")
+    CELERY_ERROR = ("500", "I50050", "백그라운드 작업 중 문제가 발생하였습니다.")
 
     @property
     def status_code(self):

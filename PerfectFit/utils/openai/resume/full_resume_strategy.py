@@ -9,7 +9,7 @@ from utils.openai.resume.resume_strategy import ResumeStrategy
 class FullResumeStrategy(ResumeStrategy):
     """전체 자기소개서를 작성하는 전략 클래스입니다."""
 
-    def __init__(self, resume: ResumeGPT.Request.CreateResume):
+    def __init__(self, resume: ResumeGPT.Request.FullResume.Create):
         super().__init__()
         self.resume = resume
 
@@ -65,9 +65,9 @@ class FullResumeStrategy(ResumeStrategy):
         ]}\n
         """
 
-    def parse_answer(self, completion: ChatCompletion) -> ResumeGPT.Response.Resume:
+    def parse_answer(self, completion: ChatCompletion) -> ResumeGPT.Response.FullResume.Answer:
         results = json.loads(completion.choices[0].message.function_call.arguments)
-        sections = [ResumeGPT.Response.Resume.Section(title=section['title'], content=section['content'])
+        sections = [ResumeGPT.Response.Section(title=section['title'], content=section['content'])
                     for section in results['sections']]
 
-        return ResumeGPT.Response.Resume(sections=sections)
+        return ResumeGPT.Response.FullResume.Answer(sections=sections)

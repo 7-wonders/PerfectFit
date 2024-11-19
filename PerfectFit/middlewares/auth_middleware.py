@@ -8,6 +8,8 @@ from utils.jwt_factory import JWTFactory
 auth_required_routes = {
     # 'URL명': ['HTTP 메소드1', 'HTTP 메소드2', ...],
     '/resume': ['POST'],
+    '/resume/all': ['POST'],
+    '/resume/write/all': ['GET'],
 }
 
 jwt_factory = JWTFactory()
@@ -32,7 +34,7 @@ def authenticate_request():
 
             token_info = jwt_factory.renew_token(refresh_token)
             jwt_factory.delete_refresh_token(refresh_token)
-            user_id = jwt_factory.verify_access_token(token_info['access_token'])
+            jwt_factory.verify_access_token(token_info['access_token'])
 
             response = make_response(redirect(request.url))
             Cookie.save(response, 'access_token', token_info['access_token'], token_info['access_token_exp'])
