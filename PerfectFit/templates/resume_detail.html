@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% include 'components/header.html' %}
+}
 
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
@@ -79,6 +79,7 @@
 
 
 {% block content %}
+    {% include 'components/header.html' %}
     <div class = "container">
 {#        ============================= 자기소개서 상세보기 제목 ============================#}
         <div class = resume-detail-header-wrapper>
@@ -114,11 +115,18 @@
                     <p class = "Regular-18">{{ section.content }}</p>
                 </div>
             {% endfor %}
-             <div class = "resume-detail-Engagement">
+            {# 조회수 및 좋아요 #}
+             <div class = "resume-detail-Engagement" style = "margin-top : 15px">
+                {# 조회수 #}
                 <div style = "margin-right: 10px;">
                     <span uk-icon="icon: eye; ratio: 1.4;"></span>
-                    <span class = "Regular-20-light">{{ response[0].viewCount }}</span>
+                    {% if isView == true %}
+                        <span class = "Regular-20-light">{{ resumes[0].viewCount }}</span>
+                    {% else %}
+                        <span class = "Regular-20-light">{{ resumes[0].viewCount + 1 }}</span>
+                    {% endif %}
                 </div>
+                {# 좋아요 #}
                 <div style = "display : flex; align-items: center;">
                     <button id="like-button" class="like-btn" onclick="actionLike()"></button>
                     <span id="like-count" class="Regular-20-light">{{ response[0].likeCount }}</span>
@@ -145,10 +153,12 @@
                     </div>
                 </div>
                 <div class = "resume-list-Engagement">
+                    {# 조회수 #}
                     <div style = "margin-right: 10px;">
                         <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                        <span class = "Regular-16-light">{{ resumes[0].viewCount }}</span>
+                        <span class = "Regular-16-light">{{ response[0].viewCount }}</span>
                     </div>
+                    {# 좋아요 #}
                     <div>
                         <button id="like-button" uk-icon="icon: heart; ratio: 1.0;" class="none-style-btn" onclick="actionLike()"></button>
                         <span id="like-count" class="Regular-16-light">{{ response[0].likeCount }}</span>
