@@ -56,6 +56,9 @@
         <div class = "resume-write-box" style = "margin-top : 30px">
             <p class = "Medium-22">자기소개서 수정</p>
             <form class="uk-form-stacked" id="resume_write_form">
+                {# 수정 중인 자기소개서 번호 #}
+                <input type="hidden" name="resumeNum" value="{{ resumeNum }}" />
+
                 {# 제목 #}
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-main-title">제목</label>
@@ -198,8 +201,6 @@
                     </div>
                 {% endif %}
 
-
-
                 <div class = "right-box">
                     <button type="button" class = "Regular-16-light custom-button add-section-btn" id = "add-section-btn" onclick="addSection()">+섹션 추가하기</button>
                 </div>
@@ -210,12 +211,17 @@
                 </div>
 
                 <div class = "resume-submit-box">
-                    <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "submit">임시저장</button>
                     <button class = "save-btn Medium-18" id = "resume-write-submit" type="submit" onclick = "submitResume()">저장</button>
                 </div>
             </form>
         </div>
     </div>
-
+    {% if get_flashed_messages() %}
+        <script>
+            {% for message in get_flashed_messages() %}
+                alert("{{ message }}");
+            {% endfor %}
+        </script>
+    {% endif %}
 
 {% endblock %}

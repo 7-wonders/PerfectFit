@@ -11,9 +11,9 @@ def get_resume_write_part():
 def get_resume_write_all():
     return render_template("resume_write_all.html")
 
-@resume_bp.route('/write/update')
-def get_resume_write_update():
-    return render_template("resume_write_update.html")
+@resume_bp.route('/write/update/<int:resumeNum>')
+def get_resume_write_update(resumeNum):
+    return render_template("resume_write_update.html", resumeNum=resumeNum)
 
 @resume_bp.route('/select')
 def get_resume_select():
@@ -30,6 +30,10 @@ def get_resume_information_part():
 @resume_bp.route('/loading')
 def get_resume_load_loading():
     return render_template("resume_loading.html")
+
+@resume_bp.route('/test')
+def get_test():
+    return render_template("textAxios.html")
 
 @resume_bp.route('/list/<int:page>')
 def get_resume_list(page):
