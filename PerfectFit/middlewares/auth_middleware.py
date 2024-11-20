@@ -8,8 +8,9 @@ from utils.jwt_factory import JWTFactory
 auth_required_routes = {
     # 'URL명': ['HTTP 메소드1', 'HTTP 메소드2', ...],
     '/resume': ['POST'],
-    '/resume/all': ['POST'],
-    '/resume/write/all': ['GET'],
+    '/resume/waiting': ['GET'],
+    '/resume/write': ['GET', 'POST'],
+    '/resume/information/all': ['GET', 'POST'],
 }
 
 jwt_factory = JWTFactory()

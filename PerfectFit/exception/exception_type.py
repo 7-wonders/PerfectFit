@@ -5,11 +5,6 @@ class ExceptionType(Enum):
     GOOGLE_NOT_ENOUGH_INFO = ("400", "B40010", "필수 정보가 부족합니다. e.g. id, email, name")
     NAVER_NOT_ENOUGH_INFO = ("400", "B40011", "필수 정보가 부족합니다. e.g. id, email, name")
     KAKAO_NOT_ENOUGH_INFO = ("400", "B40012", "필수 정보가 부족합니다. e.g. id, email, name")
-    REQUIRED_KEYWORDS = ("400", "B40020", "중요 키워드는 필수입니다.")
-    REQUIRED_JOB = ("400", "B40021", "직업는 필수입니다.")
-    REQUIRED_LEVEL = ("400", "B40022", "경력은 필수입니다.")
-    REQUIRED_PROS = ("400", "B40023", "장점은 필수입니다.")
-    REQUIRED_CONS = ("400", "B40024", "단점은 필수입니다.")
     INVALID_JOB_ID = ("400", "B40030", "유효하지 않은 직업 ID입니다.")
 
     EXPIRED_TOKEN = ("401", "U40110", "토큰이 만료되었습니다.")

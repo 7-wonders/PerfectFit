@@ -6,6 +6,7 @@ from sqlalchemy import CheckConstraint, func
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, TINYINT, DECIMAL, TIMESTAMP, CHAR
 from sqlalchemy.orm import Mapped, mapped_column
 
+from domain.models.resume_draft import ResumeDraft
 
 if TYPE_CHECKING:
     from domain.models.interview import Interview
@@ -43,6 +44,7 @@ class AppUser(db.Model):
     work_experiences: Mapped[list["WorkExperience"]] = db.relationship("WorkExperience", back_populates="user")
     project_experiences: Mapped[list["ProjectExperience"]] = db.relationship("ProjectExperience", back_populates="user")
     resumes: Mapped[list["Resume"]] = db.relationship("Resume", back_populates="user")
+    resumeDrafts: Mapped[list["ResumeDraft"]] = db.relationship("ResumeDraft", back_populates="user")
     resume_likes: Mapped[list["ResumeLike"]] = db.relationship("ResumeLike", back_populates="user")
     resume_views: Mapped[list["ResumeView"]] = db.relationship("ResumeView", back_populates="user")
     interviews: Mapped[list["Interview"]] = db.relationship("Interview", back_populates="user")

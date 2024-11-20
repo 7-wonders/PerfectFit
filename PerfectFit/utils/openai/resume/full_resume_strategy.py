@@ -2,6 +2,7 @@ import json
 
 from openai.types.chat import ChatCompletion
 
+from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
 from utils.openai.resume.resume_strategy import ResumeStrategy
 
@@ -67,7 +68,7 @@ class FullResumeStrategy(ResumeStrategy):
 
     def parse_answer(self, completion: ChatCompletion) -> ResumeGPT.Response.FullResume.Answer:
         results = json.loads(completion.choices[0].message.function_call.arguments)
-        sections = [ResumeGPT.Response.Section(title=section['title'], content=section['content'])
+        sections = [ResumeDto.Section(title=section['title'], content=section['content'])
                     for section in results['sections']]
 
         return ResumeGPT.Response.FullResume.Answer(sections=sections)

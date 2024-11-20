@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from domain.models import Job
-from domain.models import ProjectExperience, Resume
+from domain.models import ProjectExperience
 from domain.models import WorkExperience
 from dto.job.job import JobDto
+from dto.resume.resume import ResumeDto
 
 
 class ResumeGPT:
@@ -23,15 +23,10 @@ class ResumeGPT:
                 project_experiences: Optional[List["ProjectExperience"]] = field(default=None)
 
     class Response:
-        @dataclass
-        class Section:
-            title: str
-            content: str
-
         class FullResume:
             @dataclass
             class Answer:
-                sections: List['ResumeGPT.Response.Section']
+                sections: List['ResumeDto.Section']
 
             @dataclass
             class Resume:
@@ -40,6 +35,6 @@ class ResumeGPT:
                 level: str
                 pros: str
                 cons: str
-                sections: List['ResumeGPT.Response.Section']
+                sections: List['ResumeDto.Section']
                 directional: Optional[str] = field(default=None)
                 chapter: Optional[str] = field(default=None)

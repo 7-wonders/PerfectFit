@@ -6,6 +6,8 @@ from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, TIMESTAMP
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+from domain.models.resume_draft import ResumeDraft
+
 if TYPE_CHECKING:
     from domain.models.interview import Interview
     from domain.models.keyword import Keyword
@@ -27,5 +29,6 @@ class Job(db.Model):
 
     occupation: Mapped["Occupation"] = db.relationship("Occupation", back_populates="jobs")
     resumes: Mapped[list["Resume"]] = db.relationship("Resume", back_populates="job")
+    resumeDrafts: Mapped[list["ResumeDraft"]] = db.relationship("ResumeDraft", back_populates="job")
     keywords: Mapped[list["Keyword"]] = db.relationship("Keyword", back_populates="job")
     interviews: Mapped[list["Interview"]] = db.relationship("Interview", back_populates="job")
