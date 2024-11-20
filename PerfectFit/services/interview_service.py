@@ -1,4 +1,5 @@
 from config.config_mysql import get_session
+from domain.models import InterviewImprovement
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -7,6 +8,8 @@ from dto.interview.interview import InterviewDto
 from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
 from domain.models.interview_answer import InterviewAnswer
+
+from utils.open_ai import answer_improvement
 
 #from hanspell import spell_checker
 import re, requests
@@ -36,20 +39,30 @@ class InterviewService:
 
     @staticmethod
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
-        interview_answer: InterviewAnswer = InterviewAnswer(question_id=question_answer.questionId, answer=question_answer.answer)
+
+
+        session = get_session()
+
 
         # 개선사항 도출 로직 여기다가 적어야함;.
         # QuestionId와 Answer가 넘어오는데 여기서 answer는 사용자가 작성한 답변이다.
-        
+
 
         try:
-            get_session().add(interview_answer)
-            get_session().commit()
+
+            improvement_json = answer_improvement(question_answer.answer, question_answer.questionId)
+
+            improvement = InterviewImprovement(question_id=question_answer.questionId,
+                                               answer=question_answer.answer,
+                                               improvement=improvement_json['improvement'])
+            session.add(improvement)
+            session.commit()
         except Exception as e:
-            get_session().rollback()
+            session.rollback()
             print("Exception Cause :: ",e)
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
+        get_session().commit()
     @staticmethod
     def patch_interview_title(interview_title: InterviewDto.Request.patchInterviewTitle) -> None:
 

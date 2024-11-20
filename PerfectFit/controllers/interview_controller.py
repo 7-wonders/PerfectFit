@@ -61,14 +61,17 @@ def get_improvement(interview_id: int):
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
 
-@interview_bp.route('/interview', methods=['POST'])
+@interview_bp.route('/interview', methods=['POST','GET'])
 def post_question_answer():
 
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
-    post_answer_request = InterviewDto.Request.postInterviewAnswer(**data)
+    ##data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
+    ##post_answer_request = InterviewDto.Request.postInterviewAnswer(**data)
+
+    post_answer_request = InterviewDto.Request.postInterviewAnswer(questionId=14,answer="이커머스 플랫폼이 활약하는 이 의류라는 분야는 단순히 보면 작아보일 수 있는 산업이지만, 의식주라는 말이 있듯이 사람이 삶을 영위하는데에 있어서 필수적인 요소입니다. 그렇기에 저는 앞으로도 마르지 않는 샘물처럼 산업이 성장해나갈 플랫폼에 매료되었다고 말씀드리고 싶습니다. 그 중에서 저는 특히 AI는 매력적이라고 생각하는데요. 왜냐하면 이를 잘 활용하여 접근성을 높인다면, IT에 약하기에 아직 소외되고 있는 잠재적 고객층인 실버층을 타겟으로 공격적인 마케팅이 가능하다고 생각했기 때문입니다. 예를들어 정말 불필요한 UI요소를 다 빼고, 어르신이 말하는 직관적인 자연어를 해석해서 필요한 옷을 추천해줄 수 있다면 이는 정말 매력적이라고 생각합니다.")
+
 
     InterviewService.post_question_answer(post_answer_request)
 
@@ -83,7 +86,6 @@ def patch_is_public():
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
-    print(data)
     questionIds: list[int] = data.get('questionIds')
 
     InterviewService.patch_ispublic(questionIds)

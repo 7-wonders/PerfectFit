@@ -203,7 +203,42 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str):
         return None
 
 
+def answer_improvement(user_answer: str, question_id: int):
+    session = get_session()
+    print("asdasdas1")
+    question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
+    print("asdasdas2")
+    best_answer = session.query(InterviewAnswer).filter_by(question_id=question_id).first()
+    print("asdasdas3")
+    client = OpenAI(api_key=f'{OPENAI_API_KEY}')
+    print("asdasdas4")
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_format={"type": "json_object"},
+        temperature=0.7,
+        messages=[
+            {"role": "system",
+             "content": f"You are an interviewer. Please ensure to return the response as a JSON object with exactly 10 'UserAnswer' and 'Improvement' and 'TranslatedAnswer', wrapped under the key 'InterviewImprovement'."},
+            {"role": "user",
+             "content": f"당신은 면접관으로서 {question.question}라는 질문을 하였었습니다."},
+            {"role": "user",
+             "content": f"당신은 {best_answer.answer}라는 답변이 가장 이상적인 답변이라고 생각합니다.."},
+            {"role": "user",
+             "content": f"하지만, 지원자는 {user_answer}라는 답변을 당신에게 하였습니다."},
+            {"role": "user",
+             "content": f"당신이 판단하기에 지원자의 답변의 부족한 점과 보완할 점을 찾아 개선사항을 도출하고, 지원자의 답변을 개선하여 알려주세요. 한국어로 해주세요."},
 
+        ]
+    )
+    try:
+        result = response.choices[0].message.content.strip()
+        print(result)
+
+        return result
+    except KeyError as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return None
 
 
 # Llama API 키 가져오기 (가정)
