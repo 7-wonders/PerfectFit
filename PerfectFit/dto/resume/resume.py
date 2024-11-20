@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from dto.validation_class import FormModel
+
 
 class ResumeDto:
     @dataclass
@@ -10,7 +12,7 @@ class ResumeDto:
 
     class Request:
         @dataclass
-        class Create:
+        class Create(FormModel):
             title: str
             keywords: list[str]
             job_id: int
@@ -42,7 +44,18 @@ class ResumeDto:
                     return "자기소개서 단락은 1개 이상이어야 합니다."
 
         @dataclass
-        class CreateFullResume:
+        class CreateSectionContent:
+            keywords: list[str]
+            job_id: int
+            level: str
+            pros: str
+            cons: str
+            chapter_title: str
+            directional: Optional[str] = field(default=None)
+
+
+        @dataclass
+        class CreateFullResume(FormModel):
             keywords: list[str]
             job_id: int
             level: str

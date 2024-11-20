@@ -22,12 +22,25 @@ class ResumeGPT:
                 work_experiences: Optional[List["WorkExperience"]] = field(default=None)
                 project_experiences: Optional[List["ProjectExperience"]] = field(default=None)
 
-    class Response:
-        class FullResume:
+        class PartialResume:
             @dataclass
-            class Answer:
-                sections: List['ResumeDto.Section']
+            class Create:
+                keywords: List[str]
+                job_name: str
+                level: str
+                pros: str
+                cons: str
+                chapter_title: str
+                directional: Optional[str] = field(default=None)
+                work_experiences: Optional[List["WorkExperience"]] = field(default=None)
+                project_experiences: Optional[List["ProjectExperience"]] = field(default=None)
 
+    class Response:
+        @dataclass
+        class Answer:
+            sections: List['ResumeDto.Section']
+
+        class FullResume:
             @dataclass
             class Resume:
                 keywords: List[str]

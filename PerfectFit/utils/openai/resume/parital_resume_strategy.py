@@ -7,10 +7,10 @@ from dto.resume.resume_gpt import ResumeGPT
 from utils.openai.resume.resume_strategy import ResumeStrategy
 
 
-class FullResumeStrategy(ResumeStrategy):
-    """전체 자기소개서를 작성하는 전략 클래스입니다."""
+class PartialResumeStrategy(ResumeStrategy):
+    """한 단락의 자기소개서를 작성하는 전략 클래스입니다."""
 
-    def __init__(self, resume: ResumeGPT.Request.FullResume.Create):
+    def __init__(self, resume: ResumeGPT.Request.PartialResume.Create):
         super().__init__()
         self.resume = resume
 
@@ -21,9 +21,7 @@ class FullResumeStrategy(ResumeStrategy):
         반드시 자기소개서 각 단락의 내용은 공백 미포함 최소 500자 이상이어야 하고, 최대 1000자까지 작성할 수 있어.\n
         자기소개서의 단락의 내용은 소제목과 같이 두괄식 형태로 작성해야 해.\n
         
-        각 단락의 제목이 제공되면 무조건 단락의 제목에 맞게 자기소개서를 제공해야 하고, 단락 제목이 제공되지 않는다면 직무에 맞는 단락의 제목을 무작위로 4개 만들어서 사용해야해.\n
-        단락의 제목의 예시는 다음과 같고, 반드시 이걸 사용하지 않아도 돼.\n
-        e.g) 성장 과정, 입사 후 포부, 지원 동기, 직무 경험, 성격의 장단점, 협업 경험 등\n
+        단락의 제목이 제공되면 무조건 단락의 제목에 맞게 자기소개서를 제공 해야해.\n
         
         성격의 장단점과 같이 나의 단점을 말해야 하는 단락들은 나의 단점을 반드시 포함해야 하고, 나의 단점을 어떻게 극복할 것인지와 실천하고 있다는 내용을 포함해야 해.\n
         또한, 나의 장점을 말하는 단락들은 나의 장점을 반드시 포함해야 하고, 나의 장점을 어떻게 발휘할 것인지와 실천하고 있다는 내용을 포함해야 해.\n
@@ -32,7 +30,7 @@ class FullResumeStrategy(ResumeStrategy):
         [] 안에 있는 내용은 사용자가 제공하는 정보에 대한 설명이며, 사용자가 정보를 제공할 때 []로 묶어서 정보를 제공할 거야. \n
         단, [] 안에 어떠한 글자도 없거나, None 문자열이 있다면 해당 정보는 제공하지 않는 것으로 간주해.\n
         
-        - 각 단락의 제목 : [제목1, 제목2, 제목3, ...]\n
+        - 단락의 제목 : [단락의 제목]\n
         - 키워드 : [강조할 키워드로 이루어진 문자열]\n
         - 직무 : [지원하고자 하는 직무 또는 직업]\n
         - 경력 : [지원자의 경력 상태]\n
@@ -48,7 +46,7 @@ class FullResumeStrategy(ResumeStrategy):
         return f"""
         다음과 같은 정보를 사용하여 자기소개서를 만들어, json 형태로 반환해줘.
         
-        - 각 단락의 제목 : [{self.resume.chapter}]\n
+        - 단락의 제목 : [{self.resume.chapter_title}]\n
         - 키워드 : [{self.resume.keywords}]\n
         - 직무 : [{self.resume.job_name}]\n
         - 경력 : [{self.resume.level}]\n

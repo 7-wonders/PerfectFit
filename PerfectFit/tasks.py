@@ -46,7 +46,7 @@ def add_resume_task(job: Job, user: AppUser, resume: ResumeDto.Request.CreateFul
         project_experiences=user.project_experiences
     )))
 
-    answer: ResumeGPT.Response.FullResume.Answer = resume_helper.get_answer()
+    answer: ResumeGPT.Response.Answer = resume_helper.get_answer()
 
     return ResumeGPT.Response.FullResume.Resume(
         job=JobDto.Response.JobInfo(job_id=job.job_id, job_name=job.job_name),

@@ -14,7 +14,30 @@ resume_bp = Blueprint('resume', __name__)
 
 @resume_bp.route('/', methods=['GET'])
 def render_resume():
-    return render_template("resume.html")
+    page = request.args.get('page', 1, type=int)
+    count = request.args.get('count', 10, type=int)
+    sort = request.args.get('sort', 'r', type=str)
+    occupation_id = request.args.get('occupation_id', None, type=str)
+    job_id = request.args.get('job_id', None, type=str)
+    level = request.args.get('level', None, type=str)
+    search = request.args.get('search', None, type=str)
+
+    resumes, total = ResumeService.get_resumes(
+        page=page,
+        count=count,
+        sort=sort,
+        occupation_id=occupation_id,
+        job_id=job_id,
+        level=level,
+        search=search
+    )
+
+    response = {
+        "resumes": resumes,
+        "total": total
+    }
+
+    return render_template("resume.html", response=response)
 
 
 @resume_bp.route('/write', methods=['GET'])
@@ -66,6 +89,45 @@ def create_resume():
 
     ResumeService.add_resume(data)
     return redirect("/user/mypage/resume")
+
+
+@resume_bp.route('/write/part', methods=['POST'])
+def create_section_content():
+    data = request.get_json()
+
+    has_keyword = ('keywords' not in data or not data["keywords"] or len(data["keywords"]) < 1
+                   or not any([keyword.strip() for keyword in data["keywords"]]))
+    has_job = 'jobId' not in data or not data["jobId"] or data["jobId"] < 1
+    has_level = 'level' not in data or not data["level"] or not data["level"] in ["신입", "경력"]
+    has_pros = 'pros' not in data or not data["pros"]
+    has_cons = 'cons' not in data or not data["cons"]
+    has_chapter_title = 'chapterTitle' not in data or not data["chapterTitle"]
+
+    if has_keyword:
+        raise CustomException(ExceptionType.REQUIRED_KEYWORDS)
+    elif has_job:
+        raise CustomException(ExceptionType.REQUIRED_JOB)
+    elif has_level:
+        raise CustomException(ExceptionType.REQUIRED_LEVEL)
+    elif has_pros:
+        raise CustomException(ExceptionType.REQUIRED_PROS)
+    elif has_cons:
+        raise CustomException(ExceptionType.REQUIRED_CONS)
+    elif has_chapter_title:
+        raise CustomException(ExceptionType.REQUIRED_CHAPTER_TITLE)
+
+    dto = ResumeDto.Request.CreateSectionContent(
+        keywords=data["keywords"],
+        job_id=data["jobId"],
+        level=data["level"],
+        pros=data["pros"],
+        cons=data["cons"],
+        chapter_title=data["chapterTitle"],
+        directional=data["directional"]
+    )
+
+    content = ResumeService.add_section_content(dto)
+    return jsonify({"content": content}), HTTPStatus.OK
 
 
 @resume_bp.route('/information/all', methods=['GET', 'POST'])
