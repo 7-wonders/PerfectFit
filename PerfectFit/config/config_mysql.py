@@ -29,6 +29,6 @@ class Config:
     else:
         SQLALCHEMY_TRACK_MODIFICATIONS = False
         SQLALCHEMY_ECHO = True
-        SERVER_NAME = os.getenv('DEVELOP_SERVER_NAME') or 'localhost:5000'
+        SERVER_NAME = os.getenv('DEVELOP_SERVER_NAME') or '127.0.0.1:5000' ## 맥북용으로 임시 변경
 
     SECRET_KEY = os.environ.get('FLASH_SECRET_KEY')
