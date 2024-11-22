@@ -5,20 +5,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_write.css') }}" />
 {% endblock %}
 
-{% set level = "경력" %}
-{% set pros = "전 밥을 잘먹습니다." %}
-{% set cons = "밥을 잘먹어서 살이 많이 쪘습니다." %}
-{% set keywords = ['성실', '근면', '정직'] %}
-{% set directional = "제가 대식가인걸 강조해줬으면 합니다." %}
-
-{% set selectedOccupation = [
-    {
-        "occupationId": 3,
-        "occupationName": "직군3",
-        "majorCategory": "대분류3",
-        "subCategory": "소분류3"
-    }
- ]%}
+{#{% set level = "경력" %}#}
+{#{% set pros = "전 밥을 잘먹습니다." %}#}
+{#{% set cons = "밥을 잘먹어서 살이 많이 쪘습니다." %}#}
+{#{% set keywords = ['성실', '근면', '정직'] %}#}
+{#{% set directional = "제가 대식가인걸 강조해줬으면 합니다." %}#}
+{##}
+{#{% set selectedOccupation = [#}
+{#    {#}
+{#        "occupationId": 3,#}
+{#        "occupationName": "직군3",#}
+{#        "majorCategory": "대분류3",#}
+{#        "subCategory": "소분류3"#}
+{#    }#}
+{# ]%}#}
 {% set occupationList = [
     {
         "occupationId": 1,
@@ -41,28 +41,28 @@
 
  ]%}
 
-{% set resumes = [
-    {
-        "resumeId": 1,
-        "title": "자기소개서 제목1",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 2,
-        "title": "자기소개서 제목2",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 3,
-        "title": "자기소개서 제목3",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 4,
-        "title": "자기소개서 제목4",
-        "createdTime": "2024-10-04 02:17:32"
-    }
-]%}
+{#{% set resumes = [#}
+{#    {#}
+{#        "resumeId": 1,#}
+{#        "title": "자기소개서 제목1",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    },#}
+{#    {#}
+{#        "resumeId": 2,#}
+{#        "title": "자기소개서 제목2",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    },#}
+{#    {#}
+{#        "resumeId": 3,#}
+{#        "title": "자기소개서 제목3",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    },#}
+{#    {#}
+{#        "resumeId": 4,#}
+{#        "title": "자기소개서 제목4",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    }#}
+{#]%}#}
 
 {% set Total = resumes | length %}
 
@@ -150,12 +150,18 @@
                     <label class="uk-form-label" for="resume-write-occupation">직군</label>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="resume-write-occupation" name="occupation" onchange = "updateJobList()">
-                            <option selected value = "{{ selectedOccupation[0].occupationId }}">{{ selectedOccupation[0].occupationName }}</option>
-                            {% for oc in occupationList %}
-                                {% if oc.occupationId != selectedOccupation[0].occupationId %}
+                            {% if selectedOccupation %}
+                                <option selected value = "{{ selectedOccupation[0].occupationId }}">{{ selectedOccupation[0].occupationName }}</option>
+                                {% for oc in occupationList %}
+                                    {% if oc.occupationId != selectedOccupation[0].occupationId %}
+                                        <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% for oc in occupationList %}
                                     <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
-                                {% endif %}
-                            {% endfor %}
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
                 </div>
@@ -178,9 +184,12 @@
                             {% if level == "신입" %}
                                 <option selected>{{ level }}</option>
                                 <option>경력</option>
-                            {% else %}
+                            {% elif level =="경력" %}
                                 <option selected>{{ level }}</option>
                                 <option>신입</option>
+                            {% else %}
+                                <option>신입</option>
+                                <option>경력</option>
                             {% endif %}
                         </select>
                     </div>
