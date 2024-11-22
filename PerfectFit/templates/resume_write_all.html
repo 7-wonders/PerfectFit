@@ -11,16 +11,35 @@
 {% set keywords = ['성실', '근면', '정직'] %}
 {% set directional = "제가 대식가인걸 강조해줬으면 합니다." %}
 
-{% set jobs = {
-        '직군1': ['직업1-1', '직업1-2', '직업1-3'],
-        '직군2': ['직업2-1', '직업2-2'],
-        '직군3': ['직업3-1', '직업3-2', '직업3-3', '직업3-4'],
-        '직군4': ['직업4-1', '직업4-2'],
-        '직군5': ['직업5-1', '직업5-2', '직업5-3']
-    } %}
-{% set occupation = "직군3" %}
-{% set job = "직업3-1" %}
-{% set occupationList = ['직군1', '직군2', '직군3', '직군4', '직군5' ] %}
+{% set selectedOccupation = [
+    {
+        "occupationId": 3,
+        "occupationName": "직군3",
+        "majorCategory": "대분류3",
+        "subCategory": "소분류3"
+    }
+ ]%}
+{% set occupationList = [
+    {
+        "occupationId": 1,
+        "occupationName": "직군1",
+        "majorCategory": "대분류1",
+        "subCategory": "소분류1"
+    },
+    {
+        "occupationId": 2,
+        "occupationName": "직군2",
+        "majorCategory": "대분류2",
+        "subCategory": "소분류2"
+    },
+    {
+        "occupationId": 3,
+        "occupationName": "직군3",
+        "majorCategory": "대분류3",
+        "subCategory": "소분류3"
+    },
+
+ ]%}
 
 {% set resumes = [
     {
@@ -47,31 +66,35 @@
 
 {% set Total = resumes | length %}
 
-{% set list = [
-    {
-        "title": "자기소개서 항목1",
-        "content": "자기소개서 내용1"
-    },
-    {
-        "title": "자기소개서 항목2",
-        "content": "자기소개서 내용2"
-    },
-    {
-        "title": "자기소개서 항목3",
-        "content": "자기소개서 내용3"
-    },
-    {
-        "title": "자기소개서 항목4",
-        "content": "자기소개서 내용4"
-    },
-]%}
+{#{% set list = [#}
+{#    {#}
+{#        "title": "자기소개서 항목1",#}
+{#        "content": "자기소개서 내용1"#}
+{#    },#}
+{#    {#}
+{#        "title": "자기소개서 항목2",#}
+{#        "content": "자기소개서 내용2"#}
+{#    },#}
+{#    {#}
+{#        "title": "자기소개서 항목3",#}
+{#        "content": "자기소개서 내용3"#}
+{#    },#}
+{#    {#}
+{#        "title": "자기소개서 항목4",#}
+{#        "content": "자기소개서 내용4"#}
+{#    },#}
+{#]%}#}
 
 {% block scripts %}
     <script>const iconAiPath = "{{url_for('static', filename = 'img/icon_ai.svg')}}";</script>
     <script>const iconRemovePath = "{{url_for('static', filename = 'img/remove.svg')}}";</script>
     <script src="{{ url_for('static', filename='js/resume_write.js') }}"></script>
-    <script>let sectionCount = {{ list | length - 1 }};</script>
-    <script>var jobList = {{ jobs | tojson }};</script>
+    <script src="{{ url_for('static', filename='js/resume_api.js') }}"></script>
+    <script>
+        let sectionCount = {{ (list | length if list else 1) - 1 }};
+    </script>
+
+
     <script>let badgeCounter = {{ keywords | length }};</script>
 {% endblock %}
 
@@ -127,10 +150,10 @@
                     <label class="uk-form-label" for="resume-write-occupation">직군</label>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="resume-write-occupation" name="occupation" onchange = "updateJobList()">
-                            <option selected>{{ occupation }}</option>
-                            {% for occupationList in occupationList %}
-                                {% if occupationList != occupation %}
-                                    <option value="{{ occupationList }}">{{ occupationList }}</option>
+                            <option selected value = "{{ selectedOccupation[0].occupationId }}">{{ selectedOccupation[0].occupationName }}</option>
+                            {% for oc in occupationList %}
+                                {% if oc.occupationId != selectedOccupation[0].occupationId %}
+                                    <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -142,12 +165,7 @@
                     <label class="uk-form-label" for="resume-write-job">직업</label>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="resume-write-job" name = "jobName">
-                            <option value = "{{ job }}" selected>{{ job }}</option>
-                            {% for jobList in jobs[occupation] %}
-                                {% if jobList != job %}
-                                    <option value="{{ jobList }}">{{ jobList }}</option>
-                                {% endif %}
-                            {% endfor %}
+                            <option disabled>직군을 선택해주세요.</option>
                         </select>
                     </div>
                 </div>

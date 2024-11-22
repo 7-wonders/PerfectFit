@@ -129,21 +129,16 @@ function deleteSection(sectionId) {
     checkFormCompletion();
 }
 
-// 직군을 선택하면 그에 해당하는 직업만 나오게 하기
-function updateJobList() {
-    var selectedOccupation = document.getElementById("resume-write-occupation").value;
-    var jobSelect = document.getElementById("resume-write-job");
-    // 직업 목록 초기화
-    jobSelect.innerHTML = '';
+// 페이지가 실행 된 후 직업 목록을 한번 호출
+document.addEventListener("DOMContentLoaded", function() {
+    // 직군 선택값 가져오기
+    const selectedOccupation = document.getElementById("resume-write-occupation").value;
 
-    if (selectedOccupation in jobList) {
-        jobList[selectedOccupation].forEach(function(job) {
-            var option = document.createElement("option");
-            option.text = job;
-            jobSelect.add(option);
-        });
+    // 직군이 이미 선택된 상태라면, 직업 목록을 한번 호출
+    if (selectedOccupation) {
+        updateJobList();
     }
-}
+});
 
 //주요 키워드 뱃지 관련 코드
 document.addEventListener('DOMContentLoaded', function() {
@@ -255,128 +250,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Element with ID "resume-write-keyword" or "badge-container" not found.');
     }
 });
-
-
-// ai 작성하기 애니메이션(기존 코드)
-// function aiResumeWrite(idNumber) {
-//     const text = "안녕하세요 반갑습니다 안녕하세요 반갑습니다 안녕하세요 반갑습니다";
-//     const titleInput = document.getElementById(`resume-write-title-${idNumber}`);
-//     const textarea = document.getElementById(`resume-write-content-${idNumber}`);
-//     const button = document.getElementById(`ai-resume-write-${idNumber}`);
-//
-//     // 제목 입력란이 비어 있는지 확인
-//     if (!titleInput.value.trim()) {
-//         alert("제목을 입력해주세요");
-//         return; // 제목이 없으면 함수 실행 중단
-//     }
-//
-//     if (textarea && button) {
-//         let index = 0;
-//
-//         // 버튼 비활성화
-//         button.disabled = true;
-//         textarea.value = ''; // 기존 내용을 지웁니다.
-//
-//         function typeWriter() {
-//             if (index < text.length) {
-//                 textarea.value += text.charAt(index);
-//                 index++;
-//                 setTimeout(typeWriter, 100); // 타이핑 속도를 조절합니다 (100ms 간격)
-//             } else {
-//                 // 타이핑 완료 후 버튼 활성화
-//                 button.disabled = false;
-//             }
-//         }
-//
-//         typeWriter();
-//         checkFormCompletion();
-//     }
-// }
-
-// ai 작성하기 API 통신 예시
-async function aiResumeWrite(idNumber) {
-    // 입력 필드 및 필요한 요소들 가져오기
-    const titleInput = document.getElementById(`resume-write-title-${idNumber}`);
-    const textarea = document.getElementById(`resume-write-content-${idNumber}`);
-    const button = document.getElementById(`ai-resume-write-${idNumber}`);
-    const keywords = Array.from(document.querySelectorAll('[id^="badge-input-"]')).map(input => input.value.trim());
-    const directional = document.getElementById("resume-write-directionality").value.trim() || null;
-    const occupation = document.getElementById("resume-write-occupation").value;
-    const job = document.getElementById("resume-write-job").value;
-    const level = document.getElementById("resume-write-experience").value;
-    const pros = document.getElementById("resume-write-merit").value.trim();
-    const cons = document.getElementById("resume-write-disadvantage").value.trim();
-
-    // 제목 입력 확인
-    if (!titleInput.value.trim()) {
-        alert("제목을 입력해주세요.");
-        return; // 제목이 없으면 함수 종료
-    }
-
-    // 버튼 비활성화
-    button.disabled = true;
-
-    // 로딩 애니메이션 추가
-    let loadingDots = 0;
-    const loadingMessageBase = "AI가 자기소개서를 작성중입니다";
-    textarea.value = loadingMessageBase;
-    const loadingInterval = setInterval(() => {
-        loadingDots = (loadingDots + 1) % 4; // 점이 0~3개까지 순환
-        const dots = ".".repeat(loadingDots);
-        textarea.value = `${loadingMessageBase}${dots}`;
-    }, 500); // 500ms 간격으로 업데이트
-
-    try {
-        // 백엔드로 데이터 전송
-        const response = await instance.post('/resume/write/part', {
-            form: {
-                keywords: keywords,
-                occupation: occupation,
-                job: job,
-                level: level,
-                pros: pros,
-                cons: cons,
-                directional: directional,
-                chapterTitle: titleInput.value.trim()
-            }
-        });
-
-        // 백엔드로부터 받은 데이터
-        const text = response.data.content;
-
-        // 로딩 애니메이션 제거
-        clearInterval(loadingInterval);
-
-        // 애니메이션을 통한 텍스트 출력
-        let index = 0;
-        textarea.value = ""; // 기존 내용을 지움
-
-        function typeWriter() {
-            if (index < text.length) {
-                textarea.value += text.charAt(index);
-                index++;
-                setTimeout(typeWriter, 80); // 타이핑 속도 조절 (100ms 간격)
-            } else {
-                // 버튼 활성화
-                button.disabled = false;
-            }
-        }
-
-        typeWriter();
-    } catch (error) {
-        console.error("AI 생성 요청 실패:", error);
-        alert("AI 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
-
-        // 로딩 애니메이션 제거
-        clearInterval(loadingInterval);
-        textarea.value = ""; // 오류 시 텍스트 영역 초기화
-
-        // 버튼 활성화
-        button.disabled = false;
-    }
-}
-
-
 
 // 주요 키워드 div 포커스 이벤트 추가
 document.addEventListener('DOMContentLoaded', function() {

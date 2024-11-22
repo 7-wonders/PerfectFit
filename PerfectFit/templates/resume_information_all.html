@@ -9,18 +9,30 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_information.js') }}"></script>
-    <script>var jobList = {{ jobs | tojson }};</script>
 {% endblock %}
 
-{% set jobs = {
-        '직군1': ['직업1-1', '직업1-2', '직업1-3'],
-        '직군2': ['직업2-1', '직업2-2'],
-        '직군3': ['직업3-1', '직업3-2', '직업3-3', '직업3-4'],
-        '직군4': ['직업4-1', '직업4-2'],
-        '직군5': ['직업5-1', '직업5-2', '직업5-3']
-}%}
+{% set occupationList = [
+    {
+        "occupationId": 1,
+        "occupationName": "직군1",
+        "majorCategory": "대분류1",
+        "subCategory": "소분류1"
+    },
+    {
+        "occupationId": 2,
+        "occupationName": "직군2",
+        "majorCategory": "대분류2",
+        "subCategory": "소분류2"
+    },
+    {
+        "occupationId": 3,
+        "occupationName": "직군3",
+        "majorCategory": "대분류3",
+        "subCategory": "소분류3"
+    },
 
-{% set occupationList = ['직군1', '직군2', '직군3', '직군4', '직군5' ] %}
+ ]%}
+
 
 
 {% block content %}
@@ -33,10 +45,10 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-information-occupation">직군</label>
                     <div class="uk-form-controls">
-                        <select class="uk-select" id="resume-information-occupation" name="occupation" onchange = "updateJobList()">
+                        <select class="uk-select" id="resume-information-occupation" name="occupationId" onchange = "updateJobList()">
                             <option disabled selected>직군을 선택해주세요</option>
-                            {% for occupation in occupationList %}
-                                <option>{{ occupation }}</option>
+                            {% for oc in occupationList %}
+                                <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
                             {% endfor %}
                         </select>
                     </div>

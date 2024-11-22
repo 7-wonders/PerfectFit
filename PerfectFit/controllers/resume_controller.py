@@ -30,6 +30,35 @@ def get_resume_write_part():
     # JSON 응답 반환
     return jsonify(response_data), 200
 
+@resume_bp.route('/job/<int:occupation_id>', methods=['GET'])
+def get_jobs(occupation_id):
+    # 더미 데이터
+    job_data = {
+        1: [
+            {"jobId": 101, "jobName": "Software Engineer"},
+            {"jobId": 102, "jobName": "Data Scientist"},
+        ],
+        2: [
+            {"jobId": 201, "jobName": "Mechanical Engineer"},
+            {"jobId": 202, "jobName": "Civil Engineer"},
+        ],
+        3: [
+            {"jobId": 301, "jobName": "Accountant"},
+            {"jobId": 302, "jobName": "Auditor"},
+        ]
+    }
+
+    # occupation_id에 해당하는 직업 목록 가져오기
+    jobs = job_data.get(occupation_id, [])
+
+    # 응답 데이터 생성
+    response = {
+        "jobs": jobs
+    }
+
+    # JSON 데이터 반환
+    return jsonify(response), 200
+
 @resume_bp.route('/write/all')
 def get_resume_write_all():
     return render_template("resume_write_all.html")

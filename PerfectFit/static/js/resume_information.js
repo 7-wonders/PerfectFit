@@ -47,19 +47,37 @@ function addSection() {
 }
 
 // 직군을 선택하면 그에 해당하는 직업만 나오게 하기
-function updateJobList() {
-    var selectedOccupation = document.getElementById("resume-information-occupation").value;
-    var jobSelect = document.getElementById("resume-information-job");
+async function updateJobList() {
+    const selectedOccupation = document.getElementById("resume-information-occupation").value;
+    const jobSelect = document.getElementById("resume-information-job");
 
     // 직업 목록 초기화
     jobSelect.innerHTML = '';
 
-    if (selectedOccupation in jobList) {
-        jobList[selectedOccupation].forEach(function(job) {
-            var option = document.createElement("option");
-            option.text = job;
+    // 직군 선택이 비어 있는 경우 종료
+    if (!selectedOccupation) {
+        return;
+    }
+
+    try {
+        // 백엔드 API 호출: 선택한 직군 ID를 경로에 동적으로 전달
+        const response = await instance.get(`/resume/job/${selectedOccupation}`);
+
+        // 백엔드로부터 받은 직업 데이터
+        const jobList = response.data.jobs;
+
+        // 직업 데이터를 기반으로 <option> 추가
+        jobList.forEach(function (job) {
+            const option = document.createElement("option");
+            option.value = job.jobId; // jobId를 value로 설정
+            option.text = job.jobName; // jobName을 표시
             jobSelect.add(option);
         });
+
+    } catch (error) {
+        console.error("직업 목록 불러오기 실패:", error);
+        console.log(selectedOccupation);
+        alert("직업 목록을 불러오는 데 실패했습니다. 다시 시도해주세요.");
     }
 }
 
@@ -160,8 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Element with ID "resume-write-keyword" or "badge-container" not found.');
     }
 });
-
-
 
 // 주요 키워드 포커스 이벤트
 document.addEventListener('DOMContentLoaded', function() {
