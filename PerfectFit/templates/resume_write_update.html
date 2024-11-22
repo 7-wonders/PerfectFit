@@ -153,7 +153,7 @@
                                 <div class = "badge">
                                     <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
                                     <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
-                                    <input type = "hidden" name = "keywords" value="{{ keyword }}" />
+                                    <input type = "hidden" id = "badge-input-{{ loop.index0 }}" name = "keywords" value="{{ keyword }}" />
                                 </div>
                             {% endfor %}
                             <input class="keyword-input Regular-16" id="resume-write-keyword" type="text">
