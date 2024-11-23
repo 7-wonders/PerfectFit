@@ -1,5 +1,3 @@
-import json
-from dataclasses import asdict
 from http import HTTPStatus
 from urllib import request
 
@@ -11,6 +9,8 @@ from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from services.resume_service import ResumeService
 from tasks import add_resume_task
+from utils.model_converter import model_to_dict
+from utils.check_api import is_api_call
 
 resume_bp = Blueprint('resume', __name__)
 
@@ -35,19 +35,26 @@ def render_resume():
         search=search
     )
 
-    response = {
-        "resumes": resumes,
-        "total": total
-    }
+    if is_api_call(request):
+        response = {
+            "resumes": [model_to_dict(resume) for resume in resumes],
+            "total": total
+        }
 
-    return render_template("resume.html", response=response)
+        return jsonify(response), HTTPStatus.OK
+    else:
+        response = {
+            "resumes": [model_to_dict(resume) for resume in resumes],
+            "total": total
+        }
+
+        return render_template("resume.html", response=response)
 
 
 @resume_bp.route('/write', methods=['GET'])
 def render_write():
     task_id = request.args.get('task_id')
     task_response: ResumeGPT.Response.FullResume.Resume | None = None
-    response: ResumeDto.Response.ResumeForWrite | None = None
 
     if task_id:
         task = add_resume_task.AsyncResult(task_id)
