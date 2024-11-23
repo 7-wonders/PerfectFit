@@ -5,8 +5,8 @@ class JobDto:
     class Response:
         @dataclass
         class JobInfo:
-            job_id: int
-            job_name: str
+            jobId: int
+            jobName: str
 
         @dataclass
         class Jobs:
@@ -14,16 +14,16 @@ class JobDto:
 
         @dataclass
         class OccupationInfo:
-            occupation_id: int
-            occupation_name: str
-            major_category: str
-            sub_category: str
+            occupationId: int
+            occupationName: str
+            majorCategory: str
+            subCategory: str
         @dataclass
         class OccupationInfoWithJob:
-            occupation_id: int
-            occupation_name: str
-            major_category: str
-            sub_category: str
+            occupationId: int
+            occupationName: str
+            majorCategory: str
+            subCategory: str
             jobs: list['JobDto.Response.JobInfo'] = None
             total: int = 0
         @dataclass

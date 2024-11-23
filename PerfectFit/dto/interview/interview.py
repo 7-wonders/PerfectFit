@@ -59,6 +59,7 @@ class InterviewDto:
             questionId: int
             answer: str
             improvement: str
+            translatedAnswer: str
 
         @dataclass
         class improvementList :

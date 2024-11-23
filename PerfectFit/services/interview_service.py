@@ -18,24 +18,35 @@ import re, requests
 class InterviewService:
 
     @staticmethod
-    def get_questions(resume_id: int) -> list[InterviewDto.Response.interviewQuestion]:
-        # join을 해서 results에 일단 담기
-        results = (
-            get_session()
-            .query(InterviewQuestion)
-            .join(Interview, InterviewQuestion.interview_id == Interview.interview_id)
-            .filter(Interview.resume_id == resume_id)
-            .all()
-        )
+    def get_questions(interview_id: int) -> InterviewDto.Response.questions:
+        with get_session() as session:
+            # join을 해서 results에 일단 담기
+            results = (
+                session
+                .query(InterviewQuestion)
+                .join(Interview, InterviewQuestion.interview_id == Interview.interview_id)
+                .filter(Interview.interview_id == interview_id)
+                .all()
+            )
 
-        questions = [
-            InterviewDto.Response.interviewQuestion(question.question_id, question.question)
-            for question in results
-        ]
+            questions = [
+                InterviewDto.Response.interviewQuestion(question.question_id, question.question)
+                for question in results
+            ]
 
-        if not questions :
-            raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
-        return questions
+            if not questions:
+                raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
+
+            response: InterviewDto.Response.questions = InterviewDto.Response.questions(
+                questions=
+                [InterviewDto.Response.interviewQuestion(question.question_id, question.question)
+                 for question in questions],
+                total=len(questions)
+            )
+
+            session.close()
+
+        return response
 
     @staticmethod
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
@@ -47,19 +58,18 @@ class InterviewService:
         # 개선사항 도출 로직 여기다가 적어야함;.
         # QuestionId와 Answer가 넘어오는데 여기서 answer는 사용자가 작성한 답변이다.
 
-
         try:
-
-            improvement_json = answer_improvement(question_answer.answer, question_answer.questionId)
-
-            improvement = InterviewImprovement(question_id=question_answer.questionId,
-                                               answer=question_answer.answer,
-                                               improvement=improvement_json['improvement'])
-            session.add(improvement)
+            improvements = answer_improvement(question_answer.answer, question_answer.questionId)
+            for improvement in improvements['InterviewImprovement']:
+                new_improvement = InterviewImprovement(question_id=int(question_answer.questionId),
+                                               answer=improvement['UserAnswer'],
+                                               improvement=improvement['Improvement'],
+                                               translated_answer=improvement['TranslatedAnswer'])
+                session.add(new_improvement)
             session.commit()
         except Exception as e:
             session.rollback()
-            print("Exception Cause :: ",e)
+            print("Exception Cause2 :: ",e)
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
         get_session().commit()
@@ -146,7 +156,7 @@ class InterviewService:
         for question in questions:
             for improvement in question.interview_improvements :
                 if improvement :
-                    improvementDto = InterviewDto.Response.improvement(improvement.improvement_id, question.question_id, improvement.answer, improvement.improvement)
+                    improvementDto = InterviewDto.Response.improvement(improvement.improvement_id, question.question_id, improvement.answer, improvement.improvement, improvement.translated_answer)
                     improvementList.append(improvementDto)
         return improvementList
 
