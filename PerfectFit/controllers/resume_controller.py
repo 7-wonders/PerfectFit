@@ -89,20 +89,18 @@ def get_test():
 
 @resume_bp.route('/list/<int:page>')
 def get_resume_list(page):
-    totalItems = 100  # 예시: 전체 항목의 수
-    pageRange = 5  # 한 번에 표시할 페이지 범위
-    totalPages = (totalItems + pageRange - 1) // pageRange  # 전체 페이지 수 계산
-    return render_template("resume_list.html", page=page, totalPages=totalPages, pageRange=pageRange)
+    total = 100
+    return render_template("resume_list.html", total=total, page=page)
 
 @resume_bp.route('/detail/<int:resume_id>')
 def get_resume_detail(resume_id):
-    totalItems = 100  # 예시: 전체 항목의 수
-    return render_template("resume_detail.html", totalItems=totalItems)
+    total = 100
+    return render_template("resume_detail.html", total=total)
 
 
+# 자기소개서 상세보기 페이지네이션 버튼 누를 시 동작
 @resume_bp.route('/test/list/<int:page>', methods=['GET'])
 def get_resume_list_test(page):
-    # 예시: 데이터베이스에서 해당 페이지에 맞는 데이터를 가져옵니다.
     resumes = [
         {
             "resumeId": 1,

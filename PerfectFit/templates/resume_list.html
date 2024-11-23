@@ -5,9 +5,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_list.css') }}" />
 {% endblock %}
 
-{% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
-{% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
-
 {% set occupations = [
     {
         "occupationId": 1,
@@ -66,8 +63,10 @@
     }
 ]%}
 
-{% set nowPage = 1 %}
 {% set pageRange = 5 %}
+{% set totalPages = (total + pageRange - 1) // pageRange %}
+{% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
+{% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_list.js') }}"></script>

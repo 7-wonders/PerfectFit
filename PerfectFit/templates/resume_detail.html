@@ -73,7 +73,7 @@
 
 {% set page = 1 %}
 {% set pageRange = 5 %}
-{% set totalPages = (totalItems + pageRange - 1) // pageRange %}
+{% set totalPages = (total + pageRange - 1) // pageRange %}
 {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
 {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
 
