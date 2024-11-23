@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from domain.models import ProjectExperience
 from domain.models import WorkExperience
-from dto.job.job import JobDto
-from dto.resume.resume import ResumeDto
+
+
+if TYPE_CHECKING:
+    from dto.resume.resume import ResumeDto
 
 
 class ResumeGPT:
@@ -44,7 +46,7 @@ class ResumeGPT:
             @dataclass
             class Resume:
                 keywords: List[str]
-                job: 'JobDto.Response.JobInfo'
+                job_id: int
                 level: str
                 pros: str
                 cons: str

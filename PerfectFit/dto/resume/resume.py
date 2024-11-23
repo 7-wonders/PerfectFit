@@ -1,7 +1,13 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
+from dto.job.job import JobDto
+from dto.occupation.occupation import OccupationDto
 from dto.validation_class import FormModel
+
+
+if TYPE_CHECKING:
+    from dto.resume.resume_gpt import ResumeGPT
 
 
 class ResumeDto:
@@ -84,3 +90,10 @@ class ResumeDto:
             pros: str
             cons: str
             directional: Optional[str]
+
+    class Response:
+        @dataclass
+        class ResumeForWrite:
+            resume: "ResumeGPT.Response.FullResume.Resume" or None
+            jobs: "JobDto.Response.Jobs" or None
+            occupations: List["OccupationDto.Response.Occupation"]

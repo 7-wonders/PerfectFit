@@ -1,9 +1,12 @@
+import json
+from dataclasses import asdict
 from http import HTTPStatus
 from urllib import request
 
-from flask import Blueprint, request, jsonify, redirect, render_template, flash
+from flask import Blueprint, request, jsonify, redirect, render_template, flash, url_for
 
 from dto.resume.resume import ResumeDto
+from dto.resume.resume_gpt import ResumeGPT
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from services.resume_service import ResumeService
@@ -43,14 +46,34 @@ def render_resume():
 @resume_bp.route('/write', methods=['GET'])
 def render_write():
     task_id = request.args.get('task_id')
-    response = None
+    task_response: ResumeGPT.Response.FullResume.Resume | None = None
+    response: ResumeDto.Response.ResumeForWrite | None = None
 
     if task_id:
         task = add_resume_task.AsyncResult(task_id)
         state = task.state.lower()
 
         if state == 'success':
-            response = task.get()
+            task_response = task.get()
+        elif state == 'failure':
+            raise CustomException(ExceptionType.CELERY_ERROR)
+        else:
+            return redirect(f"/resume/waiting?task_id={task_id}")
+
+    if task_response:
+        jobs, occupations = ResumeService.get_resume_write_data(task_response)
+        response = ResumeDto.Response.ResumeForWrite(
+            resume=task_response,
+            jobs=jobs,
+            occupations=occupations
+        )
+    else:
+        occupations = ResumeService.get_occupations()
+        response = ResumeDto.Response.ResumeForWrite(
+            resume=None,
+            jobs=None,
+            occupations=occupations
+        )
 
     return render_template("resume_write.html", response=response)
 
@@ -85,7 +108,7 @@ def create_resume():
 
     if flash_message:
         flash(flash_message)
-        return render_template("resume_write.html")
+        return redirect(url_for('resume.render_write'))
 
     ResumeService.add_resume(data)
     return redirect("/user/mypage/resume")
@@ -130,7 +153,7 @@ def create_section_content():
     return jsonify({"content": content}), HTTPStatus.OK
 
 
-@resume_bp.route('/information/all', methods=['GET', 'POST'])
+@resume_bp.route('/information', methods=['GET', 'POST'])
 def create_section():
     if request.method == 'POST':
         keywords = request.form.getlist("keywords[]")

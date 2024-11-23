@@ -99,6 +99,59 @@ class ResumeService:
             return resumes, total
 
     @staticmethod
+    def get_resume_write_data(task_data: ResumeGPT.Response.FullResume.Resume = None):
+        with get_session() as session:
+            selected_job_query = (
+                select(
+                    Job.occupation_id
+                )
+                .where(Job.job_id == task_data.job_id)
+                .scalar_subquery()
+            )
+
+            job_query = (
+                select(
+                    Job.job_id.label('jobId'),
+                    Job.job_name.label('jobName'),
+                    (
+                        Job.job_id == task_data.job_id
+                    ).label('isSelected')
+                )
+                .where(
+                    Job.occupation_id == selected_job_query
+                )
+            )
+
+            occupation_query = (
+                select(
+                    Occupation.occupation_id.label('occupationId'),
+                    Occupation.occupation_name.label('occupationName'),
+                    (
+                        Occupation.occupation_id == selected_job_query
+                    ).label('isSelected')
+                )
+            )
+
+            jobs = session.execute(job_query).mappings().all()
+            occupations = session.execute(occupation_query).mappings().all()
+
+            return jobs, occupations
+
+    @staticmethod
+    def get_occupations():
+        with get_session() as session:
+            query = (
+                select(
+                    Occupation.occupation_id.label('occupationId'),
+                    Occupation.occupation_name.label('occupationName')
+                )
+            )
+
+            occupations = session.execute(query).mappings().all()
+
+            return occupations
+
+    @staticmethod
     def add_resume(request_resume: ResumeDto.Request.Create):
         with get_session() as session:
             user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
