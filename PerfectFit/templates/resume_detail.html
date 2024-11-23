@@ -71,12 +71,25 @@
 }
 ]%}
 
+{% set page = 1 %}
+{% set pageRange = 5 %}
+{% set totalPages = (totalItems + pageRange - 1) // pageRange %}
+{% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
+{% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
+
+
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_detail.js') }}"></script>
     <script>let isLike = {{ isLike | tojson }};</script>
     <script>let likeCount = {{ response[0].likeCount | tojson }};</script>
+    <script>
+        const startPage = {{ startPage }};
+        const endPage = {{ endPage }};
+        const totalPages = {{ totalPages }};
+        const pageRange = {{ pageRange }};
+        let currentPage = {{ page }};
+    </script>
 {% endblock %}
-
 
 {% block content %}
     {% include 'components/header.html' %}
@@ -95,8 +108,8 @@
                     <div class="uk-inline">
                         <button class="uk-button uk-button-default" type="button"></button>
                         <div uk-dropdown="mode: click; pos: bottom-center;">
-                            <a href="#">수정하기</a>
-                            <a href="#">삭제하기</a>
+                            <a class = "Regular-16-light" href="http://127.0.0.1:5000/resume/write/update/{{ response[0].resumeId }}">수정하기</a>
+                            <button class = "remove-btn Regular-16-light" onclick = "removeResumeDetail({{ response[0].resumeId }})">삭제하기</button>
                         </div>
                     </div>
                 {% endif %}
@@ -136,70 +149,73 @@
         <hr>
         {# ========================== 자기소개서 목록 ============================ #}
          <p class = "Bold-30-none-weight" style = "margin-top: 30px !important;">자기소개서 목록</p>
-        {% for i in range(5) %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
-            <div class = "resume-list">
-                {#게시물 왼쪽 부분#}
-                <div>
-                    <div class = "resume-title">
-                        <span class = "title-category">{{ resumes[0].occupation }}{{ i + 1 }} |</span>
-                        <span class = "title-category">{{ resumes[0].job }}{{ i + 1 }} |</span>
-                        <span class = "title-category">{{ resumes[0].level }}</span>
-                        <a href = "#" class = "resume-link"><span class = Medium-20>{{ resumes[0].title }}{{ i + 1 }}</span></a>
-                    </div>
-                    <div style = "margin-top: 10px;">
-                        <img src="{{ resumes[0].user.profilePath }}" class = "user-profile" />
-                        <span class = "Regular-16" style = "margin-left : 5px">{{ resumes[0].user.username }}</span>
-                        <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ resumes[0].createdTime }}</span>
-                    </div>
-                </div>
-                <div class = "resume-list-Engagement">
-                    {# 조회수 #}
-                    <div style = "margin-right: 10px;">
-                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                        <span class = "Regular-16-light">{{ response[0].viewCount }}</span>
-                    </div>
-                    {# 좋아요 #}
+        <div id="resume-list-container">
+            {% for i in range(5) %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
+                <div class = "resume-list">
+                    {#게시물 왼쪽 부분#}
                     <div>
-                        <button id="like-button" uk-icon="icon: heart; ratio: 1.0;" class="none-style-btn" onclick="actionLike()"></button>
-                        <span id="like-count" class="Regular-16-light">{{ response[0].likeCount }}</span>
+                        <div class = "resume-title">
+                            <span class = "title-category">{{ resumes[0].occupation }}{{ i + 1 }} |</span>
+                            <span class = "title-category">{{ resumes[0].job }}{{ i + 1 }} |</span>
+                            <span class = "title-category">{{ resumes[0].level }}</span>
+                            <a href = "http://127.0.0.1:5000/resume/detail/{{ resumes[0].resumeId }}" class = "resume-link"><span class = Medium-20>{{ resumes[0].title }}{{ i + 1 }}</span></a>
+                        </div>
+                        <div style = "margin-top: 10px;">
+                            <img src="{{ resumes[0].user.profilePath }}" class = "user-profile" />
+                            <span class = "Regular-16" style = "margin-left : 5px">{{ resumes[0].user.username }}</span>
+                            <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ resumes[0].createdTime }}</span>
+                        </div>
+                    </div>
+                    <div class = "resume-list-Engagement">
+                        {# 조회수 #}
+                        <div style = "margin-right: 10px;">
+                            <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                            <span class = "Regular-16-light">{{ response[0].viewCount }}</span>
+                        </div>
+                        {# 좋아요 #}
+                        <div>
+                            <span id="like-button" uk-icon="icon: heart; ratio: 1.0;"></span>
+                            <span id="like-count" class="Regular-16-light">{{ response[0].likeCount }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <hr>
-        {% endfor %}
+                <hr>
+            {% endfor %}
+        </div>
         {# 페이지네이션 #}
-        <nav aria-label="Pagination">
-           <ul class="uk-pagination uk-flex-center" uk-margin>
-                {# Previous 버튼 #}
-                <li class="{% if page == 1 %}uk-disabled{% endif %}">
-                    <a href="{% if page > 1 %}/user/resume/list/{{ page - 1 }}{% else %}#{% endif %}">
-                        <span class="Regular-20-light" uk-pagination-previous></span>
-                    </a>
-                </li>
-
-                {# 표시할 페이지 범위 계산 #}
-                {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
-                {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
+       <nav aria-label="Pagination">
+            <ul class="uk-pagination uk-flex-center" uk-margin>
+                {# Previous 버튼 렌더링 조건 #}
+                {% if startPage > 1 %}
+                    <li>
+                        <a href="#">
+                            <button class="pagination-btn Regular-20-light" onclick="updateResumeList({{ startPage }} - 1)">
+                                <span class="Regular-20-light" uk-pagination-previous></span>
+                            </button>
+                        </a>
+                    </li>
+                {% endif %}
 
                 {# 페이지 번호 생성 #}
                 {% for pageNum in range(startPage, endPage + 1) %}
-                    <li class="{% if pageNum == page %}uk-active{% endif %}">
-                        {% if pageNum == page %}
-                            <span class="Regular-20-light" aria-current="page">{{ pageNum }}</span>
-                        {% else %}
-                            <a href="/user/resume/list/{{ pageNum }}" class="Regular-20-light">{{ pageNum }}</a>
-                        {% endif %}
+                    <li>
+                        <button class="pagination-btn Regular-20-light" onclick="updateResumeList({{ pageNum }})">
+                            <span id="page-{{ pageNum }}" class="{% if pageNum == page %}primary-20{% else %}Regular-20-light{% endif %}">
+                                {{ pageNum }}
+                            </span>
+                        </button>
                     </li>
                 {% endfor %}
 
-                {# Next 버튼 #}
-                <li class="{% if page == totalPages %}uk-disabled{% endif %}">
-                    <a href="{% if page < totalPages %}/user/resume/list/{{ page + 1 }}{% else %}#{% endif %}">
-                        <span class="Regular-20-light" uk-pagination-next></span>
-                    </a>
-                </li>
+                {# Next 버튼 렌더링 조건 #}
+                {% if endPage < totalPages %}
+                    <li>
+                        <button class="pagination-btn Regular-20-light" onclick="updateResumeList({{ endPage + 1 }})">
+                            <span class="Regular-20-light" uk-pagination-next></span>
+                        </button>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
     </div>
-
 {% endblock %}

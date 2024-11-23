@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, url_for
 # 더미 데이터를 위한 import
 from flask import request, jsonify
 import time
@@ -94,10 +94,92 @@ def get_resume_list(page):
     totalPages = (totalItems + pageRange - 1) // pageRange  # 전체 페이지 수 계산
     return render_template("resume_list.html", page=page, totalPages=totalPages, pageRange=pageRange)
 
-@resume_bp.route('/detail')
-def get_resume_detail():
-    page = 1;
+@resume_bp.route('/detail/<int:resume_id>')
+def get_resume_detail(resume_id):
     totalItems = 100  # 예시: 전체 항목의 수
-    pageRange = 5  # 한 번에 표시할 페이지 범위
-    totalPages = (totalItems + pageRange - 1) // pageRange  # 전체 페이지 수 계산
-    return render_template("resume_detail.html", page=page, totalPages=totalPages, pageRange=pageRange)
+    return render_template("resume_detail.html", totalItems=totalItems)
+
+
+@resume_bp.route('/test/list/<int:page>', methods=['GET'])
+def get_resume_list_test(page):
+    # 예시: 데이터베이스에서 해당 페이지에 맞는 데이터를 가져옵니다.
+    resumes = [
+        {
+            "resumeId": 1,
+            "title": "API 자기소개서1",
+            "occupationName": "Developer",
+            "jobName": "Software Engineer",
+            "level": "경력",
+            "user": {
+                "username": "john_doe",
+                "profilePath": url_for('static', filename='img/logo.svg')
+            },
+            "viewCount": 100,
+            "likeCount": 50,
+            "createdTime": "2024-11-21T12:34:56"
+        },
+        {
+            "resumeId": 2,
+            "title": "API 자기소개서2",
+            "occupationName": "Designer",
+            "jobName": "UI/UX Designer",
+            "level": "경력",
+            "user": {
+                "username": "jane_doe",
+                "profilePath": url_for('static', filename='img/logo.svg')
+            },
+            "viewCount": 80,
+            "likeCount": 30,
+            "createdTime": "2024-11-20T11:20:45"
+        },
+        {
+            "resumeId": 3,
+            "title": "API 자기소개서3",
+            "occupationName": "Designer",
+            "jobName": "UI/UX Designer",
+            "level": "신입",
+            "user": {
+                "username": "jane_doe",
+                "profilePath": url_for('static', filename='img/logo.svg')
+            },
+            "viewCount": 80,
+            "likeCount": 30,
+            "createdTime": "2024-11-20T11:20:45"
+        },
+        {
+            "resumeId": 4,
+            "title": "API 자기소개서4",
+            "occupationName": "Designer",
+            "jobName": "UI/UX Designer",
+            "level": "신입",
+            "user": {
+                "username": "jane_doe",
+                "profilePath": url_for('static', filename='img/logo.svg')
+            },
+            "viewCount": 80,
+            "likeCount": 30,
+            "createdTime": "2024-11-20T11:20:45"
+        },
+        {
+            "resumeId": 5,
+            "title": "API 자기소개서5",
+            "occupationName": "Designer",
+            "jobName": "UI/UX Designer",
+            "level": "신입",
+            "user": {
+                "username": "jane_doe",
+                "profilePath": url_for('static', filename='img/logo.svg')
+            },
+            "viewCount": 80,
+            "likeCount": 30,
+            "createdTime": "2024-11-20T11:20:45"
+        }
+        # 여기에 더 많은 resume 객체를 추가할 수 있습니다.
+    ]
+
+    # 응답 데이터
+    response = {
+        "resumes": resumes
+    }
+
+    return jsonify(response), 200
