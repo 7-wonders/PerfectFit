@@ -9,6 +9,36 @@ let currentQuestionIndex = 0;
 let timerInterval;
 let userAnswers = [];
 
+// DOMContentLoaded로 초기화 로직을 감쌈
+document.addEventListener("DOMContentLoaded", () => {
+    loadQuestion();
+
+    // "다음 질문" 버튼 이벤트 리스너
+    document.getElementById("next-button").addEventListener("click", () => {
+        const answer = document.getElementById("answer-input").value;
+        userAnswers[currentQuestionIndex] = answer;
+
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            clearInterval(timerInterval);
+            showConfirmationModal();
+        }
+    });
+
+    // "확인" 버튼 이벤트 리스너
+    document.getElementById("confirm-button").addEventListener("click", () => {
+        alert("질문이 공개되었습니다.");
+    });
+
+    // "취소" 버튼 이벤트 리스너
+    document.getElementById("cancel-button").addEventListener("click", () => {
+        alert("질문 공개가 취소되었습니다.");
+    });
+});
+
+// 질문 로드 함수
 function loadQuestion() {
     document.getElementById("question-text").textContent = questions[currentQuestionIndex].text;
     document.getElementById("question-number").textContent = `${currentQuestionIndex + 1}/${questions.length}`;
@@ -16,6 +46,7 @@ function loadQuestion() {
     startTimer(60);
 }
 
+// 타이머 시작 함수
 function startTimer(seconds) {
     clearInterval(timerInterval);
     let timeRemaining = seconds;
@@ -34,19 +65,7 @@ function startTimer(seconds) {
     }, 1000);
 }
 
-document.getElementById("next-button").addEventListener("click", () => {
-    const answer = document.getElementById("answer-input").value;
-    userAnswers[currentQuestionIndex] = answer;
-
-    if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        loadQuestion();
-    } else {
-        clearInterval(timerInterval);
-        showConfirmationModal();
-    }
-});
-
+// 공개 확인 모달 표시 함수
 function showConfirmationModal() {
     UIkit.modal("#confirmation-modal").show();
     const questionList = document.getElementById("question-list");
@@ -63,12 +82,13 @@ function showConfirmationModal() {
                 </label>
                 <span class="toggle-arrow" onclick="toggleAnswer(this)">▼</span>
             </div>
-            <div class="answer-text">${userAnswers[index] || "답변이 없습니다."}</div>
+            <div class="answer-text" style="display: none;">${userAnswers[index] || "답변이 없습니다."}</div>
         `;
         questionList.appendChild(questionItem);
     });
 }
 
+// 답변 표시/숨김 토글 함수
 function toggleAnswer(element) {
     const questionItem = element.closest(".question-item");
     const answerText = questionItem.querySelector(".answer-text");
@@ -81,14 +101,3 @@ function toggleAnswer(element) {
         answerText.style.display = "none";
     }
 }
-
-
-document.getElementById("confirm-button").addEventListener("click", () => {
-    alert("질문이 공개되었습니다.");
-});
-
-document.getElementById("cancel-button").addEventListener("click", () => {
-    alert("질문 공개가 취소되었습니다.");
-});
-
-loadQuestion();

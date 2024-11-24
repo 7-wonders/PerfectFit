@@ -1,0 +1,126 @@
+/* 전체 컨테이너 */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    font-family: 'Noto Sans KR', sans-serif;
+    margin-top: 20px;
+}
+
+/* 제목 섹션 */
+.title-label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.title-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #87CEEB; /* 하늘색 테두리 */
+    border-radius: 4px;
+    outline: none;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.title-input:focus {
+    border-color: #00BFFF;
+    box-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+}
+
+/* 지원 경력 */
+.career-section {
+    margin-bottom: 20px;
+}
+
+.career-label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.career-options {
+    display: flex;
+    gap: 20px; /* 체크박스 간격 */
+}
+
+.career-option {
+    font-size: 14px;
+}
+
+/* 직군 선택 섹션 */
+.job-category-section {
+    margin-bottom: 20px;
+}
+
+.job-category {
+    margin-bottom: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.job-category-header {
+    background-color: #f4f8ff;
+    padding: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start; /* 왼쪽 정렬 */
+    align-items: center;
+    gap: 10px; /* 이름과 개수 간 간격 */
+}
+
+.job-category-count {
+    font-size: 12px;
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-weight: normal;
+}
+
+
+.job-category-body {
+    padding: 10px;
+    display: none; /* 초기 상태에서 숨김 */
+}
+
+.job-role {
+    padding: 5px 10px;
+    margin: 5px;
+    background-color: #ffffff;
+    border: 1px solid #007BFF;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.job-role:hover {
+    background-color: #007BFF;
+    color: #ffffff;
+}
+
+/* 버튼 섹션 */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.prev-button,
+.next-button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.prev-button:hover,
+.next-button:hover {
+    background-color: #0056b3;
+}

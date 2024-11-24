@@ -27,3 +27,11 @@ def interviewlist():
 @interview_bp.route('/result')
 def result():
     return render_template("result.html")
+
+@interview_bp.route('/resume-select')
+def resume_select():
+    return render_template("interview_resume_select.html")
+
+@interview_bp.route('/job-select')
+def job_select():
+    return render_template("interview_job_select.html")
