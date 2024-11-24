@@ -12,16 +12,20 @@ class ExceptionType(Enum):
     REQUIRED_CONS = ("400", "B40024", "단점은 필수입니다.")
     REQUIRED_CHAPTER_TITLE = ("400", "B40025", "단락의 제목은 필수입니다.")
     INVALID_JOB_ID = ("400", "B40030", "유효하지 않은 직업 ID입니다.")
+    INVALID_RESUME_ID = ("400", "B40031", "유효하지 않은 자기소개서 ID입니다.")
+    ALREADY_LIKED = ("400", "B40040", "이미 좋아요를 눌렀습니다.")
 
     EXPIRED_TOKEN = ("401", "U40110", "토큰이 만료되었습니다.")
     INVALID_TOKEN = ("401", "U40111", "토큰이 유효하지 않습니다.")
 
-    NOT_FOUND_USER = ("404", "N40410", "사용자를 찾을 수 없습니다.")
+    FORBIDDEN_RESUME = ("403", "F40310", "작성자만 자기소개서를 편집할 수 있습니다.")
 
+    NOT_FOUND_USER = ("404", "N40410", "사용자를 찾을 수 없습니다.")
     NOT_FOUND_JOB = ("404", "N40420", "직업을 찾을 수 없습니다.")
     NOT_FOUND_OCCUPATION = ("404", "N40421", "직군을 찾을 수 없습니다.")
     NOT_FOUND_INTERVIEW = ("404", "N40430", "모의 면접을 찾을 수 없습니다.")
     NOT_FOUND_QUESTION = ("404", "N40431", "질문을 찾을 수 없습니다.")
+    NOT_FOUND_RESUME = ("404", "N40432", "자기소개서를 찾을 수 없습니다.")
 
     INTERNAL_SERVER_ERROR = ("500", "I500", "서버 내부에서 오류가 발생하였습니다.")
     GOOGLE_LOGIN_ERROR = ("500", "I50010", "구글 로그인에 문제가 발생하였습니다.")

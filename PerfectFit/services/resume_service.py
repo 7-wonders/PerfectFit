@@ -620,3 +620,44 @@ class ResumeService:
 
             session.add_all(new_sections)
             session.commit()
+
+    @staticmethod
+    def like_resume(resume_id: str, is_like: bool):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with get_session() as session:
+            if is_like:
+                like = session.query(ResumeLike).filter(
+                    ResumeLike.user_id == user_id,
+                    ResumeLike.resume_id == resume_id
+                ).first()
+
+                if like:
+                    raise CustomException(ExceptionType.ALREADY_LIKED)
+
+                session.add(ResumeLike(
+                    user_id=user_id,
+                    resume_id=resume_id
+                ))
+            else:
+                session.query(ResumeLike).filter(
+                    ResumeLike.user_id == user_id,
+                    ResumeLike.resume_id == resume_id
+                ).delete()
+
+            session.commit()
+
+    @staticmethod
+    def delete_resume(resume_id: int):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with get_session() as session:
+            resume = session.query(Resume).filter(Resume.resume_id == resume_id).first()
+            if not resume:
+                raise CustomException(ExceptionType.NOT_FOUND_RESUME)
+
+            if resume.user_id != user_id:
+                raise CustomException(ExceptionType.FORBIDDEN_RESUME)
+
+            session.query(Resume).filter(Resume.resume_id == resume_id).delete()
+            session.commit()

@@ -302,3 +302,25 @@ def get_task(task_id):
         raise CustomException(ExceptionType.CELERY_ERROR)
     else:
         return {}, HTTPStatus.ACCEPTED
+
+
+@resume_bp.route('/<resume_id>/like', methods=['POST', 'DELETE'])
+def like_resume(resume_id: str):
+    if not resume_id.isdecimal():
+        return CustomException(ExceptionType.INVALID_RESUME_ID)
+
+    if request.method == 'POST':
+        ResumeService.like_resume(resume_id, True)
+    elif request.method == 'DELETE':
+        ResumeService.like_resume(resume_id, False)
+
+    return jsonify({}), HTTPStatus.NO_CONTENT
+
+
+@resume_bp.route('/<resume_id>', methods=['DELETE'])
+def delete_resume(resume_id: str):
+    if not resume_id.isdecimal():
+        return CustomException(ExceptionType.INVALID_RESUME_ID)
+
+    ResumeService.delete_resume(int(resume_id))
+    return jsonify({}), HTTPStatus.NO_CONTENT
