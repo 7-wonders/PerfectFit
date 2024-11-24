@@ -126,17 +126,21 @@ def patch_title(interview_id: int):
 @interview_bp.route('/spellcheck', methods=['POST'])
 def spell_check():
 
-    data = request.get_json()  # POST 요청의 BODY 가져오기.
-    spellCheckDto = InterviewDto.Request.spellCheck(**data)
-
+    # data = request.get_json()  # POST 요청의 BODY 가져오기.
+    print("debug1")
+    content = request.form.get('content', None, type=str)
+    print(content)
+    spellCheckDto = InterviewDto.Request.spellCheck(content = content)
+    print("debug1")
     translatedContent = InterviewService.spell_check(spellCheckDto)
-
+    print("debug1")
     response: InterviewDto.Response.spellChecked = InterviewDto.Response.spellChecked(
         translatedContent= translatedContent
     )
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    print(response.translatedContent)
+    # return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return jsonify(asdict(response)), 200
 
 @interview_bp.route('/testGPT',methods=['GET'])
 def gpt():
@@ -149,3 +153,6 @@ def gpt2():
 @interview_bp.route('/test/interview/post', methods=['GET'])
 def post_test():
     return render_template('test/test_interview_post.html')
+@interview_bp.route('/test/spellcheck', methods=['GET'])
+def spellcheck_test():
+    return render_template('test/test_spellchecker.html')
