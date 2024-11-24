@@ -47,19 +47,37 @@ function addSection() {
 }
 
 // 직군을 선택하면 그에 해당하는 직업만 나오게 하기
-function updateJobList() {
-    var selectedOccupation = document.getElementById("resume-information-occupation").value;
-    var jobSelect = document.getElementById("resume-information-job");
+async function updateJobList() {
+    const selectedOccupation = document.getElementById("resume-information-occupation").value;
+    const jobSelect = document.getElementById("resume-information-job");
 
     // 직업 목록 초기화
     jobSelect.innerHTML = '';
 
-    if (selectedOccupation in jobList) {
-        jobList[selectedOccupation].forEach(function(job) {
-            var option = document.createElement("option");
-            option.text = job;
+    // 직군 선택이 비어 있는 경우 종료
+    if (!selectedOccupation) {
+        return;
+    }
+
+    try {
+        // 백엔드 API 호출: 선택한 직군 ID를 경로에 동적으로 전달
+        const response = await instance.get(`/resume/job/${selectedOccupation}`);
+
+        // 백엔드로부터 받은 직업 데이터
+        const jobList = response.data.jobs;
+
+        // 직업 데이터를 기반으로 <option> 추가
+        jobList.forEach(function (job) {
+            const option = document.createElement("option");
+            option.value = job.jobId; // jobId를 value로 설정
+            option.text = job.jobName; // jobName을 표시
             jobSelect.add(option);
         });
+
+    } catch (error) {
+        console.error("직업 목록 불러오기 실패:", error);
+        console.log(selectedOccupation);
+        alert("직업 목록을 불러오는 데 실패했습니다. 다시 시도해주세요.");
     }
 }
 
@@ -109,15 +127,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     badgeButton.id = `badge-btn-${badgeCounter}`;
                     badgeButton.textContent = 'X';
 
+                    const badgeInput = document.createElement('input');
+                    badgeInput.id = `badge-input-${badgeCounter}`;
+                    badgeInput.type = 'hidden';
+                    badgeInput.name = 'keywords[]';
+                    badgeInput.value = text;
+
                     badgeButton.addEventListener('click', function() {
                         badgeContainer.removeChild(badge);
+                        badgeContainer.removeChild(badgeInput);
                         updateBadgeIDs(); // ID 재정렬 함수 호출
                     });
 
                     badge.appendChild(badgeText);
                     badge.appendChild(badgeButton);
                     badgeContainer.appendChild(badge);
-
+                    badgeContainer.appendChild(badgeInput);
                     badgeContainer.appendChild(inputElement);
 
                     badgeCounter++;
@@ -136,10 +161,12 @@ document.addEventListener('DOMContentLoaded', function() {
             badges.forEach(badge => {
                 const badgeText = badge.querySelector('.badge-text');
                 const badgeButton = badge.querySelector('.badge-button');
+                const badgeInput = badge.querySelector('.badge-input');
 
-                if (badgeText && badgeButton) {
+                if (badgeText && badgeButton && badgeInput) {
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeButton.id = `badge-btn-${badgeCounter}`;
+                    badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeCounter++;
                 }
             });
@@ -151,8 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Element with ID "resume-write-keyword" or "badge-container" not found.');
     }
 });
-
-
 
 // 주요 키워드 포커스 이벤트
 document.addEventListener('DOMContentLoaded', function() {
@@ -185,39 +210,85 @@ function checkFormCompletion() {
     const inputs = [
         document.getElementById("resume-information-occupation"),
         document.getElementById("resume-information-job"),
-        document.getElementById("resume-information-experience"),
         document.getElementById("resume-information-merit"),
         document.getElementById("resume-information-disadvantage")
     ];
 
     // 모든 입력 필드가 채워졌는지 확인
     let allFilled = inputs.every(input => {
-        return input && (input.tagName === "SELECT" ? input.value : input.value.trim() !== "");
+        return input && (input.tagName === "SELECT" ? input.value && input.value !== "직군을 선택해주세요" : input.value.trim() !== "");
     });
 
     // badge 클래스가 있는 div가 존재하는지 확인
     const hasBadges = document.querySelectorAll("div.badge").length > 0;
 
-    // 버튼 스타일 변경 및 활성화/비활성화 처리
-    if (allFilled && hasBadges) {
+    // 경력 선택 여부 확인
+    const experience = document.getElementById("resume-information-experience").value;
+    let selectExperience;
+    if(experience === "신입" || experience === "경력") selectExperience = true
+
+
+    if (allFilled && hasBadges && selectExperience) {
         button.style.backgroundColor = "#2B7FFF";
         button.style.color = "#fff";
-        button.disabled = false; // 버튼 활성화
     } else {
         button.style.backgroundColor = ""; // 기본 색상으로 복귀
         button.style.color = ""; // 기본 색상으로 복귀
-        button.disabled = true; // 버튼 비활성화
     }
 }
 
-// 버튼 클릭 이벤트 처리
-function handleButtonClick() {
-    const button = document.getElementById("resume-information-submit");
-    button.addEventListener("click", function () {
-        if (!button.disabled) {
-            window.location.href = "http://127.0.0.1:5000/resume/select"; // 링크로 이동
+// submit 버튼 클릭 시 동작
+function submitInformation() {
+    const experience = document.getElementById("resume-information-experience").value;
+    let selectExperience;
+    const inputs = [
+        {
+            element: document.getElementById("resume-information-occupation"),
+            name: "직군"
+        },
+        {
+            element: document.getElementById("resume-information-job"),
+            name: "직업"
+        },
+        {
+            element: document.getElementById("resume-information-merit"),
+            name: "장점"
+        },
+        {
+            element: document.getElementById("resume-information-disadvantage"),
+            name: "단점"
         }
-    });
+    ];
+
+    // badge 클래스가 있는 div가 존재하는지 확인
+    const hasBadges = document.querySelectorAll("div.badge").length > 0;
+
+    // 입력 필드 확인
+    for (const input of inputs) {
+        const value = input.element.tagName === "SELECT" ? input.element.value : input.element.value.trim();
+        if (!value || (input.element.tagName === "SELECT" && value === "직군을 선택해주세요")) {
+            alert(`${input.name}을(를) 채워주세요.`);
+            input.element.focus(); // 해당 입력 필드로 포커스 이동
+            event.preventDefault();
+            return; // 함수 종료
+        }
+    }
+    // 경력 선택 여부 확인 후 경고
+    if(experience === "신입" || experience === "경력") selectExperience = true
+    if(!selectExperience) {
+        alert("경력을 선택해주세요.");
+        event.preventDefault();
+        return;
+    }
+    // Badge가 없는 경우 경고
+    if (!hasBadges) {
+        alert("주요 키워드를 추가해주세요.");
+        event.preventDefault();
+        return; // 함수 종료
+    }
+
+    // 모든 조건이 충족되면 폼 제출 (추가적인 동작이 필요하면 여기에 작성)
+    alert("자기소개서를 작성하기 위한 제출되었습니다.");
 }
 
 // 모든 필드에 이벤트 리스너 추가

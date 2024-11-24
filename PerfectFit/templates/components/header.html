@@ -6,7 +6,7 @@
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 {% endblock %}
 
-{% set login = false %}
+{% set login = true %}
 
 <header>
     <div class="header-wrapper">
@@ -18,10 +18,10 @@
                 <div class="uk-navbar-left">
                     <ul class="uk-navbar-nav">
                         <li>
-                            <a href="/about">자기소개서</a>
+                            <a href="#">자기소개서</a>
                             <div class="uk-navbar-dropdown">
                                 <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="#">자기소개서 목록</a></li>
+                                    <li><a href="http://127.0.0.1:5000/resume/list/1">자기소개서 목록</a></li>
                                     <li><a href="http://127.0.0.1:5000/resume/select">자기소개서 작성</a></li>
                                 </ul>
                             </div>

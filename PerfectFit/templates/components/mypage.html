@@ -11,8 +11,8 @@
     {% include 'components/header.html' %}
     <div class="container">
             <div>
-                <img src="{{ url_for('static', filename='img/logo.svg') }}" class = "user-profile-big" />
-                <span class = "Bold-30">{{ userName }}님</span>
+                <img src="{{ response.user.profilePath }}" class = "user-profile-big" />
+                <span class = "Bold-30">{{ response.user.username }}님</span>
             </div>
         <nav class="uk-navbar-container" uk-navbar>
             <div class="uk-navbar-left">

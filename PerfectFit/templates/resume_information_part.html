@@ -101,9 +101,16 @@
 
                 <div class = "submit-btn-box">
                     <button class = "resume-information-back" id = "resume-information-back" type="button" onclick="window.location.href='http://127.0.0.1:5000/user/resume/select'">이전</button>
-                    <button class = "resume-information-submit" id = "resume-information-submit"  type="submit">다음</button>
+                    <button class = "resume-information-submit" id = "resume-information-submit"  type="submit" onclick = "submitInformation()">다음</button>
                 </div>
             </form>
         </div>
     </div>
+    {% if get_flashed_messages() %}
+        <script>
+            {% for message in get_flashed_messages() %}
+                alert("{{ message }}");
+            {% endfor %}
+        </script>
+    {% endif %}
 {% endblock %}

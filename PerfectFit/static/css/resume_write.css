@@ -133,6 +133,7 @@ button {
     display: flex;
     gap : 5px;
     flex-wrap: wrap;
+    width : 100%;
 }
 
 /*badge 한 개가 들어있는 div*/
@@ -152,9 +153,10 @@ button {
     outline : none;
     display: inline-block;
     height: 40px;
-    width : auto;
+    width : 100%;
     min-width: 50px;
-    max-width: 100%;
+    /*max-width: 100%;*/
+    flex-grow: 1
 }
 
 /*뱃지 삭제 버튼*/
