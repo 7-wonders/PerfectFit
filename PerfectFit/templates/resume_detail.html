@@ -29,8 +29,7 @@
     }
 ]%}
 
-{% set response = [
-    {
+{% set response = {
     "resumeId" : 1,
     "user" : {
 	    "userId": "testId",
@@ -68,8 +67,7 @@
      "likeCount": 16,
      "viewCount": 32,
      "createdTime": "2024-11-17"
-}
-]%}
+}%}
 
 {% set page = 1 %}
 {% set pageRange = 5 %}
@@ -81,7 +79,7 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_detail.js') }}"></script>
     <script>let isLike = {{ isLike | tojson }};</script>
-    <script>let likeCount = {{ response[0].likeCount | tojson }};</script>
+    <script>let likeCount = {{ response.likeCount | tojson }};</script>
     <script>
         const startPage = {{ startPage }};
         const endPage = {{ endPage }};
@@ -97,32 +95,32 @@
 {#        ============================= 자기소개서 상세보기 제목 ============================#}
         <div class = resume-detail-header-wrapper>
             <div class = "resume-detail-title">
-                <span class = "title-category">{{ response[0].info.occupationName }} |</span>
-                <span class = "title-category">{{ response[0].info.jobName }} |</span>
-                <span class = "title-category">{{ response[0].info.level }}</span>
-                <span class = Medium-20>{{ response[0].title }}</span>
+                <span class = "title-category">{{ response.info.occupationName }} |</span>
+                <span class = "title-category">{{ response.info.jobName }} |</span>
+                <span class = "title-category">{{ response.info.level }}</span>
+                <span class = Medium-20>{{ response.title }}</span>
             </div>
             <div class = "resume-detail-title-and-edit">
-                <p class = "Bold-24-none-weight" style = "margin : 0 !important;">{{ response[0].user.title }}</p>
-                {% if response[0].user.userId == nowUserId %}
+                <p class = "Bold-24-none-weight" style = "margin : 0 !important;">{{ response.user.title }}</p>
+                {% if response.user.userId == nowUserId %}
                     <div class="uk-inline">
                         <button class="uk-button uk-button-default" type="button"></button>
                         <div uk-dropdown="mode: click; pos: bottom-center;">
-                            <a class = "Regular-16-light" href="http://127.0.0.1:5000/resume/write/update/{{ response[0].resumeId }}">수정하기</a>
-                            <button class = "remove-btn Regular-16-light" onclick = "removeResumeDetail({{ response[0].resumeId }})">삭제하기</button>
+                            <a class = "Regular-16-light" href="http://127.0.0.1:5000/resume/{{ response.resumeId }}/update">수정하기</a>
+                            <button class = "remove-btn Regular-16-light" onclick = "removeResumeDetail({{ response.resumeId }})">삭제하기</button>
                         </div>
                     </div>
                 {% endif %}
             </div>
             <div>
-                <img src="{{ response[0].user.profilePath }}" class = "user-profile" />
-                <span class = "Regular-16" style = "margin-left : 5px">{{ response[0].user.username }}</span>
-                <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ response[0].createdTime }}</span>
+                <img src="{{ response.user.profilePath }}" class = "user-profile" />
+                <span class = "Regular-16" style = "margin-left : 5px">{{ response.user.username }}</span>
+                <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ response.createdTime }}</span>
             </div>
         </div>
 {#        ============================ 자기소개서 내용 ==========================#}
         <div class = "resume-detail-content-wrapper">
-            {% for section in response[0].sections %}
+            {% for section in response.sections %}
                 <div class = "resume-detail-content">
                     <p class = "Bold-20-none-weight">{{ section.title }}</p>
                     <p class = "Regular-18">{{ section.content }}</p>
@@ -134,15 +132,15 @@
                 <div style = "margin-right: 10px;">
                     <span uk-icon="icon: eye; ratio: 1.4;"></span>
                     {% if isView == true %}
-                        <span class = "Regular-20-light">{{ resumes[0].viewCount }}</span>
+                        <span class = "Regular-20-light">{{ response.viewCount }}</span>
                     {% else %}
-                        <span class = "Regular-20-light">{{ resumes[0].viewCount + 1 }}</span>
+                        <span class = "Regular-20-light">{{ response.viewCount + 1 }}</span>
                     {% endif %}
                 </div>
                 {# 좋아요 #}
                 <div style = "display : flex; align-items: center;">
                     <button id="like-button" class="like-btn" onclick="actionLike()"></button>
-                    <span id="like-count" class="Regular-20-light">{{ response[0].likeCount }}</span>
+                    <span id="like-count" class="Regular-20-light">{{ response.likeCount }}</span>
                 </div>
             </div>
         </div>
@@ -170,12 +168,12 @@
                         {# 조회수 #}
                         <div style = "margin-right: 10px;">
                             <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                            <span class = "Regular-16-light">{{ response[0].viewCount }}</span>
+                            <span class = "Regular-16-light">{{ response.viewCount }}</span>
                         </div>
                         {# 좋아요 #}
                         <div>
                             <span id="like-button" uk-icon="icon: heart; ratio: 1.0;"></span>
-                            <span id="like-count" class="Regular-16-light">{{ response[0].likeCount }}</span>
+                            <span id="like-count" class="Regular-16-light">{{ response.likeCount }}</span>
                         </div>
                     </div>
                 </div>

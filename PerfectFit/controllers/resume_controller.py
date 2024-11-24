@@ -59,11 +59,11 @@ def get_jobs(occupation_id):
     # JSON 데이터 반환
     return jsonify(response), 200
 
-@resume_bp.route('/write/all')
-def get_resume_write_all():
+@resume_bp.route('/write')
+def get_resume_write():
     return render_template("resume_write_all.html")
 
-@resume_bp.route('/write/update/<int:resumeNum>')
+@resume_bp.route('/<int:resumeNum>/update')
 def get_resume_write_update(resumeNum):
     return render_template("resume_write_update.html", resumeNum=resumeNum)
 
@@ -71,13 +71,9 @@ def get_resume_write_update(resumeNum):
 def get_resume_select():
     return render_template("resume_select.html")
 
-@resume_bp.route('/information/all')
-def get_resume_information_all():
+@resume_bp.route('/information')
+def get_resume_information():
     return render_template("resume_information_all.html")
-
-@resume_bp.route('/information/part')
-def get_resume_information_part():
-    return render_template("resume_information_part.html")
 
 @resume_bp.route('/loading')
 def get_resume_load_loading():

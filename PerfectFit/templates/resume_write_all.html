@@ -41,28 +41,28 @@
 
  ]%}
 
-{#{% set resumes = [#}
-{#    {#}
-{#        "resumeId": 1,#}
-{#        "title": "자기소개서 제목1",#}
-{#        "createdTime": "2024-10-04 02:17:32"#}
-{#    },#}
-{#    {#}
-{#        "resumeId": 2,#}
-{#        "title": "자기소개서 제목2",#}
-{#        "createdTime": "2024-10-04 02:17:32"#}
-{#    },#}
-{#    {#}
-{#        "resumeId": 3,#}
-{#        "title": "자기소개서 제목3",#}
-{#        "createdTime": "2024-10-04 02:17:32"#}
-{#    },#}
-{#    {#}
-{#        "resumeId": 4,#}
-{#        "title": "자기소개서 제목4",#}
-{#        "createdTime": "2024-10-04 02:17:32"#}
-{#    }#}
-{#]%}#}
+{% set resumes = [
+    {
+        "resumeId": 1,
+        "title": "자기소개서 제목1",
+        "createdTime": "2024-10-04 02:17:32"
+    },
+    {
+        "resumeId": 2,
+        "title": "자기소개서 제목2",
+        "createdTime": "2024-10-04 02:17:32"
+    },
+    {
+        "resumeId": 3,
+        "title": "자기소개서 제목3",
+        "createdTime": "2024-10-04 02:17:32"
+    },
+    {
+        "resumeId": 4,
+        "title": "자기소개서 제목4",
+        "createdTime": "2024-10-04 02:17:32"
+    }
+]%}
 
 {% set Total = resumes | length %}
 
@@ -268,7 +268,7 @@
                         <div class="uk-margin">
                             <div class = "resume-write-header">
                                 <label class="uk-form-label" for="resume-write-title-0">항목1</label>
-                                <button type="button" class ="Regular-16-light custom-button" id="ai-resume-write-0" onclick="aiResumeWrite(0)"><img src="{{ url_for('static', filename='img/icon_ai.svg') }}"/>AI 작성하기</button>
+                                <button type="button" uk-tooltip="AI 작성하기" class ="Regular-16-light custom-button" id="ai-resume-write-0" onclick="aiResumeWrite(0)"><img src="{{ url_for('static', filename='img/icon_ai.svg') }}"/></button>
                             </div>
                             <div class="uk-form-controls">
                                 <input class="uk-input" id="resume-write-title-0" name="sections[][title]" type="text" placeholder="제목을 입력해주세요.">

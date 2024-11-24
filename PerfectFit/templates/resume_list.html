@@ -164,7 +164,7 @@
                         <span class = "title-category">{{ resumes[0].occupation }}{{ i + 1 }} |</span>
                         <span class = "title-category">{{ resumes[0].job }}{{ i + 1 }} |</span>
                         <span class = "title-category">{{ resumes[0].level }}</span>
-                        <a href = "#" class = "resume-link"><span class = Medium-20>{{ resumes[0].title }}{{ i + 1 }}</span></a>
+                        <a href = "http://127.0.0.1:5000/resume/detail/1" class = "resume-link"><span class = Medium-20>{{ resumes[0].title }}{{ i + 1 }}</span></a>
                     </div>
                     <div style = "margin-top: 10px;">
                         <img src="{{ resumes[0].user.profilePath }}" class = "user-profile" />
@@ -219,7 +219,6 @@
                     </li>
                 {% endif %}
             </ul>
-
        </nav>
     </div>
 {% endblock %}
