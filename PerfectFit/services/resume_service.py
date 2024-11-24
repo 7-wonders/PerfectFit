@@ -1,14 +1,16 @@
 from celery.exceptions import NotRegistered
-from flask import request
+from flask import request, flash
 from kombu.exceptions import OperationalError
-from sqlalchemy import func, select
+from sqlalchemy import func, select, RowMapping
 from sqlalchemy.orm import joinedload
 
 from config.config_mysql import get_session
 from domain.models import Job, AppUser, ProjectExperience, Resume, ProsCons, ResumeSection, Keyword, ResumeView, \
     ResumeLike, Occupation
+from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
+from dto.resume_section.resume_section import ResumeSectionDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
@@ -31,13 +33,13 @@ class ResumeService:
             level = kwargs.get('level')
             search = kwargs.get('search')
 
-            subquery_count_resume_view = (
+            view_scalar_query = (
                 select(func.count(ResumeView.view_id))
                 .where(ResumeView.resume_id == Resume.resume_id)
                 .scalar_subquery()
             )
 
-            subquery_count_resume_like = (
+            like_scalar_query = (
                 select(func.count(ResumeLike.like_id))
                 .where(ResumeLike.resume_id == Resume.resume_id)
                 .scalar_subquery()
@@ -48,8 +50,8 @@ class ResumeService:
             job_where_clause = Job.job_id == job_id if job_id else True
             occupation_where_clause = Occupation.occupation_id == occupation_id if occupation_id else True
 
-            order_by_value = [subquery_count_resume_view.desc(), Resume.created_time.desc()] \
-                                if kwargs.get('sort') == 'f' else [Resume.created_time.desc()]
+            order_by_value = [view_scalar_query.desc(), Resume.created_time.desc()] \
+                if kwargs.get('sort') == 'f' else [Resume.created_time.desc()]
 
             query = (
                 select(
@@ -57,8 +59,8 @@ class ResumeService:
                     Resume.title,
                     Resume.level,
                     Resume.created_time.label('createdTime'),
-                    subquery_count_resume_like.label('likeCount'),
-                    subquery_count_resume_view.label('viewCount'),
+                    like_scalar_query.label('likeCount'),
+                    view_scalar_query.label('viewCount'),
                     AppUser.username.label('username'),
                     AppUser.profile_path.label('profilePath'),
                     Job.job_name.label('jobName'),
@@ -114,7 +116,7 @@ class ResumeService:
                     Job.job_id.label('jobId'),
                     Job.job_name.label('jobName'),
                     (
-                        Job.job_id == task_data.job_id
+                            Job.job_id == task_data.job_id
                     ).label('isSelected')
                 )
                 .where(
@@ -127,7 +129,7 @@ class ResumeService:
                     Occupation.occupation_id.label('occupationId'),
                     Occupation.occupation_name.label('occupationName'),
                     (
-                        Occupation.occupation_id == selected_job_query
+                            Occupation.occupation_id == selected_job_query
                     ).label('isSelected')
                 )
             )
@@ -152,6 +154,236 @@ class ResumeService:
             return occupations
 
     @staticmethod
+    def get_resume(resume_id: str) -> tuple[RowMapping | None, RowMapping | None, bool]:
+        access_token = request.cookies.get('access_token')
+        user_id = None
+        increased_view = False
+
+        if access_token:
+            user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with get_session() as session:
+            is_like_scalar_query = func.exists(
+                select(1)
+                .where(ResumeLike.user_id == user_id, ResumeLike.resume_id == Resume.resume_id)
+            )
+
+            is_view_scalar_query = func.exists(
+                select(1)
+                .where(ResumeView.user_id == user_id, ResumeView.resume_id == Resume.resume_id)
+            )
+
+            like_scalar_query = (
+                select(func.count(ResumeLike.like_id))
+                .where(ResumeLike.resume_id == Resume.resume_id)
+                .correlate(Resume)
+                .scalar_subquery()
+            )
+
+            view_scalar_query = (
+                select(func.count(ResumeView.view_id))
+                .where(ResumeView.resume_id == Resume.resume_id)
+                .correlate(Resume)
+                .scalar_subquery()
+            )
+
+            columns = [
+                Resume.resume_id.label('resumeId'),
+                Resume.title,
+                Resume.level,
+                Resume.created_time.label('createdTime'),
+                like_scalar_query.label('likeCount'),
+                view_scalar_query.label('viewCount'),
+                AppUser.user_id.label('user.userId'),
+                AppUser.username.label('user.username'),
+                AppUser.profile_path.label('user.profilePath'),
+                Job.job_name.label('jobName'),
+                Occupation.occupation_name.label('occupationName'),
+            ]
+
+            if user_id:
+                columns.append(is_like_scalar_query.label('isLike'))
+                columns.append(is_view_scalar_query.label('isView'))
+
+            resume_query = (
+                select(*columns)
+                .join(Job, Job.job_id == Resume.job_id)
+                .join(Occupation, Occupation.occupation_id == Job.occupation_id)
+                .join(AppUser, AppUser.user_id == Resume.user_id)
+                .filter(Resume.resume_id == resume_id, Resume.is_shared.is_(True))
+            )
+
+            resume = session.execute(resume_query).mappings().first()
+
+            if not resume:
+                return None, None, increased_view
+
+            sections_query = (
+                select(
+                    ResumeSection.resume_section_id.label('sectionId'),
+                    ResumeSection.title,
+                    ResumeSection.content
+                )
+                .filter(ResumeSection.resume_id == resume_id)
+            )
+
+            sections = session.execute(sections_query).mappings().all()
+            if not sections:
+                return None, None, increased_view
+
+            if user_id and resume.get('user.userId') != user_id and not resume.get('isView'):
+                session.add(ResumeView(
+                    user_id=user_id,
+                    resume_id=resume.resumeId
+                ))
+
+                session.commit()
+                increased_view = True
+
+            return resume, sections, increased_view
+
+    @staticmethod
+    def get_resume_with_update(resume_id: str):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+        if not user_id:
+            flash('로그인이 필요합니다.', 'danger')
+            return None
+
+        with (get_session() as session):
+            pros_subquery = (
+                select(ProsCons.content)
+                .where(ProsCons.resume_id == resume_id)
+                .where(ProsCons.type == 'pros')
+                .scalar_subquery()
+            )
+
+            cons_subquery = (
+                select(ProsCons.content)
+                .where(ProsCons.resume_id == resume_id)
+                .where(ProsCons.type == 'cons')
+                .scalar_subquery()
+            )
+
+            resume_query = (
+                select(
+                    Resume.user_id.label('userId'),
+                    Resume.resume_id.label('resumeId'),
+                    Resume.job_id.label('jobId'),
+                    Resume.title,
+                    Resume.level,
+                    Resume.directional,
+                    Resume.is_shared.label('isPublic'),
+                    pros_subquery.label('pros'),
+                    cons_subquery.label('cons')
+                )
+                .filter(Resume.resume_id == resume_id)
+            )
+
+            resume = session.execute(resume_query).mappings().first()
+            job_id = resume.get('jobId')
+            pros = resume.get('pros')
+            cons = resume.get('cons')
+
+            if not job_id or not pros or not cons:
+                flash('자기소개서 정보를 불러오는 중 오류가 발생했습니다.', 'danger')
+                return None
+
+            if resume.get('userId') != user_id:
+                flash('본인의 자기소개서만 수정할 수 있습니다.', 'danger')
+                return None
+
+            sections_query = (
+                select(
+                    ResumeSection.resume_section_id.label('sectionId'),
+                    ResumeSection.title,
+                    ResumeSection.content
+                )
+                .filter(ResumeSection.resume_id == resume_id)
+            )
+
+            sections = session.execute(sections_query).mappings().all()
+            if not sections:
+                return None
+
+            keywords_query = (
+                select(
+                    Keyword.keyword_id.label('keywordId'),
+                    Keyword.content
+                )
+                .filter(Keyword.resume_id == resume_id)
+            )
+
+            keywords = session.execute(keywords_query).mappings().all()
+            if not keywords:
+                flash('자기소개서 정보를 불러오는 중 오류가 발생했습니다.', 'danger')
+                return None
+
+            selected_job_query = (
+                select(
+                    Job.occupation_id
+                )
+                .where(Job.job_id == job_id)
+                .scalar_subquery()
+            )
+
+            job_query = (
+                select(
+                    Job.job_id.label('jobId'),
+                    Job.job_name.label('jobName'),
+                    (
+                            Job.job_id == job_id
+                    ).label('isSelected')
+                )
+                .where(
+                    Job.occupation_id == selected_job_query
+                )
+            )
+
+            occupation_query = (
+                select(
+                    Occupation.occupation_id.label('occupationId'),
+                    Occupation.occupation_name.label('occupationName'),
+                    (
+                            Occupation.occupation_id == selected_job_query
+                    ).label('isSelected')
+                )
+            )
+
+            jobs = session.execute(job_query).mappings().all()
+            occupations = session.execute(occupation_query).mappings().all()
+
+            response = ResumeDto.Response.ResumeForUpdate(
+                resume=ResumeDto.Response.ResumeWithUpdate(
+                    resumeId=resume.get('resumeId'),
+                    title=resume.get('title'),
+                    level=resume.get('level'),
+                    pros=pros,
+                    cons=cons,
+                    keywords=[
+                        KeywordDto.Response.Keyword(
+                            keywordId=keyword.get('keywordId'),
+                            content=keyword.get('content')
+                        )
+                        for keyword in keywords
+                    ],
+                    directional=resume.get('directional'),
+                    sections=[
+                        ResumeSectionDto.Response.Section(
+                            sectionId=section.get('sectionId'),
+                            title=section.get('title'),
+                            content=section.get('content')
+                        )
+                        for section in sections
+                    ],
+                    isPublic=resume.get('isPublic')
+                ),
+                jobs=jobs,
+                occupations=occupations
+            )
+
+            return response
+
+    @staticmethod
     def add_resume(request_resume: ResumeDto.Request.Create):
         with get_session() as session:
             user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
@@ -174,13 +406,13 @@ class ResumeService:
 
             pros = ProsCons(
                 resume_id=resume.resume_id,
-                type='장점',
+                type='pros',
                 content=request_resume.pros,
             )
 
             cons = ProsCons(
                 resume_id=resume.resume_id,
-                type='단점',
+                type='cons',
                 content=request_resume.cons,
             )
 
@@ -298,3 +530,93 @@ class ResumeService:
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
         return answer.sections[0].content
+
+    @staticmethod
+    def update_resume(resume_id: str, data: ResumeDto.Request.Update):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with (get_session() as session):
+            resume = session.query(Resume).filter(Resume.resume_id == resume_id).first()
+            if not resume:
+                flash('자기소개서를 찾을 수 없습니다.', 'danger')
+                return None
+
+            if resume.user_id != user_id:
+                flash('잘못된 접근입니다.', 'danger')
+                return None
+
+            job = session.query(Job).filter(Job.job_id == data.job_id).first()
+            if not job:
+                raise CustomException(ExceptionType.INVALID_JOB_ID)
+
+            resume.title = data.title
+            resume.job_id = data.job_id
+            resume.level = data.level
+            resume.directional = data.directional \
+                if data.directional not in ["None", None, "", "null"] else None
+            resume.is_shared = data.is_shared
+
+            pros = session.query(ProsCons).filter(ProsCons.resume_id == resume_id, ProsCons.type == 'pros').first()
+            if pros:
+                pros.content = data.pros
+
+            cons = session.query(ProsCons).filter(ProsCons.resume_id == resume_id, ProsCons.type == 'cons').first()
+            if cons:
+                cons.content = data.cons
+
+            session.query(Keyword).filter(Keyword.resume_id == resume_id).delete()
+            keywords = [
+                Keyword(
+                    resume_id=resume_id,
+                    job_id=data.job_id,
+                    content=keyword.content
+                )
+                for keyword in data.keywords
+            ]
+            session.add_all(keywords)
+
+            db_section = session.query(ResumeSection).filter(ResumeSection.resume_id == resume_id).all()
+            new_sections = []
+
+            # 사용자가 추가한 섹션 ID 기준으로 나누기
+            data_sections_by_id = {int(section.section_id): section
+                                   for section in data.sections
+                                   if section.section_id not in [None, "None", "", "null"]}
+            # DB에 저장된 섹션 ID 기준으로 나누기
+            db_sections = {section.resume_section_id: section
+                           for section in db_section}
+            # 사용자가 추가한 섹션
+            new_sections_by_data = [section
+                                    for section in data.sections
+                                    if section.section_id in [None, "None", "", "null"]]
+
+            db_sections_ids = set(db_sections.keys())
+            data_sections_ids = set(data_sections_by_id.keys())
+
+            # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되지 않았다면 삭제
+            for section_id in db_sections_ids - data_sections_ids:
+                session.delete(db_sections[section_id])
+
+            # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되어 있다면 수정
+            for section_id in db_sections_ids & data_sections_ids:
+                if not db_sections[section_id].title.strip() \
+                        or not db_sections[section_id].content.strip():
+                    continue
+
+                db_section = db_sections[section_id]
+                db_section.title = data_sections_by_id[section_id].title
+                db_section.content = data_sections_by_id[section_id].content
+
+            # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되지 않았다면 추가
+            for section in new_sections_by_data:
+                if not section.title.strip() or not section.content.strip():
+                    continue
+
+                new_sections.append(ResumeSection(
+                    resume_id=resume_id,
+                    title=section.title,
+                    content=section.content
+                ))
+
+            session.add_all(new_sections)
+            session.commit()

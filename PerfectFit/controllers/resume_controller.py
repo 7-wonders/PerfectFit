@@ -3,8 +3,11 @@ from urllib import request
 
 from flask import Blueprint, request, jsonify, redirect, render_template, flash, url_for
 
+from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
+from dto.resume_section.resume_section import ResumeSectionDto
+from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from services.resume_service import ResumeService
@@ -49,6 +52,94 @@ def render_resume():
         }
 
         return render_template("resume.html", response=response)
+
+
+@resume_bp.route('/<resume_id>', methods=['GET'])
+def render_resume_detail(resume_id: str):
+    if not resume_id.isdecimal():
+        redirect(url_for('resume.render_resume'))
+
+    resume, sections, increased_view = ResumeService.get_resume(resume_id)
+    if not resume or not sections:
+        return redirect(url_for('resume.render_resume'))
+
+    response: ResumeDto.Response.Resume = ResumeDto.Response.Resume(
+        resumeId=resume.get('resumeId'),
+        title=resume.get('title'),
+        level=resume.get('level'),
+        jobName=resume.get('jobName'),
+        occupationName=resume.get('occupationName'),
+        viewCount=resume.get('viewCount') + 1 if increased_view else resume.get('viewCount'),
+        likeCount=resume.get('likeCount'),
+        createdTime=resume.get('createdTime').strftime('%Y-%m-%d %H:%M:%S'),
+        isLike=(
+            None if request.cookies.get('access_token') is None
+            else
+            resume.get('isLike') if 'isLike' in resume else False
+        ),
+        section=[ResumeSectionDto.Response.Section(
+            sectionId=section.get('sectionId'),
+            title=section.get('title'),
+            content=section.get('content')
+        ) for section in sections],
+        user=UserDto.Response.IntroUserWithProfile(
+            userId=resume.get('user.userId'),
+            username=resume.get('user.username'),
+            profilePath=resume.get('user.profilePath')
+        )
+    )
+
+    return render_template("resume_detail.html", response=response)
+
+
+@resume_bp.route('/<resume_id>/update', methods=['GET', 'POST'])
+def render_update_resume(resume_id: str):
+    if not resume_id.isdecimal():
+        redirect(url_for('resume.render_resume'))
+
+    if request.method == 'POST':
+        job_id = request.form.get("job_id")
+        title = request.form.get("title")
+        level = request.form.get("level")
+        pros = request.form.get("pros")
+        cons = request.form.get("cons")
+        is_shared = request.form.get("is_shared") or False
+        directional = request.form.get("directional")
+        keyword_ids = request.form.getlist("keywords[][keywordId]")
+        keyword_contents = request.form.getlist("keywords[][content]")
+        keywords = zip(keyword_ids, keyword_contents)
+
+        section_ids = request.form.getlist("sections[][sectionId]")
+        section_titles = request.form.getlist("sections[][title]")
+        section_contents = request.form.getlist("sections[][content]")
+        sections = zip(section_ids, section_titles, section_contents)
+
+        data = ResumeDto.Request.Update(
+            job_id=int(job_id),
+            title=title,
+            level=level,
+            pros=pros,
+            cons=cons,
+            is_shared=bool(is_shared),
+            directional=directional,
+            keywords=[KeywordDto.Request.Update(keywordId=keyword_id, content=content)
+                      for keyword_id, content in keywords],
+            sections=[ResumeSectionDto.Request.Update(section_id=section_id, title=title, content=content)
+                      for section_id, title, content in sections]
+        )
+
+        flash_message = data.__validation__()
+        if flash_message:
+            flash(flash_message)
+        else:
+            ResumeService.update_resume(resume_id, data=data)
+            return redirect(f"/resume/{resume_id}")
+
+    response = ResumeService.get_resume_with_update(resume_id)
+    if not response:
+        return redirect(url_for('resume.render_resume'))
+
+    return render_template("resume_update.html", response=response)
 
 
 @resume_bp.route('/write', methods=['GET'])
@@ -108,7 +199,8 @@ def create_resume():
         is_shared=bool(is_shared),
         directional=directional,
         keywords=keywords,
-        sections=[ResumeDto.Section(title=title, content=content) for title, content in sections]
+        sections=[ResumeSectionDto.Request.Create(title=title, content=content)
+                  for title, content in sections]
     )
 
     flash_message = data.__validation__()

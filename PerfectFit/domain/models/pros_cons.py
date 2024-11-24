@@ -33,5 +33,5 @@ class ProsCons(db.Model):
 
     # 제약 조건 설정
     __table_args__ = (
-        CheckConstraint("type IN ('장점', '단점')", name="check_type"),
+        CheckConstraint("type IN ('pros', 'cons')", name="check_type"),
     )

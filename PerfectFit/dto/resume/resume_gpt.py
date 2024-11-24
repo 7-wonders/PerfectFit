@@ -4,9 +4,8 @@ from typing import List, Optional, TYPE_CHECKING
 from domain.models import ProjectExperience
 from domain.models import WorkExperience
 
-
 if TYPE_CHECKING:
-    from dto.resume.resume import ResumeDto
+    from dto.resume_section.resume_section import ResumeSectionDto
 
 
 class ResumeGPT:
@@ -40,7 +39,7 @@ class ResumeGPT:
     class Response:
         @dataclass
         class Answer:
-            sections: List['ResumeDto.Section']
+            sections: List['ResumeSectionDto.Response.Section']
 
         class FullResume:
             @dataclass
@@ -50,6 +49,6 @@ class ResumeGPT:
                 level: str
                 pros: str
                 cons: str
-                sections: List['ResumeDto.Section']
+                sections: List['ResumeSectionDto.Response.Section']
                 directional: Optional[str] = field(default=None)
                 chapter: Optional[str] = field(default=None)
