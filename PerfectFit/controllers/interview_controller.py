@@ -59,8 +59,8 @@ def get_improvement(interview_id: int):
 @interview_bp.route('/interview', methods=['POST'])
 def post_question_answer():
 
-    #jwt_factory = JWTFactory()
-    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     ##data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
     ##post_answer_request = InterviewDto.Request.postInterviewAnswer(**data)
@@ -81,6 +81,48 @@ def post_question_answer():
 
 
     return redirect('/test/test_interview_post.html')
+
+@interview_bp.route('/interview/resume', methods=['POST'])
+def make_interview_resume():
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    # POST 요청에서 form 데이터를 읽어옴
+    resume_id = request.form.get('resumeId', None, type=int)
+    level = request.form.get('level', None, type=str)
+
+    # 디버깅: 데이터 출력
+    # DTO 생성
+    request_dto = InterviewDto.Request.postMakeInterviewResume(
+        resumeId=resume_id,
+        level=level
+    )
+
+    InterviewService.make_interview_resume(request_dto)
+
+@interview_bp.route('/interview/job', methods=['POST'])
+def make_interview_job():
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    # POST 요청에서 form 데이터를 읽어옴
+    job_id = request.form.get('jobId', None, type=int)
+    level = request.form.get('level', None, type=str)
+
+    # 디버깅: 데이터 출력
+    # DTO 생성
+    request_dto = InterviewDto.Request.postMakeInterviewJob(
+        jobId=job_id,
+        userId=user_id,
+        level=level
+    )
+
+    InterviewService.make_interview_job(request_dto)
+
+
+
 
 @interview_bp.route('/interview/ispublic', methods=['PATCH'])
 def patch_is_public():
@@ -125,22 +167,40 @@ def patch_title(interview_id: int):
 
 @interview_bp.route('/spellcheck', methods=['POST'])
 def spell_check():
+    if request.method == 'POST':
+        # POST 요청에서 폼 데이터를 가져옵니다.
+        content = request.form.get('content', None, type=str)
+        if not content:
+            return render_template(
+                'test/test_spellchecker.html',
+                content="",
+                translatedContent="문장을 입력해주세요."
+            )
 
-    # data = request.get_json()  # POST 요청의 BODY 가져오기.
-    print("debug1")
-    content = request.form.get('content', None, type=str)
-    print(content)
-    spellCheckDto = InterviewDto.Request.spellCheck(content = content)
-    print("debug1")
-    translatedContent = InterviewService.spell_check(spellCheckDto)
-    print("debug1")
-    response: InterviewDto.Response.spellChecked = InterviewDto.Response.spellChecked(
-        translatedContent= translatedContent
+        spellCheckDto = InterviewDto.Request.spellCheck(content=content)
+        translatedContent = InterviewService.spell_check(spellCheckDto)
+        # 데이터를 HTML에 전달하며 렌더링
+        return render_template(
+            'test/test_spellchecker.html',
+            content=content,
+            translatedContent=translatedContent
+        )
+    # GET 요청 처리 (기본 빈 페이지 렌더링)
+    return render_template(
+        'test/test_spellchecker.html',
+        content="",
+        translatedContent=""
     )
-    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    print(response.translatedContent)
-    # return Response(json_response, status=200, content_type='application/json; charset=utf-8')
-    return jsonify(asdict(response)), 200
+    # data = request.get_json()  # POST 요청의 BODY 가져오기.
+    #
+    # print("debug1")
+    # response: InterviewDto.Response.spellChecked = InterviewDto.Response.spellChecked(
+    #     translatedContent= translatedContent
+    # )
+    # json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+    # print(response.translatedContent)
+    # # return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    # return jsonify(asdict(response)), 200
 
 @interview_bp.route('/testGPT',methods=['GET'])
 def gpt():

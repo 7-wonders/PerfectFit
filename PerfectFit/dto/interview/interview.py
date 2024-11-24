@@ -9,6 +9,17 @@ class InterviewDto:
         class postInterviewAnswer:
             questionId: int
             answer: str
+
+        @dataclass
+        class postMakeInterviewResume:
+            resumeId: int
+            level: str
+
+        @dataclass
+        class postMakeInterviewJob:
+            jobId: int
+            userId: int
+            level: str
         @dataclass
         class patchInterviewTitle:
             interviewId: int

@@ -9,9 +9,9 @@ from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
 from domain.models.interview_answer import InterviewAnswer
 
-from utils.open_ai import answer_improvement
+from utils.open_ai import answer_improvement, make_interview_based_on_resume, make_interview_based_on_job
 
-#from hanspell import spell_checker
+from hanspell import spell_checker
 import re, requests
 
 
@@ -50,12 +50,8 @@ class InterviewService:
 
     @staticmethod
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
-
-
         session = get_session()
 
-
-        # 개선사항 도출 로직 여기다가 적어야함;.
         # QuestionId와 Answer가 넘어오는데 여기서 answer는 사용자가 작성한 답변이다.
 
         try:
@@ -71,8 +67,31 @@ class InterviewService:
             session.rollback()
             print("Exception Cause2 :: ",e)
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
-
         get_session().commit()
+
+    @staticmethod
+    def make_interview_resume(request_dto: InterviewDto.Request.postMakeInterviewResume) -> None:
+        session = get_session()
+
+        try:
+            make_interview_based_on_resume(request_dto.resumeId, request_dto.level)
+        except Exception as e:
+            session.rollback()
+            print("Exception Cause2 :: ", e)
+            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+
+    @staticmethod
+    def make_interview_job(request_dto: InterviewDto.Request.postMakeInterviewJob) -> None:
+        session = get_session()
+
+        try:
+            make_interview_based_on_job(request_dto.jobId, request_dto.level)
+        except Exception as e:
+            session.rollback()
+            print("Exception Cause2 :: ", e)
+            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+
+
     @staticmethod
     def patch_interview_title(interview_title: InterviewDto.Request.patchInterviewTitle) -> None:
 
@@ -165,35 +184,10 @@ class InterviewService:
         text = spellCheckDto.content
 
         try:
-            passportKey = get_passport_key()
-
             # 맞춤법 검사 수행
-            # result = spell_checker.check(text, passportKey)
-            # print(result)
-            # print(result.checked)
-            #return result.checked
-            return "str"
+            result = spell_checker.check(text)
+            print(result)
+            print(result.checked)
+            return result.checked
         except Exception as e:
             print("Error occurred:", e)
-
-
-def get_passport_key():
-    """네이버에서 '네이버 맞춤법 검사기' 페이지에서 passportKey를 획득
-
-        - 네이버에서 '네이버 맞춤법 검사기'를 띄운 후
-        html에서 passportKey를 검색하면 값을 찾을 수 있다.
-
-        - 찾은 값을 spell_checker.py 48 line에 적용한다.
-    """
-
-    url = "https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=네이버+맞춤법+검사기"
-    res = requests.get(url)
-
-    html_text = res.text
-
-    match = re.search(r'passportKey=([^&"}]+)', html_text)
-    if match:
-        passport_key = match.group(1)
-        return passport_key
-    else:
-        return False
