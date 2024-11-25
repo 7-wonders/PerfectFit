@@ -19,4 +19,4 @@ class DetailedUserDTO:
             profile_path: str
             work_experiences: List['PexDTO.Response.WorkExperience']
             project_experiences: List['PexDTO.Response.ProjectExperience']
-            resumes: List['PexDTO.Response.Resume']
+            resumes: List['PexDTO.Response.resume']

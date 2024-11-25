@@ -123,9 +123,9 @@ class ResumeDto:
     class Response:
         @dataclass
         class ResumeForWrite:
-            resume: "ResumeGPT.Response.FullResume.Resume" or None
+            resume: "ResumeGPT.Response.FullResume.resume" or None
             jobs: "JobDto.Response.Jobs" or None
-            occupations: List["OccupationDto.Response.Occupation"]
+            occupations: List["OccupationDto.Response.occupation"]
 
         @dataclass
         class Resume:
@@ -157,7 +157,7 @@ class ResumeDto:
         class ResumeForUpdate:
             resume: "ResumeDto.Response.ResumeWithUpdate"
             jobs: "JobDto.Response.Jobs"
-            occupations: List["OccupationDto.Response.Occupation"]
+            occupations: List["OccupationDto.Response.occupation"]
 
         @dataclass
         class MyResumeInfo:
@@ -165,7 +165,7 @@ class ResumeDto:
             title: str
             view_count: int
             like_count: int
-            occupation: 'OccupationDto.Response.Occupation'
+            occupation: 'OccupationDto.Response.occupation'
             job: str
             level: str
             created_time: datetime

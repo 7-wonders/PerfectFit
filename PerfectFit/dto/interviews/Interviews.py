@@ -17,7 +17,7 @@ class Interviews:
             is_public: bool
             view_count: int
             like_count: int
-            occupation: 'Interviews.Response.Occupation'
+            occupation: 'interviews.Response.occupation'
             job: str
             level: str
             created_time: datetime
@@ -27,5 +27,5 @@ class Interviews:
             user_id: int
             username: str
             profile_path: str
-            interviews: List['Interviews.Response.Interview']
+            interviews: List['interviews.Response.Interview']
             total: int
