@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Optional
-from datetime import date, datetime
+from typing import List
+from datetime import date
+
 
 class PexDTO:  # ProjectExperienceDTO를 줄여서 작성하였습니다.
     class Response:

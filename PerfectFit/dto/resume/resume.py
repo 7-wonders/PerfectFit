@@ -1,17 +1,15 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
-
-from dto.job.job import JobDto
-from dto.keyword.keyword import KeywordDto
-from dto.occupation.occupation import OccupationDto
-from dto.resume_section.resume_section import ResumeSectionDto
-from dto.user.user import UserDto
 from dto.validation_class import FormModel
-
 
 if TYPE_CHECKING:
     from dto.resume.resume_gpt import ResumeGPT
+    from dto.job.job import JobDto
+    from dto.keyword.keyword import KeywordDto
+    from dto.occupation.occupation import OccupationDto
+    from dto.resume_section.resume_section import ResumeSectionDto
+    from dto.user.user import UserDto
 
 
 class ResumeDto:
@@ -75,7 +73,7 @@ class ResumeDto:
                     return "장점은 필수입니다."
                 elif not self.cons.strip():
                     return "단점은 필수입니다."
-                elif (not self.sections or len(self.sections) < 1):
+                elif not self.sections or len(self.sections) < 1:
                     return "자기소개서 단락은 1개 이상 또는 모두 공백이 아니어야 합니다."
 
         @dataclass
@@ -87,7 +85,6 @@ class ResumeDto:
             cons: str
             chapter_title: str
             directional: Optional[str] = field(default=None)
-
 
         @dataclass
         class CreateFullResume(FormModel):
@@ -123,9 +120,9 @@ class ResumeDto:
     class Response:
         @dataclass
         class ResumeForWrite:
-            resume: "ResumeGPT.Response.FullResume.resume" or None
+            resume: "ResumeGPT.Response.FullResume.Resume" or None
             jobs: "JobDto.Response.Jobs" or None
-            occupations: List["OccupationDto.Response.occupation"]
+            occupations: List["OccupationDto.Response.Occupation"]
 
         @dataclass
         class Resume:
@@ -157,7 +154,7 @@ class ResumeDto:
         class ResumeForUpdate:
             resume: "ResumeDto.Response.ResumeWithUpdate"
             jobs: "JobDto.Response.Jobs"
-            occupations: List["OccupationDto.Response.occupation"]
+            occupations: List["OccupationDto.Response.Occupation"]
 
         @dataclass
         class MyResumeInfo:
@@ -165,7 +162,7 @@ class ResumeDto:
             title: str
             view_count: int
             like_count: int
-            occupation: 'OccupationDto.Response.occupation'
+            occupation: 'OccupationDto.Response.Occupation'
             job: str
             level: str
             created_time: datetime

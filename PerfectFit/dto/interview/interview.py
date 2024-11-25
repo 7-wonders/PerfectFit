@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
 
 class InterviewDto:

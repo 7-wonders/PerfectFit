@@ -1,3 +1,4 @@
+from flask import request
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy.orm import joinedload
 from sqlalchemy.testing.pickleable import User
@@ -7,6 +8,7 @@ from domain.models.app_user import AppUser
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from config.config_mysql import get_session
+from utils.jwt_factory import JWTFactory
 
 
 class UserService:
@@ -16,16 +18,16 @@ class UserService:
         return paginate_user
 
     @staticmethod
-    def get_user(user_id: int) -> AppUser | None:
+    def get_user() -> AppUser | None:
+        # 이렇게 사용하면 좀 더 쉽게 사용하실 수 있습니다 !
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
         user: AppUser = get_session().query(AppUser).options(
-            joinedload(AppUser.project_experience)
+            joinedload(AppUser.project_experiences)
         ).filter(AppUser.user_id == user_id).first()
 
         if not user:
             raise CustomException(ExceptionType.NOT_FOUND_USER)
-
-        # project_experience를 변수에 담기
-        project_experiences = user.project_experience  # SQLAlchemy 관계로 가져온 데이터
 
         return user
 
@@ -43,12 +45,14 @@ class UserService:
         session.commit()
 
     @staticmethod
-    def get_user_with_resumes(user_id: int, page: int, count: int):
+    def get_user_with_resumes(page: int, count: int):
         """
         사용자 정보와 이력서를 함께 가져오는 메서드
         """
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
         # 사용자 정보 및 페이징 처리된 이력서 데이터를 한 번의 쿼리로 가져오기
-        user = User.query.filter_by(id=user_id).first()
+        user = AppUser.query.filter_by(user_id=user_id).first()
         if not user:
             raise ValueError("사용자를 찾을 수 없습니다.")
 

@@ -8,35 +8,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-4">
-        <h1 class="text-center">User List</h1>
+    {% if user %}
+        {{ user }}
+    {% endif %}
 
-        <!-- 사용자 데이터 테이블 -->
-        <table class="table table-striped mt-4">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>User ID</th>
-                    <th>Username</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 사용자 데이터 반복 출력 -->
-                {% for user in users['users'] %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ user.user_id }}</td>
-                    <td>{{ user.username }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- 페이지네이션 정보 -->
-        <div class="text-center mt-4">
-            <p>Total Pages: {{ users['pages'] }}</p>
-        </div>
-    </div>
+    {% if users %}
+        {{ users }}
+    {% endif %}
 
     <!-- Bootstrap JS (선택사항, 동작 추가용) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>

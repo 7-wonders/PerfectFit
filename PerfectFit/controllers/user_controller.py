@@ -4,16 +4,14 @@ import json
 from flask import current_app, Response, request
 from werkzeug.utils import secure_filename
 
-from dto.DetailedUser.detailed_user import DetailedUserDTO
-from dto.ProjectExperience.project_experience import PexDTO
 from flask import Blueprint, render_template, redirect, make_response
 
-from dto.Request.Request import RequestDTO
-from dto.WorkExperience.work_experience import WorkExperienceDTO
 from dto.interview.interview import InterviewDto
 from dto.occupation.occupation import OccupationDto
+from dto.project_experience.project_experience import PexDTO
 from dto.resume.resume import ResumeDto
 from dto.user.user import UserDto
+from dto.work_experience.work_experience import WorkExperienceDTO
 from services.interview_service import InterviewService
 from services.necessaryinfo_service import NecessaryInfoService
 from services.optionalinfo_service import OptionalInfoService
@@ -24,11 +22,13 @@ from utils.jwt_factory import JWTFactory
 
 user_bp = Blueprint('user', __name__)
 
+
 def get_pagination_params():
     """공통적으로 페이지네이션 파라미터를 가져오는 함수"""
     page = request.args.get('page', default=1, type=int)
     count = request.args.get('count', default=10, type=int)
     return page, count
+
 
 @user_bp.route('/users')
 def get_users():
@@ -42,33 +42,32 @@ def get_users():
 
     return render_template("testusers.html", users=asdict(response))
 
+
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
-    response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
+    response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.user_id, user.username)
     return render_template("testusers.html", user=response)
+
 
 @user_bp.route('/user/mypage/info')
 def get_info():
-    try:
-        # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
-        access_token = request.cookies.get('access_token')
-        if not access_token:
-            raise ValueError("Access token이 없습니다.")
-        jwt_factory = JWTFactory()
-        user_id = jwt_factory.verify_access_token(access_token)
-    except ValueError as e:
-        return Response(
-            json.dumps({"error": str(e)}),
-            status=401,
-            content_type='application/json; charset=utf-8'
-        )
+    # try:
+    #     # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
+    #     access_token = request.cookies.get('access_token')
+    #     jwt_factory = JWTFactory()
+    #     user_id = jwt_factory.verify_access_token(access_token)
+    # except ValueError as e:
+    #     return Response(
+    #         json.dumps({"error": str(e)}),
+    #         status=401,
+    #         content_type='application/json; charset=utf-8'
+    #     )
+    user = UserService.get_user()
 
-    user = UserService.get_user(user_id)
-
-    response = DetailedUserDTO.Response.DetailedUser(
-        user_id=user.id,
-        username=user.name,
+    response = UserDto.Response.DetailedUser(
+        user_id=user.user_id,
+        username=user.username,
         age=user.age,
         major=user.major,
         university=user.university,
@@ -113,8 +112,7 @@ def get_info():
 
 @user_bp.route('/user/profile')
 def get_profile():
-    user_id = request.headers.get("user_id")
-    user = UserService.get_user(user_id)
+    user = UserService.get_user()
 
     response = {
         "profilePath": user.profile_path
@@ -126,28 +124,34 @@ def get_profile():
 
 @user_bp.route('/user/mypage/resume')
 def get_resumes():
-    user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
 
     # get_user 하지말고 get_user with resumes 메소드를 만들어서 컨트롤러에 대응하는 서비스 만들고. user랑 resumes를 join시켰습니다
-    user, resumes, total = UserService.get_user_with_resumes(user_id, page, count)
+    user, resumes, total = UserService.get_user_with_resumes(page, count)
 
     # DTO를 사용하여 응답 생성
     response = ResumeDto.Response.MyResume(
         user=UserDto.Response.IntroUserWithProfile(
-            userId=user.id,
-            username=user.name,
+            userId=user.user_id,
+            username=user.username,
             profilePath=user.profile_path
         ),
         resumes=[
             ResumeDto.Response.MyResumeInfo(
                 resume_id=resume.resume_id,
                 title=resume.title,
-                view_count=resume.view_count,
-                like_count=resume.like_count,
+                # 컬럼에 view_count, like_count가 없어서 주석처리했습니다.
+                # 직접 DB COUNT 해서 가져와야 합니다.
+                # view_count=resume.view_count,
+                # like_count=resume.like_count,
+                view_count=1,
+                like_count=1,
                 occupation=OccupationDto.Response.Occupation(
-                    occupationId=resume.occupation_id,
-                    occupationName=resume.occupation_name
+                    # occupation 테이블을 통해서 가져와야 합니다.
+                    # occupationId=resume.occupation_id,
+                    # occupationName=resume.occupation_name
+                    occupationId=1,
+                    occupationName="Software Engineer"
                 ),
                 job=resume.job,
                 level=resume.level,
@@ -185,13 +189,14 @@ def get_interviews():
 
     return render_template("testusers.html", user=response)
 
+
 @user_bp.route('/user/requirements', methods=['POST'])
 def create_requirements():
     user_id = request.headers.get("user_id")  # 토큰에서 user_id 추출
 
     # 요청 데이터를 DTO로 변환
     data = request.get_json()
-    request_dto = RequestDTO.CreateRequirementsRequest(**data)  # **data로 전달
+    request_dto = UserDto.Request.CreateRequirementsRequest(**data)  # **data로 전달
 
     # 필수 값 확인
     if not request_dto.keywords or request_dto.job_id is None or not request_dto.level or not request_dto.pros or not request_dto.cons:
@@ -239,13 +244,15 @@ def register_necessary_info():
 
     # 필수 필드 유효성 검사를 수행합니다.
     if not all([name, age, email, address]):
-        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
     NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
 
     # 응답: 성공 시 204 No Content를 반환
     return Response(status=204)
+
 
 @user_bp.route('/user/optional', methods=['POST'])
 def register_optional_info():
@@ -315,6 +322,7 @@ def send_verification_code():
     # 성공 시 204 No Content 반환
     return Response(status=204)
 
+
 @user_bp.route('/user/verify/compare', methods=['POST'])
 def verify_code():
     # 요청 바디에서 이메일 주소와 인증 코드를 추출합니다.
@@ -326,7 +334,6 @@ def verify_code():
     if not email or not verify_code:
         return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
 
-
     is_valid = VerificationService.verify_code(email, verify_code) # 서비스 계층에서 이메일 인증 코드 검증을 처리
 
     if is_valid:
@@ -334,7 +341,9 @@ def verify_code():
         return Response(status=204) # 인증 성공 시 204 No Content 반환
     else:
         # 인증 실패 시 400 Bad Request 반환
-        return Response(json.dumps({"error": "잘못된 인증 코드입니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "잘못된 인증 코드입니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
+
 
 @user_bp.route('/user/profile', methods=['PATCH'])
 def update_profile_picture():
@@ -343,16 +352,19 @@ def update_profile_picture():
 
     # 요청 파일에서 프로필 이미지 파일 가져오기
     if 'profile' not in request.files:
-        return Response(json.dumps({"error": "프로필 파일이 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "프로필 파일이 필요합니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     file = request.files['profile']
     if file.filename == '':
-        return Response(json.dumps({"error": "유효한 파일이 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "유효한 파일이 필요합니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 파일명을 안전하게 처리하고, 파일 확장자 검증 (이미지 파일인지 확인)
     filename = secure_filename(file.filename)
     if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-        return Response(json.dumps({"error": "지원되지 않는 파일 형식입니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "지원되지 않는 파일 형식입니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 파일 저장 경로 설정
     upload_folder = current_app.config['UPLOAD_FOLDER']  # 업로드 폴더는 config에 정의되어 있어야 함
@@ -365,9 +377,9 @@ def update_profile_picture():
     # 성공 시 204 No Content 반환
     return Response(status=204)
 
+
 @user_bp.route('/user', methods=['DELETE'])
 def delete_user():
-
     user_id = request.headers.get("Authorization")
 
     # 필수 값 확인
