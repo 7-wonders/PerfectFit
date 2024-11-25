@@ -45,7 +45,6 @@ class AuthService:
     @staticmethod
     def google_login(code: str) -> dict:
         with get_session() as session:
-            session = cast(scoped_session[Session], session)
             access_token, token_type = GoogleOAuthHandler().get_access_token(code)
             user_response_json = GoogleOAuthHandler().get_user_info(token_type, access_token)
 
@@ -127,8 +126,6 @@ class AuthService:
     @staticmethod
     def kakao_login(code: str, state: str) -> dict:
         with get_session() as session:
-            session = cast(scoped_session[Session], session)
-
             access_token, token_type = KakaoOAuthHandler().get_access_token(code, state=state)
             user_response_json = KakaoOAuthHandler().get_user_info(token_type, access_token)
 

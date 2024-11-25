@@ -21,6 +21,7 @@ class InterviewImprovement(db.Model):
     )
     answer: Mapped[str] = mapped_column(TEXT, nullable=False)
     improvement: Mapped[str] = mapped_column(TEXT, nullable=False)
+    translated_answer: Mapped[str] = mapped_column(TEXT, nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
     question: Mapped["InterviewQuestion"] = db.relationship("InterviewQuestion", back_populates="interview_improvements")

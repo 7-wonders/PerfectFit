@@ -83,3 +83,11 @@ class Redis:
         except redis.RedisError as e:
             logger.error(f"Redis 데이터 삭제 중 '{key}' key 값을 가진 데이터에서 문제가 발생하였습니다. {e}")
             raise CustomException(ExceptionType.REDIS_DATA_ERROR)
+
+    def save(self, key: str, value: str):
+        """Redis에 데이터를 저장하며 TTL 설정"""
+        self._redis_instance.setex(key, 60, value)
+
+    def get(self, key: str):
+        """Redis에서 데이터를 가져오기"""
+        return self._redis_instance.get(key)
