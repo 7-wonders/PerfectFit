@@ -9,7 +9,7 @@ class InterviewDto:
         class postInterviewAnswer:
             questionId: int
             answer: str
-
+              
         @dataclass
         class postMakeInterviewResume:
             resumeId: int
@@ -20,10 +20,12 @@ class InterviewDto:
             jobId: int
             userId: int
             level: str
+              
         @dataclass
         class patchInterviewTitle:
             interviewId: int
             title: str
+
         @dataclass
         class spellCheck:
             content: str
@@ -44,24 +46,24 @@ class InterviewDto:
             level: str
 
         @dataclass
-        class interviewQuestion :
+        class interviewQuestion:
             question_id: int
             question: str
 
         @dataclass
-        class questions :
+        class questions:
             questions: list['InterviewDto.Response.interviewQuestion']
-            total : int
+            total: int
 
         @dataclass
-        class isPublicInterview :
+        class isPublicInterview:
             questionId: int
             title: str
             answer: str
             isPublic: bool
 
         @dataclass
-        class isPublicList :
+        class isPublicList:
             interviews: list['InterviewDto.Response.isPublicInterview']
 
         @dataclass
@@ -73,13 +75,22 @@ class InterviewDto:
             translatedAnswer: str
 
         @dataclass
-        class improvementList :
+        class improvementList:
             improvements: list['InterviewDto.Response.improvement']
 
         @dataclass
         class spellChecked:
             translatedContent: str
 
+        # 새로 추가된 interviewSummary
+        @dataclass
+        class interviewSummary:
+            interview_id: int
+            title: str
+            created_time: str
+            view_count: int
+            like_count: int
+              
         class InterviewQuestionAnswer(BaseModel):
             Question: str
             BestAnswer: str

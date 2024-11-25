@@ -1,17 +1,24 @@
 import os
 from dataclasses import asdict
 import json
-from flask import Blueprint, render_template, request, Response, current_app
+from flask import current_app
 from werkzeug.utils import secure_filename
-from dto.ProjectExperience.projectExperience import PexDTO
-from services.user_service import UserService, ResumeService, InterviewService, RequirementsService, \
-    NecessaryInfoService, OptionalInfoService, VerificationService
+
+from dto.DetailedUser.detailed_user import DetailedUserDTO
+from dto.ProjectExperience.project_experience import PexDTO
 from flask import Blueprint, render_template, request, redirect, make_response
+
+from dto.Request.Request import RequestDTO
+from dto.Resume.resume import ResumeDTO
+from dto.WorkExperience.work_experience import WorkExperienceDTO
+from dto.interview.interview import InterviewDto
 from dto.user.user import UserDto
-from exception.custom_exception import CustomException
-from exception.exception_type import ExceptionType
-from services.user_service import UserService
-from utils.const import const
+from services.interview_service import InterviewService
+from services.necessaryinfo_service import NecessaryInfoService
+from services.optionalinfo_service import OptionalInfoService
+from services.requirements_service import RequirementsService
+from services.resume_service import ResumeService
+from services.verification_service import VerificationService
 from utils.jwt_factory import JWTFactory
 
 user_bp = Blueprint('user', __name__)
@@ -24,7 +31,7 @@ def get_pagination_params():
 
 @user_bp.route('/users')
 def get_users():
-    page, count = get_pagination_params()  # 페이지네이션 파라미터 함수 사용
+    page, count = get_pagination_params()  # 페이지네이션 파라미터 함수 사용 // 테스트3
 
     paginate_user = UserService.get_users(page, count)
     response: UserDto.Response.Users = UserDto.Response.Users(
@@ -32,20 +39,33 @@ def get_users():
         pages=paginate_user.pages,
     )
 
-    return render_template("users.html", users=asdict(response))
+    return render_template("testusers.html", users=asdict(response))
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.id, user.name)
-    return render_template("user.html", user=response)
+    return render_template("testusers.html", user=response)
 
 @user_bp.route('/user/mypage/info')
 def get_info():
-    user_id = request.headers.get("user_id")
+    try:
+        # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
+        access_token = request.cookies.get('access_token')
+        if not access_token:
+            raise ValueError("Access token이 없습니다.")
+        jwt_factory = JWTFactory()
+        user_id = jwt_factory.verify_access_token(access_token)
+    except ValueError as e:
+        return Response(
+            json.dumps({"error": str(e)}),
+            status=401,
+            content_type='application/json; charset=utf-8'
+        )
+
     user = UserService.get_user(user_id)
 
-    response: PexDTO.Response.DetailedUser = PexDTO.Response.DetailedUser(
+    response = DetailedUserDTO.Response.DetailedUser(
         user_id=user.id,
         username=user.name,
         age=user.age,
@@ -59,7 +79,7 @@ def get_info():
         phone_number=user.phone_number,
         profile_path=user.profile_path,
         work_experiences=[
-            PexDTO.Response.WorkExperience(
+            WorkExperienceDTO.Response.WorkExperience(
                 work_experience_id=exp.work_experience_id,
                 from_date=exp.from_date,
                 to_date=exp.to_date,
@@ -87,8 +107,7 @@ def get_info():
         ]
     )
 
-    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return render_template("testusers.html", user=asdict(response))  # JSON 데이터 전달
 
 @user_bp.route('/user/profile')
 def get_profile():
@@ -100,104 +119,105 @@ def get_profile():
     }
 
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return render_template("testusers.html", user=response)
 
 @user_bp.route('/user/mypage/resume')
 def get_resumes():
     user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
 
-    user = UserService.get_user(user_id)
-    resumes, total = ResumeService.get_resumes(user_id, page, count)
+    # get_user 하지말고 get_user with resumes 메소드를 만들어서 컨트롤러에 대응하는 서비스 만들고. user랑 resumes를 join시켰습니다
+    user, resumes, total = UserService.get_user_with_resumes(user_id, page, count)
 
-    response = {
-        "user": {
-            "userId": user.id,
-            "username": user.name,
-            "profilePath": user.profile_path
-        },
-        "resumes": [
-            {
-                "resumeId": resume.resume_id,
-                "title": resume.title,
-                "viewCount": resume.view_count,
-                "likeCount": resume.like_count,
-                "occupation": {
-                    "occupationId": resume.occupation_id,
-                    "occupationName": resume.occupation_name
-                },
-                "job": resume.job,
-                "level": resume.level,
-                "createdTime": resume.created_time
-            }
+    # DTO를 사용하여 응답 생성
+    response = ResumeDTO.Response(
+        user=ResumeDTO.User(
+            user_id=user.id,
+            username=user.name,
+            profile_path=user.profile_path
+        ),
+        resumes=[
+            ResumeDTO.Resume(
+                resume_id=resume.resume_id,
+                title=resume.title,
+                view_count=resume.view_count,
+                like_count=resume.like_count,
+                occupation=PexDTO.Response.Occupation(
+                    occupation_id=resume.occupation_id,
+                    occupation_name=resume.occupation_name
+                ),
+                job=resume.job,
+                level=resume.level,
+                created_time=resume.created_time
+            )
             for resume in resumes
         ],
-        "total": total
-    }
+        total=total
+    )
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
-
+    return render_template("testusers.html", user=response)
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
     user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
 
+    # 사용자 및 인터뷰 데이터 조회
     user = UserService.get_user(user_id)
     interviews, total = InterviewService.get_interviews(user_id, page, count)
 
-    response = {
-        "user": {
-            "userId": user.id,
-            "username": user.name,
-            "profilePath": user.profile_path
-        },
-        "interviews": [
-            {
-                "interviewId": interview.interview_id,
-                "title": interview.title,
-                "isPublic": interview.is_public,
-                "viewCount": interview.view_count,
-                "likeCount": interview.like_count,
-                "occupation": {
-                    "occupationId": interview.occupation_id,
-                    "occupationName": interview.occupation_name
-                },
-                "job": interview.job,
-                "level": interview.level,
-                "createdTime": interview.created_time
-            }
+    # DTO를 사용하여 응답 생성
+    response = InterviewDto.Response.isPublicList(
+        interviews=[
+            InterviewDto.Response.isPublicInterview(
+                questionId=interview.question_id,
+                title=interview.title,
+                answer=interview.answer,
+                isPublic=interview.is_public
+            )
             for interview in interviews
-        ],
-        "total": total
-    }
+        ]
+    )
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+    return render_template("testusers.html", user=response)
 
 @user_bp.route('/user/requirements', methods=['POST'])
 def create_requirements():
     user_id = request.headers.get("user_id")  # 토큰에서 user_id 추출
 
-    # 요청 바디에서 데이터를 추출합니다.
+    # 요청 데이터를 DTO로 변환
     data = request.get_json()
-    keywords = data.get("keywords", [])
-    job_id = data.get("jobId")
-    level = data.get("level")
-    pros = data.get("pros")
-    cons = data.get("cons")
-    prompt = data.get("prompt", "")  # 선택 필드
-    title = data.get("title", [])  # 선택 필드
+    request_dto = RequestDTO.CreateRequirementsRequest(**data)  # **data로 전달
 
     # 필수 값 확인
-    if not keywords or job_id is None or not level or not pros or not cons:
-        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400, content_type='application/json; charset=utf-8')
+    if not request_dto.keywords or request_dto.job_id is None or not request_dto.level or not request_dto.pros or not request_dto.cons:
+        return Response(
+            json.dumps({"error": "필수 필드가 누락되었습니다."}),
+            status=400,
+            content_type='application/json; charset=utf-8'
+        )
 
     # 데이터베이스에 저장하는 서비스 계층 호출
-    RequirementsService.create_requirements(user_id, keywords, job_id, level, pros, cons, prompt, title)
+    RequirementsService.create_requirements(
+        user_id=user_id,
+        keywords=request_dto.keywords,
+        job_id=request_dto.job_id,
+        level=request_dto.level,
+        pros=request_dto.pros,
+        cons=request_dto.cons,
+        prompt=request_dto.prompt,
+        title=request_dto.title
+    )
 
-    # 응답 생성
-    return Response(status=201)
+    # Redis에 데이터 저장
+    from config.config_redis import Redis
+    redis_instance = Redis()  # Redis 인스턴스 생성
+    redis_key = f"user:{user_id}:requirements"
+    redis_value = json.dumps(data, ensure_ascii=False)
+
+    redis_instance.save(redis_key, redis_value)
+
+    # 리다이렉션으로 응답 반환
+    return redirect("/requirements/success")
 
 @user_bp.route('/user/necessary', methods=['POST'])
 def register_necessary_info():
@@ -224,7 +244,7 @@ def register_necessary_info():
 
 @user_bp.route('/user/optional', methods=['POST'])
 def register_optional_info():
-    # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
+    # 헤더에서 사용자 ID 추출
     user_id = request.headers.get("user_id")
 
     # 요청 바디에서 선택 정보 데이터를 추출합니다.
@@ -237,7 +257,27 @@ def register_optional_info():
     work_experiences = data.get("workExperiences", [])
     phone_number = data.get("phoneNumber")
 
-    # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
+    # Redis에 저장할 데이터 생성
+    redis_data = {
+        "user_id": user_id,
+        "major": major,
+        "university": university,
+        "university_status": university_status,
+        "grade": grade,
+        "project_experiences": project_experiences,
+        "work_experiences": work_experiences,
+        "phone_number": phone_number,
+    }
+
+    # Redis에 데이터 저장
+    from config.config_redis import Redis
+    redis_handler = Redis()
+    redis_key = f"user:{user_id}:optional_info"
+    redis_value = json.dumps(redis_data, ensure_ascii=False)
+
+    redis_handler.save(redis_key, redis_value)
+
+    # 데이터베이스에 저장하기 위해 서비스 계층 호출
     OptionalInfoService.register_info(
         user_id=user_id,
         major=major,
@@ -249,8 +289,9 @@ def register_optional_info():
         phone_number=phone_number
     )
 
-    # 응답: 성공 시 201 Created를 반환
-    return Response(status=201)
+    # 성공 시 리다이렉션
+    redirect_uri = "/optional-info/success"
+    return redirect(redirect_uri)
 
 
 @user_bp.route('/user/verify/send', methods=['POST'])
