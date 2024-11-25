@@ -1,0 +1,37 @@
+from typing import Optional, TYPE_CHECKING
+
+from config.config_mysql import db
+
+from sqlalchemy.dialects.mysql import INTEGER, CHAR, VARCHAR, TIMESTAMP
+from sqlalchemy import ForeignKey, CheckConstraint, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from domain.models.resume_draft import ResumeDraft
+
+if TYPE_CHECKING:
+    from domain.models.resume import Resume
+
+
+class ProsCons(db.Model):
+    __tablename__ = "pros_cons"
+
+    pros_cons_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    resume_id: Mapped[int] = mapped_column(
+        INTEGER(unsigned=True),
+        ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE")
+    )
+    draft_id: Mapped[int] = mapped_column(
+        INTEGER(unsigned=True),
+        ForeignKey("resume_draft.draft_id", onupdate="CASCADE", ondelete="CASCADE")
+    )
+    type: Mapped[str] = mapped_column(CHAR(2), nullable=False)
+    content: Mapped[str] = mapped_column(VARCHAR(200), nullable=False)
+    created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    resume: Mapped["Resume"] = db.relationship("Resume", back_populates="pros_cons")
+    resumeDraft: Mapped["ResumeDraft"] = db.relationship("ResumeDraft", back_populates="pros_cons")
+
+    # 제약 조건 설정
+    __table_args__ = (
+        CheckConstraint("type IN ('pros', 'cons')", name="check_type"),
+    )
