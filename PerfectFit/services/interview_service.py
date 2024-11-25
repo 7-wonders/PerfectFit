@@ -9,12 +9,10 @@ from dto.interview.interview import InterviewDto
 
 from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
-from domain.models.interview_answer import InterviewAnswer
 
 from utils.open_ai import answer_improvement, make_interview_based_on_resume, make_interview_based_on_job
 
 from hanspell import spell_checker
-import re, requests
 
 
 class InterviewService:

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
 
 from dto.job.job import JobDto
@@ -158,3 +159,19 @@ class ResumeDto:
             jobs: "JobDto.Response.Jobs"
             occupations: List["OccupationDto.Response.Occupation"]
 
+        @dataclass
+        class MyResumeInfo:
+            resume_id: int
+            title: str
+            view_count: int
+            like_count: int
+            occupation: 'OccupationDto.Response.Occupation'
+            job: str
+            level: str
+            created_time: datetime
+
+        @dataclass
+        class MyResume:
+            user: 'UserDto.Response.IntroUserWithProfile'
+            resumes: List['ResumeDto.Response.MyResumeInfo']
+            total: int

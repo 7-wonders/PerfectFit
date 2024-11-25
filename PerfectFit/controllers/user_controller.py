@@ -6,18 +6,18 @@ from werkzeug.utils import secure_filename
 
 from dto.DetailedUser.detailed_user import DetailedUserDTO
 from dto.ProjectExperience.project_experience import PexDTO
-from flask import Blueprint, render_template, request, redirect, make_response
+from flask import Blueprint, render_template, redirect, make_response
 
 from dto.Request.Request import RequestDTO
-from dto.Resume.resume import ResumeDTO
 from dto.WorkExperience.work_experience import WorkExperienceDTO
 from dto.interview.interview import InterviewDto
+from dto.occupation.occupation import OccupationDto
+from dto.resume.resume import ResumeDto
 from dto.user.user import UserDto
 from services.interview_service import InterviewService
 from services.necessaryinfo_service import NecessaryInfoService
 from services.optionalinfo_service import OptionalInfoService
 from services.requirements_service import RequirementsService
-from services.resume_service import ResumeService
 from services.verification_service import VerificationService
 from utils.jwt_factory import JWTFactory
 
@@ -109,6 +109,7 @@ def get_info():
 
     return render_template("testusers.html", user=asdict(response))  # JSON 데이터 전달
 
+
 @user_bp.route('/user/profile')
 def get_profile():
     user_id = request.headers.get("user_id")
@@ -121,6 +122,7 @@ def get_profile():
     json_response = json.dumps(response, ensure_ascii=False, indent=2)
     return render_template("testusers.html", user=response)
 
+
 @user_bp.route('/user/mypage/resume')
 def get_resumes():
     user_id = request.headers.get("user_id")
@@ -130,21 +132,21 @@ def get_resumes():
     user, resumes, total = UserService.get_user_with_resumes(user_id, page, count)
 
     # DTO를 사용하여 응답 생성
-    response = ResumeDTO.Response(
-        user=ResumeDTO.User(
-            user_id=user.id,
+    response = ResumeDto.Response.MyResume(
+        user=UserDto.Response.IntroUserWithProfile(
+            userId=user.id,
             username=user.name,
-            profile_path=user.profile_path
+            profilePath=user.profile_path
         ),
         resumes=[
-            ResumeDTO.Resume(
+            ResumeDto.Response.MyResumeInfo(
                 resume_id=resume.resume_id,
                 title=resume.title,
                 view_count=resume.view_count,
                 like_count=resume.like_count,
-                occupation=PexDTO.Response.Occupation(
-                    occupation_id=resume.occupation_id,
-                    occupation_name=resume.occupation_name
+                occupation=OccupationDto.Response.Occupation(
+                    occupationId=resume.occupation_id,
+                    occupationName=resume.occupation_name
                 ),
                 job=resume.job,
                 level=resume.level,
@@ -156,6 +158,8 @@ def get_resumes():
     )
 
     return render_template("testusers.html", user=response)
+
+
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
     user_id = request.headers.get("user_id")
