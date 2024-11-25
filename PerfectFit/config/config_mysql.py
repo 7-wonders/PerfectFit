@@ -11,7 +11,7 @@ db = SQLAlchemy(model_class=Base)
 
 
 def get_session():
-    return db.session
+    return db.session()
 
 
 class Config:
