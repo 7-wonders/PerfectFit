@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from pydantic import BaseModel
+from typing import List, Optional
 
 
 class InterviewDto:
@@ -7,6 +9,17 @@ class InterviewDto:
         class postInterviewAnswer:
             questionId: int
             answer: str
+
+        @dataclass
+        class postMakeInterviewResume:
+            resumeId: int
+            level: str
+
+        @dataclass
+        class postMakeInterviewJob:
+            jobId: int
+            userId: int
+            level: str
         @dataclass
         class patchInterviewTitle:
             interviewId: int
@@ -57,6 +70,7 @@ class InterviewDto:
             questionId: int
             answer: str
             improvement: str
+            translatedAnswer: str
 
         @dataclass
         class improvementList :
@@ -65,3 +79,10 @@ class InterviewDto:
         @dataclass
         class spellChecked:
             translatedContent: str
+
+        class InterviewQuestionAnswer(BaseModel):
+            Question: str
+            BestAnswer: str
+
+        class InterviewResponse(BaseModel):
+            InterviewQuestions: List['InterviewDto.Response.InterviewQuestionAnswer']

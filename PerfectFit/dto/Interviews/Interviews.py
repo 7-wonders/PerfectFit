@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 class Interviews:
+
     class Response:
         @dataclass
         class Occupation:
