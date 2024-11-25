@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 
-class Occupation:
-    @dataclass
-    class Occupation:
-        occupation_id: int
-        occupation_name: str
+
+class OccupationDto:
+    class Response:
+        @dataclass
+        class Occupation:
+            occupationId: int
+            occupationName: str
