@@ -1,0 +1,175 @@
+
+{% set response = {
+    "user" : {
+        "userId": 1,
+        "username": "홍길동",
+        "age": 25,
+        "major": "컴퓨터공학",
+        "university": "서울대학교",
+        "universityStatus": "재학중",
+        "grade": 3.8,
+        "address": "서울특별시 강남구",
+        "detailAddress": "테헤란로 123",
+        "email": "honggildong@example.com",
+        "phoneNumber": "010-1234-5678",
+        "profilePath": url_for('static', filename='img/logo.svg')
+    },
+    "workExperiences": [
+        {
+            "workExperienceId": 1,
+            "fromDate": "2022-01-01",
+            "toDate": "2023-06-30",
+            "companyName": "ABC Corporation",
+            "position": "프론트엔드 개발자",
+            "responsibility": "웹 애플리케이션 UI 개발 및 유지보수"
+        },
+        {
+            "workExperienceId": 2,
+            "fromDate": "2021-05-01",
+            "toDate": "2021-12-31",
+            "companyName": "XYZ Solutions",
+            "position": "백엔드 개발자",
+            "responsibility": "RESTful API 설계 및 데이터베이스 관리"
+        }
+    ],
+    "projectExperiences": [
+        {
+            "projectExperienceId": "P1",
+            "projectName": "전자상거래 웹사이트 개발",
+            "fromDate": "2022-02-01",
+            "toDate": "2022-06-30",
+            "contents": [
+                {
+                    "projectExperienceTaskId": 1,
+                    "content": "React를 활용한 프론트엔드 개발"
+                },
+                {
+                    "projectExperienceTaskId": 2,
+                    "content": "Node.js 기반 백엔드 API 구현"
+                },
+                {
+                    "projectExperienceTaskId": 3,
+                    "content": "AWS EC2 서버 배포 및 운영"
+                }
+            ]
+        },
+        {
+            "projectExperienceId": "P2",
+            "projectName": "모바일 앱 개발",
+            "fromDate": "2021-07-01",
+            "toDate": "2021-12-31",
+            "contents": [
+                {
+                    "projectExperienceTaskId": 4,
+                    "content": "React Native를 활용한 크로스 플랫폼 앱 개발"
+                },
+                {
+                    "projectExperienceTaskId": 5,
+                    "content": "Firebase를 이용한 실시간 데이터 동기화"
+                },
+                {
+                    "projectExperienceTaskId": 6,
+                    "content": "UI/UX 디자인 협업 및 테스트"
+                }
+            ]
+        }
+    ]
+} %}
+
+
+
+{% block Content %}
+    {% include 'components/mypage.html' %}
+    <div class = "container">
+        {#필수 정보#}
+        <div class = "information-box">
+            <table class="uk-table user-information">
+                <thead>
+                    <tr>
+                        <td class = "Bold-20">필수 정보</td>
+                        <td class = "information-box-update"><a href = "http://127.0.0.1:5000/register/information/required" ><span class = "Regular-16-light">내용 수정하기></span></a></td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td class = "Regular-16-Medium">이름</td>
+                        <td class = "Medium-16-Medium">{{ response.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">나이</td>
+                        <td class = "Medium-16-Medium">{{ response.user.age }}세</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">주소</td>
+                        <td class = "Medium-16-Medium">{{ response.user.address }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">이메일 주소</td>
+                        <td class = "Medium-16-Medium">{{ response.user.email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {#선택 정보#}
+        <div class = "information-box">
+            <table class="uk-table user-information">
+                <thead>
+                    <tr>
+                        <td class = "Bold-20">선택 정보</td>
+                        <td class = "information-box-update"><a href = "http://127.0.0.1:5000/register/information/selection" ><span class = "Regular-16-light">내용 수정하기></span></a></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class = "Regular-16-Medium">학력</td>
+                        <td class = "Medium-16-Medium">{{ response.user.university }} {{ response.user.universityStatus }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">전공</td>
+                        <td class = "Medium-16-Medium">{{ response.user.major }}</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">학점</td>
+                        <td class = "Medium-16-Medium">{{ response.user.grade }}/4.5</td>
+                    </tr>
+                    <tr>
+                        <td class = "Regular-16-Medium">전화번호</td>
+                        <td class = "Medium-16-Medium">{{ response.user.phoneNumber }}</td>
+                    </tr>
+                    {% for workExperience in response.workExperiences %}
+                        <tr>
+                            {% if loop.index0 == 0 %}
+                                <td class="Regular-16-Medium">경력</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            <td class="Medium-16-Medium">
+                                연차 : {{ workExperience.fromDate }} ~ {{ workExperience.toDate }} <p></p>
+                                회사 이름 : {{ workExperience.companyName }} <p></p>
+                                직책 : {{ workExperience.position }} <p></p>
+                                맡은 일 : {{ workExperience.responsibility }} <p></p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% for projectExperience in response.projectExperiences %}
+                        <tr>
+                            {% if loop.index0 == 0 %}
+                                <td class="Regular-16-Medium">프로젝트 경험</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            <td class="Medium-16-Medium">
+                                프로젝트 이름 : {{ projectExperience.projectName }}<p></p>
+                                개발 기간 : {{ projectExperience.fromDate }} ~ {{ projectExperience.toDate }} <p></p>
+                                {% for content in projectExperience.contents %}
+                                    프로젝트 내용{{ loop.index }}: {{ content.content }} <p></p>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

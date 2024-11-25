@@ -1,0 +1,35 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/loading-analyze.css') }}">
+{% endblock %}
+
+{% block scripts %}
+   <script>
+    const dots = document.getElementById("dots");
+    let dotCount = 0;
+
+    setInterval(() => {
+      dotCount = (dotCount + 1) % 4; // 0, 1, 2, 3 반복
+      dots.textContent = ".".repeat(dotCount); // 점의 개수에 따라 텍스트 변경
+    }, 500); // 0.5초마다 업데이트
+  </script>
+{% endblock %}
+
+{% block content %}
+  <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
+    <div class="container uk-text-center">
+      <!-- 로봇 로딩 GIF 이미지 -->
+      <div class="loading-robot">
+        <img src="{{ url_for('static', filename='img/loading-robot.gif') }}" alt="Loading Robot" style="width: 300px; height: 300px;">
+      </div>
+      <!-- 로딩 텍스트 -->
+      <p class="loading-text">AI가 면접 답변에 대해서 분석 중입니다<span id="dots"></span></p>
+    </div>
+  </div>
+{% endblock %}
+
+

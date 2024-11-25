@@ -1,0 +1,126 @@
+/* 전체 컨테이너 */
+.container {
+  width: 80%;
+  margin: 0 auto;
+  font-family: 'Noto Sans KR', sans-serif;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* 제목 라벨 스타일 */
+.title-label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: left; /* 제목 라벨 왼쪽 정렬 */
+}
+
+/* 제목 입력란 스타일 */
+.title-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #87CEEB; /* 하늘색 테두리 */
+  border-radius: 4px;
+  margin-bottom: 20px;
+  outline: none;
+  font-size: 14px;
+}
+
+/* 제목 입력란 포커스 스타일 */
+.title-input:focus {
+  border-color: #00BFFF; /* 진한 하늘색 */
+  box-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+}
+
+/* 지원 경력 섹션 */
+.career-section {
+  margin-bottom: 20px; /* 테이블과 간격 */
+  text-align: left; /* 왼쪽 정렬 */
+}
+
+/* 지원 경력 라벨 */
+.career-label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px; /* 경력/신입 옵션과 간격 */
+}
+
+/* 지원 경력 옵션 (경력, 신입) */
+.career-options {
+  display: flex;
+  gap: 20px; /* 옵션 간격 */
+}
+
+.career-option {
+  font-size: 14px;
+}
+
+.career-option input {
+  margin-right: 5px;
+}
+
+/* 데이터 테이블 컨테이너 - 스크롤 가능 */
+.data-table-container {
+  max-height: 300px; /* 최대 높이 설정 */
+  overflow-y: auto; /* 스크롤 활성화 */
+  border: 1px solid #ddd; /* 테두리 */
+  border-radius: 4px; /* 둥근 모서리 */
+  margin-bottom: 20px; /* 버튼과 간격 */
+  text-align: left; /* 테이블 내용은 왼쪽 정렬 */
+}
+
+/* 데이터 테이블 스타일 */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.data-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  position: sticky; /* 헤더 고정 */
+  top: 0;
+  z-index: 1;
+}
+
+.data-table td {
+  background-color: #fff;
+}
+
+.data-table tr:hover {
+  background-color: #f0f8ff; /* 행 호버 시 하늘색 */
+}
+
+/* 버튼 컨테이너 */
+.button-container {
+  display: flex;
+  justify-content: space-between; /* 버튼을 양 끝으로 배치 */
+  margin-top: 20px;
+}
+
+/* 버튼 스타일 */
+.prev-button,
+.next-button {
+  padding: 10px 20px;
+  background-color: #007BFF; /* 파란색 */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.prev-button:hover,
+.next-button:hover {
+  background-color: #0056b3; /* 호버 시 진한 파란색 */
+}
