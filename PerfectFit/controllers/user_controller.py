@@ -1,7 +1,7 @@
 import os
 from dataclasses import asdict
 import json
-from flask import current_app
+from flask import current_app, Response, request
 from werkzeug.utils import secure_filename
 
 from dto.DetailedUser.detailed_user import DetailedUserDTO
@@ -18,6 +18,7 @@ from services.interview_service import InterviewService
 from services.necessaryinfo_service import NecessaryInfoService
 from services.optionalinfo_service import OptionalInfoService
 from services.requirements_service import RequirementsService
+from services.user_service import UserService
 from services.verification_service import VerificationService
 from utils.jwt_factory import JWTFactory
 
@@ -363,11 +364,6 @@ def update_profile_picture():
 
     # 성공 시 204 No Content 반환
     return Response(status=204)
-
-from flask import Blueprint, request, Response, json
-from services.user_service import UserService
-
-user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/user', methods=['DELETE'])
 def delete_user():
