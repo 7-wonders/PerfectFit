@@ -158,7 +158,7 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str):
         temperature=0.7,
         messages=[
             {"role": "system",
-             "content": f"You are an interviewer related to {job.job_name}. Please ensure to return the response as a JSON object with exactly 10 'Question' and 'Best Answer' pairs, wrapped under the key 'InterviewQuestions'."},
+             "content": f"You are an interviewer related to {job.job_name}. Please ensure to return the response as a JSON object with exactly 10 'Question' and 'BestAnswer' pairs, wrapped under the key 'InterviewQuestions'."},
             {"role": "user", "content": f"당신은 직업 : {job.job_name}에 관한 선임자이며 오랜 경력의 전문가입니다. 해당 직무 관련 신입 채용을 위해 면접을 진행해야합니다."},
             {"role": "user",
              "content": "당신은 지금부터 면접을 진행해야 해야합니다. 지원 전공 관련 심화 내용을 위주로 질문해주세요. 이 면접은 직무 면접입니다."},
@@ -174,18 +174,22 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str):
         new_interview = Interview(user_id=user_id, resume_id=None, job_id=job.job_id, company=None, title="더미 제목", level = level)
         get_session().add(new_interview)
         get_session().flush()
-
+        print("1")
         interview_id = new_interview.interview_id
+        print("1")
         # interview_data = json.loads(result)
         # interview_questions = interview_data.get("InterviewQuestions", [])
         interview_data_dict = json.loads(result)
+        print("1")
         interview_data = InterviewDto.Response.InterviewResponse.model_validate(interview_data_dict)
+        print("1")
         interview_questions = interview_data.InterviewQuestions
-
+        print("1a")
+        print(interview_questions)
         for item in interview_questions:
-            question_text = item.get("Question")
-            answer_text = item.get("Best Answer")
-
+            question_text = item.Question
+            answer_text = item.BestAnswer
+            print("1b")
             # 질문 저장
             new_question = InterviewQuestion(interview_id=interview_id, question=question_text)
             get_session().add(new_question)

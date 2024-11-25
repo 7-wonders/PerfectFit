@@ -1,3 +1,6 @@
+import json
+from dataclasses import asdict
+
 from config.config_mysql import get_session
 
 from domain.models import Job, Occupation
@@ -34,3 +37,25 @@ class JobService:
         if not occupations :
             raise CustomException(ExceptionType.NOT_FOUND_OCCUPATION)
         return occupations
+
+    @staticmethod
+    def get_all():
+        occupations: list[Occupation] = JobService.get_occupations()
+
+        response: JobDto.Response.OccupationsWithJob = JobDto.Response.OccupationsWithJob(
+            occupations=[JobDto.Response.OccupationInfoWithJob(
+                occupationId=occupation.occupation_id,
+                occupationName=occupation.occupation_name,
+                majorCategory=occupation.major_category,
+                subCategory=occupation.sub_category)
+                for occupation in occupations],
+        )
+        for i, occupation in enumerate(response.occupations):
+            jobs_info: JobDto.Response.Jobs = JobService.get_jobs_info(occupation.occupationId)
+
+            response.occupations[i].jobs = jobs_info.jobs
+            response.occupations[i].total = len(jobs_info.jobs)
+
+        json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+
+        return response

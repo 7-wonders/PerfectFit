@@ -4,6 +4,7 @@ from dataclasses import asdict
 from flask import Blueprint, request, jsonify, Response, render_template, redirect
 
 from dto.interview.interview import InterviewDto
+from services.job_service import JobService
 
 from services.interview_service import InterviewService
 from utils.jwt_factory import JWTFactory
@@ -82,7 +83,7 @@ def post_question_answer():
 
     return redirect('/test/test_interview_post.html')
 
-@interview_bp.route('/interview/resume/select', methods=['POST'])
+@interview_bp.route('/resume/select', methods=['POST'])
 def make_interview_resume():
 
     jwt_factory = JWTFactory()
@@ -101,16 +102,18 @@ def make_interview_resume():
 
     InterviewService.make_interview_resume(request_dto)
 
-@interview_bp.route('/interview/job/select', methods=['POST'])
+@interview_bp.route('/job/select', methods=['POST'])
 def make_interview_job():
-
+    print("들어옴")
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     # POST 요청에서 form 데이터를 읽어옴
     job_id = request.form.get('jobId', None, type=int)
     level = request.form.get('level', None, type=str)
-
+    print(job_id)
+    print(level)
+    print(user_id)
     # 디버깅: 데이터 출력
     # DTO 생성
     request_dto = InterviewDto.Request.postMakeInterviewJob(
@@ -244,4 +247,6 @@ def resume_select():
 
 @interview_bp.route('/job-select')
 def job_select():
-    return render_template("interview_job_select.html")
+    job_list = JobService.get_all()
+    print(job_list)
+    return render_template("interview_job_select.html", response = job_list)

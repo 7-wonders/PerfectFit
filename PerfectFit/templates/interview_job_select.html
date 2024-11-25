@@ -9,38 +9,91 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/interview_job_select.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const categoryHeaders = document.querySelectorAll(".job-category-header");
+            const jobRoleButtons = document.querySelectorAll(".job-role");
+
+            // 직군 펼치기/접기 기능
+            categoryHeaders.forEach(header => {
+                header.addEventListener("click", () => {
+                    const body = header.nextElementSibling;
+                    body.style.display = body.style.display === "block" ? "none" : "block";
+                });
+            });
+
+            // 선택된 직업 ID 처리
+            jobRoleButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    const selected = document.querySelector(".job-role.selected");
+                    if (selected) selected.classList.remove("selected");
+                    button.classList.add("selected");
+                });
+            });
+
+            // 폼 제출 시 선택된 직업 ID 포함
+            const form = document.querySelector("#jobForm");
+            form.addEventListener("submit", (event) => {
+                const selectedJob = document.querySelector(".job-role.selected");
+                if (selectedJob) {
+                    const jobIdInput = document.createElement("input");
+                    jobIdInput.type = "hidden";
+                    jobIdInput.name = "jobId";
+                    jobIdInput.value = selectedJob.dataset.jobId; // `data-job-id`에서 값 추출
+                    form.appendChild(jobIdInput);
+                }
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <!-- 제목 입력란 -->
-        <label for="title" class="title-label">제목</label>
-        <input type="text" id="title" placeholder="제목을 입력해주세요." class="title-input" />
+        <!-- 폼 시작 -->
+        <form id="jobForm" action="/interview/job/select" method="POST">
+            <!-- 제목 입력란 -->
+            <label for="title" class="title-label">제목</label>
+            <input type="text" id="title" name="title" placeholder="제목을 입력해주세요." class="title-input" required />
 
-        <!-- 지원 경력 -->
-        <div class="career-section">
-            <span class="career-label">지원 경력</span>
-            <div class="career-options">
-                <label class="career-option">
-                    <input type="checkbox" id="career-experienced" />
-                    경력
-                </label>
-                <label class="career-option">
-                    <input type="checkbox" id="career-newbie" />
-                    신입
-                </label>
+            <!-- 지원 경력 -->
+            <div class="career-section">
+                <span class="career-label">지원 경력</span>
+                <div class="career-options">
+                    <label class="career-option">
+                        <input type="radio" id="career-experienced" name="level" value="경력" required />
+                        경력
+                    </label>
+                    <label class="career-option">
+                        <input type="radio" id="career-newbie" name="level" value="신입" required />
+                        신입
+                    </label>
+                </div>
             </div>
-        </div>
 
-        <!-- 직군 선택 -->
-        <div class="job-category-section">
-            <!-- 직군 데이터가 동적으로 추가될 공간 -->
-        </div>
+            <!-- 직군 선택 -->
+            <div class="job-category-section">
+                {% for occupation in response.occupations %}
+                    <div class="job-category">
+                        <div class="job-category-header">
+                            {{ occupation.occupationName }} <span>({{ occupation.total }}개)</span>
+                        </div>
+                        <div class="job-category-body">
+                            {% for job in occupation.jobs %}
+                                <button type="button" class="job-role" data-job-id="{{ job.jobId }}">
+                                    {{ job.jobName }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
 
-        <!-- 버튼 영역 -->
-        <div class="button-container">
-            <button class="prev-button">이전</button>
-            <button class="next-button">다음</button>
-        </div>
+            <!-- 버튼 영역 -->
+            <div class="button-container">
+                <button type="button" class="prev-button">이전</button>
+                <button type="submit" class="next-button">다음</button>
+            </div>
+        </form>
+        <!-- 폼 종료 -->
     </div>
 {% endblock %}

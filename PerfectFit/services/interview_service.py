@@ -85,7 +85,7 @@ class InterviewService:
         session = get_session()
 
         try:
-            make_interview_based_on_job(request_dto.jobId, request_dto.level)
+            make_interview_based_on_job(request_dto.jobId,request_dto.userId, request_dto.level)
         except Exception as e:
             session.rollback()
             print("Exception Cause2 :: ", e)
