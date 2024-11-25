@@ -6,6 +6,8 @@ from sqlalchemy.dialects.mysql import INTEGER, VARCHAR, TIMESTAMP
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+from domain.models.resume_draft import ResumeDraft
+
 if TYPE_CHECKING:
     from domain.models.job import Job
     from domain.models.resume import Resume
@@ -17,8 +19,11 @@ class Keyword(db.Model):
     keyword_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     resume_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
-        ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False
+        ForeignKey("resume.resume_id", onupdate="CASCADE", ondelete="CASCADE")
+    )
+    draft_id: Mapped[int] = mapped_column(
+        INTEGER(unsigned=True),
+        ForeignKey("resume_draft.draft_id", onupdate="CASCADE", ondelete="CASCADE")
     )
     job_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
@@ -28,6 +33,6 @@ class Keyword(db.Model):
     content: Mapped[str] = mapped_column(VARCHAR(20), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    # 관계 설정
     resume: Mapped["Resume"] = db.relationship("Resume", back_populates="keywords")
+    resumeDraft: Mapped["ResumeDraft"] = db.relationship("ResumeDraft", back_populates="keywords")
     job: Mapped["Job"] = db.relationship("Job", back_populates="keywords")

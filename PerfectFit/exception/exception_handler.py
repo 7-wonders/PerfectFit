@@ -1,3 +1,5 @@
+import traceback
+
 from flask import request, Response, url_for, redirect, make_response, render_template, Blueprint
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -16,7 +18,7 @@ def delete_cookie(response: Response) -> Response:
 
 @eh_bp.app_errorhandler(CustomException)
 def custom_exception(e: CustomException):
-    logger.error(e.__str__())
+    logger.error(f"{e.__str__()} : {traceback.format_exc()}")
 
     if e.exception.value == ExceptionType.INVALID_TOKEN.value or e.exception.value == ExceptionType.EXPIRED_TOKEN.value:
         if is_api_call(request):
@@ -52,7 +54,7 @@ def page_not_found(e):
 
 @eh_bp.app_errorhandler(Exception)
 def internal_server_error_page(e: Exception):
-    logger.error(e.__str__())
+    logger.error(f"{e.__str__()} : {traceback.format_exc()}")
 
     exception = CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 

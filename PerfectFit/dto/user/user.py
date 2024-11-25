@@ -11,6 +11,12 @@ class UserDto:
             username: str
 
         @dataclass
+        class IntroUserWithProfile:
+            userId: int
+            username: str
+            profilePath: Optional[str]
+
+        @dataclass
         class Users:
             users: List['UserDto.Response.IntroUser']
             pages: int

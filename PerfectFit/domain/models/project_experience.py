@@ -25,6 +25,6 @@ class ProjectExperience(db.Model):
     project_name: Mapped[str] = mapped_column(VARCHAR(50), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
-    user: Mapped["AppUser"] = db.relationship("AppUser", back_populates="project_experience")
+    user: Mapped["AppUser"] = db.relationship("AppUser", back_populates="project_experiences")
     tasks: Mapped[list["ProjectExperienceTask"]] = db.relationship("ProjectExperienceTask",
                                                               back_populates="project_experience")
