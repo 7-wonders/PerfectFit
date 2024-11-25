@@ -82,7 +82,7 @@ def post_question_answer():
 
     return redirect('/test/test_interview_post.html')
 
-@interview_bp.route('/interview/resume', methods=['POST'])
+@interview_bp.route('/interview/resume/select', methods=['POST'])
 def make_interview_resume():
 
     jwt_factory = JWTFactory()
@@ -101,7 +101,7 @@ def make_interview_resume():
 
     InterviewService.make_interview_resume(request_dto)
 
-@interview_bp.route('/interview/job', methods=['POST'])
+@interview_bp.route('/interview/job/select', methods=['POST'])
 def make_interview_job():
 
     jwt_factory = JWTFactory()
@@ -213,6 +213,35 @@ def gpt2():
 @interview_bp.route('/test/interview/post', methods=['GET'])
 def post_test():
     return render_template('test/test_interview_post.html')
+  
 @interview_bp.route('/test/spellcheck', methods=['GET'])
 def spellcheck_test():
     return render_template('test/test_spellchecker.html')
+
+@interview_bp.route('/loading')
+def loading_create():
+    return render_template("Loading-create.html")
+
+@interview_bp.route('/loading-analyze')
+def loading_analyze():
+    return render_template("Loading-analyze.html")
+
+@interview_bp.route('/')
+def interview():
+    return render_template("interview.html")
+
+@interview_bp.route('/list')
+def interviewlist():
+    return render_template("interviewlist.html")
+
+@interview_bp.route('/result')
+def result():
+    return render_template("result.html")
+
+@interview_bp.route('/resume-select')
+def resume_select():
+    return render_template("interview_resume_select.html")
+
+@interview_bp.route('/job-select')
+def job_select():
+    return render_template("interview_job_select.html")

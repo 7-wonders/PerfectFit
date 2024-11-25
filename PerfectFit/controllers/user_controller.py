@@ -412,3 +412,16 @@ def logout():
         jwt_factory.delete_refresh_token(refresh_token)
 
     return response
+
+# @user_bp.route('/user/mypage/resume')
+# def get_mypage_resume():
+#     return render_template("mypage_resume.html", active_page = 'resume')
+
+# @user_bp.route('/user/mypage/interview')
+# def get_mypage_interview():
+#     return render_template("mypage_interview.html", active_page = 'interview')
+
+# @user_bp.route('/user/mypage/information')
+# def get_mypage_information():
+#     return render_template("mypage_information.html", active_page = 'information')
+

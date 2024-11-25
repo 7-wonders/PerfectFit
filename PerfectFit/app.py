@@ -3,6 +3,9 @@ from flask import Flask, render_template, send_from_directory
 
 from controllers.job_controller import job_bp
 from controllers.interview_controller import interview_bp
+from controllers.resume_controller import resume_bp
+from controllers.user_controller import user_bp
+from database.config import Config, db  # Config와 db를 import
 
 from dotenv import load_dotenv
 
@@ -43,6 +46,7 @@ def favicon():
 
 @app.route('/')
 def index():
+
     return render_template("main.html")
 
 

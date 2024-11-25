@@ -1,0 +1,61 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_resume_select.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/interview_resume_select.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- 제목 입력란 -->
+        <label for="title" class="title-label">제목</label>
+        <input type="text" id="title" placeholder="제목을 입력해주세요." class="title-input" />
+
+        <!-- 지원 경력 -->
+        <div class="career-section">
+            <span class="career-label">지원 경력</span>
+            <div class="career-options">
+                <label class="career-option">
+                    <input type="checkbox" id="career-experienced" />
+                    경력
+                </label>
+                <label class="career-option">
+                    <input type="checkbox" id="career-newbie" />
+                    신입
+                </label>
+            </div>
+        </div>
+
+        <!-- 스크롤 가능한 테이블 -->
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>선택</th>
+                        <th>제목</th>
+                        <th>직업</th>
+                        <th>경력</th>
+                        <th>작성날짜</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body">
+                    <!-- 데이터를 JS로 동적으로 추가 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="button-container">
+            <button class="prev-button">이전</button>
+            <button class="next-button">다음</button>
+        </div>
+    </div>
+{% endblock %}
+
+

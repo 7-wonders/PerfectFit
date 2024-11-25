@@ -1,5 +1,5 @@
 header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.30);
+    border-bottom: 1px solid #EFEFEF !important;
 }
 
 .header-wrapper {
@@ -23,6 +23,25 @@ header {
     margin-right: 60px;
 }
 
-.uk-drop {
+.main-menu .uk-drop {
     top: initial !important;
 }
+
+.uk-modal-container .uk-modal-dialog {
+    width: 100px !important;
+    min-width : 380px !important;
+    min-height: 450px !important;
+    border-radius: 8px;
+    padding : 0;
+    align-items: center;
+    display: flex;
+}
+
+.user-profile {
+    width : 45px;
+    height : 45px;
+    border-radius: 70%;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.15);
+}
+
+

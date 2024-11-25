@@ -1,0 +1,94 @@
+
+{% set response = {
+    "user": {
+        "userId": 1,
+        "username": "홍길동",
+        "profilePath": url_for('static', filename='img/logo.svg')
+    },
+    "interviews": [
+        {
+            "interviewId": 1,
+            "title": "웹 개발자 면접 후기",
+            "isPublic": True,
+            "viewCount": 50,
+            "likeCount": 10,
+            "occupation": {
+                "occupationId": 101,
+                "occupationName": "웹 개발"
+            },
+            "job": "프론트엔드 개발자",
+            "level": "경력",
+            "createdTime": "2024-11-01"
+        },
+        {
+            "interviewId": 2,
+            "title": "백엔드 개발자 면접 팁",
+            "isPublic": False,
+            "viewCount": 30,
+            "likeCount": 5,
+            "occupation": {
+                "occupationId": 102,
+                "occupationName": "백엔드 개발"
+            },
+            "job": "백엔드 개발자",
+            "level": "신입",
+            "createdTime": "2024-10-15"
+        },
+        {
+            "interviewId": 3,
+            "title": "풀스택 개발자 면접 준비법",
+            "isPublic": True,
+            "viewCount": 80,
+            "likeCount": 15,
+            "occupation": {
+                "occupationId": 103,
+                "occupationName": "풀스택 개발"
+            },
+            "job": "풀스택 개발자",
+            "level": "경력",
+            "createdTime": "2024-09-20"
+        }
+    ],
+    "total": 3
+} %}
+
+{% block Content %}
+    {% include 'components/mypage.html' %}
+    <div class="container">
+        {#모의면접 게시물#}
+        <div>
+            {% for interview in response.interviews %}
+                <div class = "resume-list">
+                    {#게시물 왼쪽 부분#}
+                    <div>
+                        <div class = "resume-list-header">
+                            <span class = "title-category">{{ interview.occupation.occupationName }} |</span>
+                            <span class = "title-category">{{ interview.job }} |</span>
+                            <span class = "title-category">{{ interview.level }}</span>
+                            <a href = "#"><span class = Medium-20>{{ interview.title }}</span></a>
+                        </div>
+                        <p class="Regular-16">공개 여부 : {{ '공개' if interview.isPublic else '비공개' }}</p>
+                    </div>
+                    {#게시물 오른쪽 부분#}
+                    <div>
+                        <p class = "Regular-16">작성일 : {{ interview.createdTime }}</p>
+                        <div class = "resume-list-Engagement">
+                            <div>
+                                <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                                <span class = "Regular-16-light">{{ interview.viewCount }}</span>
+                            </div>
+                            <div>
+                                <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                                <span class = "Regular-16-light">{{ interview.likeCount }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if loop.index0 < response.interviews|length %}
+                   <hr>
+               {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

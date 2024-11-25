@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결과 확인 화면</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <!-- 제목 및 수정 버튼 -->
+    <div class="title-section" id="title-section">
+        <span id="display-title">2024-10-11 웹개발자 분야 모의면접</span>
+        <button id="edit-button" class="edit-icon">✏️</button>
+    </div>
+
+    <!-- 제목 수정 입력란 (초기 상태에서는 숨겨져 있음) -->
+    <div class="edit-section" id="edit-section" style="display: none;">
+        <input type="text" id="edit-title-input" value="2024-10-11 웹개발자 분야 모의면접" />
+        <button id="save-button" class="save-button">변경</button>
+    </div>
+
+    <!-- 내용 섹션 -->
+    <div class="content-section">
+        <!-- 질문 및 답변 박스 -->
+        <div class="left-panel">
+            <div class="question">
+                <div class="question-title">
+                    졸업 작품 중 팀원이 이탈하였을 때 어떻게 하였는가?
+                    <button class="check-button">개선 사항 확인</button>
+                </div>
+                <div class="answer">
+                    얄랴이 얄라
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="question">
+                <div class="question-title">
+                    팀원 간의 갈등을 어떻게 해결했는가?
+                    <button class="check-button">개선 사항 확인</button>
+                </div>
+                <div class="answer">
+                    팀원 간의 의견 차이를 조정하기 위해 서로의 아이디어를 존중하고 협력했습니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 가운데 화살표 -->
+        <div class="arrow-panel">
+            <span class="arrow">→</span>
+        </div>
+
+        <!-- 개선 사항 박스 -->
+        <div class="right-panel">
+            <div class="result-header">개선 사항</div>
+            <div class="result-content">개선 사항입니다.</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit-icons.min.js"></script>
+<script>
+    // 연필 아이콘 클릭 시 제목을 숨기고 수정 입력란을 표시
+    document.getElementById("edit-button").addEventListener("click", function() {
+        document.getElementById("title-section").style.display = "none";
+        document.getElementById("edit-section").style.display = "flex";
+    });
+
+    // 변경 버튼 클릭 시 수정된 제목을 표시하고 입력란을 숨김
+    document.getElementById("save-button").addEventListener("click", function() {
+        const newTitle = document.getElementById("edit-title-input").value;
+        document.getElementById("display-title").textContent = newTitle;
+        document.getElementById("edit-section").style.display = "none";
+        document.getElementById("title-section").style.display = "flex";
+    });
+</script>
+</body>
+</html>

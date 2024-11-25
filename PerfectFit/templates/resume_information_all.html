@@ -1,0 +1,140 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_information.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/resume_information.js') }}"></script>
+{% endblock %}
+
+{% set occupationList = [
+    {
+        "occupationId": 1,
+        "occupationName": "직군1",
+        "majorCategory": "대분류1",
+        "subCategory": "소분류1"
+    },
+    {
+        "occupationId": 2,
+        "occupationName": "직군2",
+        "majorCategory": "대분류2",
+        "subCategory": "소분류2"
+    },
+    {
+        "occupationId": 3,
+        "occupationName": "직군3",
+        "majorCategory": "대분류3",
+        "subCategory": "소분류3"
+    },
+
+ ]%}
+
+
+
+{% block content %}
+    <div class = "container">
+        <div class = "resume-information-box">
+            <p class = "Bold-24">정보 입력</p>
+            <p class = "Regular-16-light">AI가 자기소개서를 작성하기 위한 정보를 입력해주세요.</p>
+            <form class="uk-form-stacked" id="resume_write_form">
+                 {# 직군 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-occupation">직군</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="resume-information-occupation" name="occupationId" onchange = "updateJobList()">
+                            <option disabled selected>직군을 선택해주세요</option>
+                            {% for oc in occupationList %}
+                                <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {# 직업 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-job">직업</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="resume-information-job" name="jobId">
+                            <option value="" disabled selected>직군을 선택해주세요.</option>
+                        </select>
+                    </div>
+                </div>
+
+                 {# 경력 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-experience">경력 여부</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="resume-information-experience" name="level">
+                            <option disabled selected>경력을 선택해주세요</option>
+                            <option>신입</option>
+                            <option>경력</option>
+                        </select>
+                    </div>
+                </div>
+
+                {#주요 키워드#}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-keyword">주요 키워드</label>
+                    <div class="keyword-input-box">
+                        <div class = "badge-container">
+                            <input class="keyword-input Regular-16" id="resume-information-keyword" type="text" placeholder="주요 키워드를 입력해주세요(ex. 성실)">
+                        </div>
+                    </div>
+                </div>
+
+                {# 장점 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-merit">장점</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea custom-textarea" id="resume-information-merit" placeholder="장점을 입력해주세요." name="pros" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)"></textarea>
+                    </div>
+                </div>
+
+                {# 단점 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-disadvantage">단점</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea custom-textarea" id="resume-information-disadvantage" name="cons" placeholder="단점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)"></textarea>
+                    </div>
+                </div>
+
+
+                {# 방향성 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-directionality">방향성(선택 사항)</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea custom-textarea" id="resume-information-directionality" name="directional" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)"></textarea>
+                    </div>
+                </div>
+
+                {# 항목 #}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="resume-information-title-0">항목1(선택 사항)</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="resume-information-title-0" name="chapter[]" type="text" placeholder="제목을 입력해주세요.">
+                    </div>
+                    <div class = "add-content-box">
+                        <button type="button" class = "Regular-16-light" onclick="addSection()">+항목 추가하기</button>
+                    </div>
+                </div>
+
+
+                <div class = "submit-btn-box">
+                    <button class = "resume-information-back" id = "resume-information-back" type="button" onclick="window.location.href='http://127.0.0.1:5000/user/resume/select'">이전</button>
+                    <button class = "resume-information-submit" id = "resume-information-submit"  type="submit" onclick="submitInformation()">다음</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% if get_flashed_messages() %}
+        <script>
+            {% for message in get_flashed_messages() %}
+                alert("{{ message }}");
+            {% endfor %}
+        </script>
+    {% endif %}
+{% endblock %}
