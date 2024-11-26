@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload
 from config.config_mysql import get_session
 from domain.models import Job, AppUser, ProjectExperience, Resume, ProsCons, ResumeSection, Keyword, ResumeView, \
     ResumeLike, Occupation
+from domain.models.resume_draft import ResumeDraft
 from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
@@ -23,6 +24,23 @@ logger = Logger(__name__)
 
 
 class ResumeService:
+    @staticmethod
+    def get_intro_drafts(user_id: int):
+        with get_session() as session:
+            query = (
+                select(
+                    ResumeDraft.draft_id,
+                    ResumeDraft.title,
+                    ResumeDraft.created_time
+                )
+                .where(ResumeDraft.user_id == user_id)
+                .order_by(ResumeDraft.draft_id.desc())
+            )
+
+            resume_drafts = session.execute(query).mappings().all()
+            return resume_drafts
+
+
     @staticmethod
     def get_resumes(**kwargs):
         with (get_session() as session):
@@ -127,6 +145,8 @@ class ResumeService:
 
     @staticmethod
     def get_resume_write_data(task_data: ResumeGPT.Response.FullResume.Resume = None):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
         with get_session() as session:
             selected_job_query = (
                 select(
@@ -161,11 +181,14 @@ class ResumeService:
 
             jobs = session.execute(job_query).mappings().all()
             occupations = session.execute(occupation_query).mappings().all()
+            resume_intro_drafts = ResumeService.get_intro_drafts(user_id)
 
-            return jobs, occupations
+            return jobs, occupations, resume_intro_drafts
 
     @staticmethod
-    def get_occupations():
+    def get_resume_write_without_data():
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
         with get_session() as session:
             query = (
                 select(
@@ -175,8 +198,9 @@ class ResumeService:
             )
 
             occupations = session.execute(query).mappings().all()
+            resume_intro_drafts = ResumeService.get_intro_drafts(user_id)
 
-            return occupations
+            return occupations, resume_intro_drafts
 
     @staticmethod
     def get_resume(resume_id: str) -> tuple[RowMapping | None, RowMapping | None, bool]:

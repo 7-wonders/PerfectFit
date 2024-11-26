@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
+
+from dto.resume_draft.resume_draft import ResumeDraftDto
 from dto.validation_class import FormModel
 
 if TYPE_CHECKING:
@@ -121,8 +123,9 @@ class ResumeDto:
         @dataclass
         class ResumeForWrite:
             resume: "ResumeGPT.Response.FullResume.Resume" or None
+            drafts: list["ResumeDraftDto.Response.Intro"]
             jobs: "JobDto.Response.Jobs" or None
-            occupations: List["OccupationDto.Response.Occupation"]
+            occupations: list["OccupationDto.Response.Occupation"]
 
         @dataclass
         class Resume:
