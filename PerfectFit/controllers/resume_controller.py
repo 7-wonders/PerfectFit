@@ -6,10 +6,12 @@ from flask import Blueprint, request, jsonify, redirect, render_template, flash,
 from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
+from dto.resume_draft.resume_draft import ResumeDraftDto
 from dto.resume_section.resume_section import ResumeSectionDto
 from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
+from services.occupation_service import OccupationService
 from services.resume_service import ResumeService
 from tasks import add_resume_task
 from utils.model_converter import model_to_dict
@@ -159,16 +161,30 @@ def render_write():
             return redirect(f"/resume/waiting?task_id={task_id}")
 
     if task_response:
-        jobs, occupations = ResumeService.get_resume_write_data(task_response)
+        jobs, occupations, resume_drafts = ResumeService.get_resume_write_data(task_response)
         response = ResumeDto.Response.ResumeForWrite(
             resume=task_response,
+            drafts=[
+                ResumeDraftDto.Response.Intro(
+                    draftId=draft.draft_id,
+                    title=draft.title,
+                    createdTime=draft.created_time,
+                ) for draft in resume_drafts
+            ],
             jobs=jobs,
             occupations=occupations
         )
     else:
-        occupations = ResumeService.get_occupations()
+        occupations, resume_drafts = ResumeService.get_resume_write_without_data()
         response = ResumeDto.Response.ResumeForWrite(
             resume=None,
+            drafts=[
+                ResumeDraftDto.Response.Intro(
+                    draftId=draft.draft_id,
+                    title=draft.title,
+                    createdTime=draft.created_time.strftime('%Y-%m-%d %H:%M:%S'),
+                ) for draft in resume_drafts
+            ],
             jobs=None,
             occupations=occupations
         )
@@ -219,7 +235,7 @@ def create_section_content():
 
     has_keyword = ('keywords' not in data or not data["keywords"] or len(data["keywords"]) < 1
                    or not any([keyword.strip() for keyword in data["keywords"]]))
-    has_job = 'jobId' not in data or not data["jobId"] or data["jobId"] < 1
+    has_job = 'jobId' not in data or not data["jobId"] or int(data["jobId"]) < 1
     has_level = 'level' not in data or not data["level"] or not data["level"] in ["신입", "경력"]
     has_pros = 'pros' not in data or not data["pros"]
     has_cons = 'cons' not in data or not data["cons"]
@@ -282,7 +298,10 @@ def create_section():
         task = ResumeService.add_section(request_resume)
         return redirect(f"/resume/waiting?task_id={task.id}")
     else:
-        return render_template("resume_information_all.html")
+        occupation = OccupationService.get_occupations()
+        return render_template("resume_information_all.html", response={
+            "occupation": occupation
+        })
 
 
 @resume_bp.route('/waiting', methods=['GET'])
