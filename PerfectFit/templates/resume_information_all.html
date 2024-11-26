@@ -11,27 +11,27 @@
     <script src="{{ url_for('static', filename='js/resume_information.js') }}"></script>
 {% endblock %}
 
-{% set occupationList = [
-    {
-        "occupationId": 1,
-        "occupationName": "직군1",
-        "majorCategory": "대분류1",
-        "subCategory": "소분류1"
-    },
-    {
-        "occupationId": 2,
-        "occupationName": "직군2",
-        "majorCategory": "대분류2",
-        "subCategory": "소분류2"
-    },
-    {
-        "occupationId": 3,
-        "occupationName": "직군3",
-        "majorCategory": "대분류3",
-        "subCategory": "소분류3"
-    },
-
- ]%}
+{#{% set occupationList = [#}
+{#    {#}
+{#        "occupationId": 1,#}
+{#        "occupationName": "직군1",#}
+{#        "majorCategory": "대분류1",#}
+{#        "subCategory": "소분류1"#}
+{#    },#}
+{#    {#}
+{#        "occupationId": 2,#}
+{#        "occupationName": "직군2",#}
+{#        "majorCategory": "대분류2",#}
+{#        "subCategory": "소분류2"#}
+{#    },#}
+{#    {#}
+{#        "occupationId": 3,#}
+{#        "occupationName": "직군3",#}
+{#        "majorCategory": "대분류3",#}
+{#        "subCategory": "소분류3"#}
+{#    },#}
+{##}
+{# ]%}#}
 
 
 
@@ -40,8 +40,9 @@
         <div class = "resume-information-box">
             <p class = "Bold-24">정보 입력</p>
             <p class = "Regular-16-light">AI가 자기소개서를 작성하기 위한 정보를 입력해주세요.</p>
-            <form class="uk-form-stacked" id="resume_write_form">
+            <form class="uk-form-stacked" id="resume_write_form" action="/resume/information" method="POST">
                  {# 직군 #}
+            {{ response }}
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-information-occupation">직군</label>
                     <div class="uk-form-controls">

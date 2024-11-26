@@ -29,8 +29,7 @@ async function updateJobList() {
 
     try {
         // 백엔드 API 호출: 선택한 직군 ID를 경로에 동적으로 전달
-        const response = await instance.get(`/resume/job/${selectedOccupation}`);
-
+        const response = await instance.get(`/job/${selectedOccupation}`);
         // 백엔드로부터 받은 직업 데이터
         const jobList = response.data.jobs;
 
@@ -49,7 +48,11 @@ async function updateJobList() {
     }
 }
 
-
+// 자기소개서 작성하기 - 넘어온 직업이 없을시 한 번 직업 호출
+document.addEventListener("DOMContentLoaded", function() {
+    if(getJob)
+        updateJobList();
+});
 
 
 // 자기소개서 작성하기 - ai 작성하기 API 통신 예시
@@ -60,24 +63,15 @@ async function aiResumeWrite(idNumber) {
     const button = document.getElementById(`ai-resume-write-${idNumber}`);
     const keywords = Array.from(document.querySelectorAll('[id^="badge-input-"]')).map(input => input.value.trim());
     const directional = document.getElementById("resume-write-directionality").value.trim() || null;
-    const occupationId = document.getElementById("resume-write-occupation").value;
     const jobId = document.getElementById("resume-write-job").value;
     const level = document.getElementById("resume-write-experience").value;
     const pros = document.getElementById("resume-write-merit").value.trim();
     const cons = document.getElementById("resume-write-disadvantage").value.trim();
-
-    // 제목 입력 확인
-    if (!titleInput.value.trim()) {
-        alert("제목을 입력해주세요.");
-        return; // 제목이 없으면 함수 종료
-    }
-
+     // 로딩 애니메이션 추가
+    let loadingDots = 0;
     // 버튼 비활성화
     button.disabled = true;
     textarea.disabled = true;
-
-    // 로딩 애니메이션 추가
-    let loadingDots = 0;
     const loadingMessageBase = "AI가 자기소개서를 작성중입니다";
     textarea.value = loadingMessageBase;
     const loadingInterval = setInterval(() => {
@@ -88,18 +82,16 @@ async function aiResumeWrite(idNumber) {
 
     try {
         // 백엔드로 데이터 전송
-        const response = await instance.post('/resume/write/part', {
-            form: {
+        console.log(keywords);
+        const response = await instance.post('/resume/write/part', JSON.stringify({
                 keywords: keywords,
-                occupationId: occupationId,
-                jobId: jobId,
+                jobId: Number(jobId),
                 level: level,
                 pros: pros,
                 cons: cons,
                 directional: directional,
                 chapterTitle: titleInput.value.trim()
-            }
-        });
+            }));
 
         // 백엔드로부터 받은 데이터
         const text = response.data.content;
@@ -115,7 +107,7 @@ async function aiResumeWrite(idNumber) {
             if (index < text.length) {
                 textarea.value += text.charAt(index);
                 index++;
-                setTimeout(typeWriter, 50); // 타이핑 속도 조절
+                setTimeout(typeWriter, 15); // 타이핑 속도 조절
             } else {
                 // 버튼 활성화
                 button.disabled = false;
@@ -126,7 +118,10 @@ async function aiResumeWrite(idNumber) {
         typeWriter();
     } catch (error) {
         console.error("AI 생성 요청 실패:", error);
-        alert("AI 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+        if(error.status === 400)
+            aiResumeWriteValidation();
+        else
+            alert("AI 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
 
         // 로딩 애니메이션 제거
         clearInterval(loadingInterval);
@@ -134,5 +129,6 @@ async function aiResumeWrite(idNumber) {
 
         // 버튼 활성화
         button.disabled = false;
+        textarea.disabled = false;
     }
 }
