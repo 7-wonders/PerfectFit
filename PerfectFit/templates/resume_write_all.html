@@ -117,12 +117,12 @@
                                         <td class = "Medium-16">저장일시</td>
                                         <td class = "Medium-16">삭제</td>
                                     </tr>
-                                    {% for resume in resumes %}
-                                        <tr id="resume-{{ resume.resumeId }}">
-                                            <td class = "Medium-16">{{ resume.resumeId }}</td>
-                                            <td class = "Medium-16"><button class="custom-button Medium-16" onclick="loadResumeData('{{ resume.resumeId }}')">{{ resume.title }}</button></td>
-                                            <td class = "Medium-16">{{ resume.createdTime }}</td>
-                                            <td><button type="button" class = "custom-button" onclick="removeResumeData('{{ resume.resumeId }}')"><img src="{{ url_for('static', filename='img/remove.svg') }}"/></button></td>
+                                    {% for draft in response.drafts %}
+                                        <tr id="resume-{{ draft.draftId }}">
+                                            <td class = "Medium-16">{{ loop.index }}</td>
+                                            <td class = "Medium-16"><button class="custom-button Medium-16" onclick="loadResumeData('{{ draft.draftId }}')">{{ draft.title }}</button></td>
+                                            <td class = "Medium-16">{{ draft.createdTime }}</td>
+                                            <td><button type="button" class = "custom-button" onclick="removeResumeData('{{ draft.draftId }}')"><img src="{{ url_for('static', filename='img/remove.svg') }}"/></button></td>
                                         </tr>
                                     {% endfor %}
                                 {% else %}
@@ -182,16 +182,8 @@
                     <label class="uk-form-label" for="resume-write-experience">경력 여부</label>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="resume-write-experience" name = "level">
-                            {% if level == "신입" %}
-                                <option selected>{{ level }}</option>
-                                <option>경력</option>
-                            {% elif level =="경력" %}
-                                <option selected>{{ level }}</option>
-                                <option>신입</option>
-                            {% else %}
-                                <option>신입</option>
-                                <option>경력</option>
-                            {% endif %}
+                            <option value="신입" {% if response.resume and response.resume.level == '신입' %} selected {% endif %}>신입</option>
+                            <option value="경력" {% if response.resume and response.resume.level == '경력' %} selected {% endif %}>경력</option>
                         </select>
                     </div>
                 </div>
@@ -200,7 +192,7 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-merit">장점</label>
                     <div class="uk-form-controls">
-                        <textarea class="uk-textarea custom-textarea" id="resume-write-merit" name="pros" placeholder="장점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ pros }}</textarea>
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-merit" name="pros" placeholder="장점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ response.resume.pros if response.resume }}</textarea>
                     </div>
                 </div>
 
@@ -208,7 +200,7 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-disadvantage">단점</label>
                     <div class="uk-form-controls">
-                        <textarea class="uk-textarea custom-textarea" id="resume-write-disadvantage" name="cons" placeholder="단점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ cons }}</textarea>
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-disadvantage" name="cons" placeholder="단점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ response.resume.cons if response.resume }}</textarea>
                     </div>
                 </div>
 
@@ -217,13 +209,15 @@
                     <label class="uk-form-label" for="resume-write-keyword">주요 키워드</label>
                     <div class="keyword-input-box">
                         <div class = "badge-container">
-                            {% for keyword in keywords %}
-                                <div class = "badge">
-                                    <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
-                                    <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
-                                    <input type = "hidden" id = "badge-input-{{ loop.index0 }}" name = "keywords" value="{{ keyword }}" />
-                                </div>
-                            {% endfor %}
+                            {% if response.resume %}
+                                {% for keyword in response.resume.keywords %}
+                                    <div class = "badge">
+                                        <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
+                                        <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
+                                        <input type = "hidden" id = "badge-input-{{ loop.index0 }}" name = "keywords" value="{{ keyword }}" />
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
                             <input class="keyword-input Regular-16" id="resume-write-keyword" type="text">
                         </div>
                     </div>
@@ -234,11 +228,11 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-directionality">방향성(선택 사항)</label>
                     <div class="uk-form-controls">
-                        <textarea class="uk-textarea custom-textarea" id="resume-write-directionality" placeholder="AI가 참고할 방향성에 대해 적어주세요." name = "directional" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ directional }}</textarea>
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-directionality" placeholder="AI가 참고할 방향성에 대해 적어주세요." name = "directional" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ response.resume.directional }}</textarea>
                     </div>
                 </div>
-                {% if list %}
-                    {% for resumeList in list %}
+                {% if response.resume %}
+                    {% for resumeList in response.resume.sections %}
                         <div class = "resume-container" id = "resume-write-container-{{ loop.index0 }}">
                             {# 항목 #}
                             <div class="uk-margin">

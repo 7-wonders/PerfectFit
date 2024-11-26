@@ -363,8 +363,14 @@ function addSectionIfNeeded(requiredCount) {
     }
 }
 
-// 임시 저장 목록 불러오기
+// 임시 저장 목록 불러오기 백엔드 개발시 수정
 function loadResumeData(resumeId) {
+    try {
+        const sampleData = 2;
+    }
+    catch(error) {
+        alert("임시저장 목록을 불러오는데 실패하였습니다 다시 시도해주세요.")
+    }
     const sampleData = {
         title: "수정된 제목 예시",
         occupation: "직군5",
@@ -556,20 +562,22 @@ function loadResumeData(resumeId) {
 }
 
 // 임시 저장 목록 삭제
-function removeResumeData(resumeId) {
+async function removeResumeData(resumeId) {
     // 콘솔에 resumeId를 출력해서 확인 (테스트 용도)
     console.log(`Removing resume with ID: ${resumeId}`);
-
-    // 해당 resumeId를 가진 <tr> 요소를 찾아서 제거
-    const resumeRow = document.getElementById(`resume-${resumeId}`);
-    if (resumeRow) {
-        resumeRow.remove();
+    try {
+        await instance.delete(`/resume/draft/${resumeId}`);
+        // 해당 resumeId를 가진 <tr> 요소를 찾아서 제거
+        const resumeRow = document.getElementById(`resume-${resumeId}`);
+        if (resumeRow) {
+            resumeRow.remove();
+        }
+    }
+    catch (error) {
+        alert("임시저장 목록을 삭제 하는데 실패했습니다. 다시 시도해주세요.");
     }
 
-    // 여기서 API 호출을 추가하면 서버에서 해당 resumeId를 삭제할 수 있습니다.
-    // 예: fetch(`/api/remove-resume/${resumeId}`, { method: 'DELETE' });
 
-    // 여기에 AJAX 요청을 추가하여 서버와 통신을 할 수 있습니다.
 }
 
 // 자기소개서 "저장" 버튼 클릭 시 동작
@@ -662,6 +670,7 @@ function submitResume() {
     alert("자기소개서가 제출되었습니다.");
 }
 
+// ai 작성하기 유효성 검사
 function aiResumeWriteValidation() {
     // 자기소개서 항목 및 내용
     const titleInputs = document.querySelectorAll('[id^="resume-write-title-"]');
