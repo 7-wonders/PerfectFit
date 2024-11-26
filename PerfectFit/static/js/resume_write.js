@@ -129,16 +129,6 @@ function deleteSection(sectionId) {
     checkFormCompletion();
 }
 
-// 페이지가 실행 된 후 직업 목록을 한번 호출
-document.addEventListener("DOMContentLoaded", function() {
-    // 직군 선택값 가져오기
-    const selectedOccupation = document.getElementById("resume-write-occupation").value;
-
-    // 직군이 이미 선택된 상태라면, 직업 목록을 한번 호출
-    if (selectedOccupation) {
-        updateJobList();
-    }
-});
 
 //주요 키워드 뱃지 관련 코드
 document.addEventListener('DOMContentLoaded', function() {
@@ -340,8 +330,22 @@ function setupEventListeners() {
     const observer = new MutationObserver(checkFormCompletion);
     observer.observe(badgeContainer, { childList: true, subtree: true });
 
-    // 버튼 클릭 이벤트 리스너 추가
-    handleButtonClick();
+    // 버튼 클릭 이벤트 리스너 추가(이 코드 추가하면 input에서 Enter 누를 시 submit이 됨)
+    // handleButtonClick();
+
+    // Enter 키 방지 추가
+    const titleInputs = document.querySelectorAll('[id^="resume-write-title-"]');
+    const mainTitleInput = document.getElementById("resume-write-main-title");
+
+    function preventEnter(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // 기본 Enter 동작 차단
+        }
+    }
+
+    titleInputs.forEach(input => input.addEventListener("keydown", preventEnter));
+    mainTitleInput.addEventListener("keydown", preventEnter);
+
 }
 
 
@@ -656,5 +660,73 @@ function submitResume() {
 
     // 모든 조건이 충족되면 제출
     alert("자기소개서가 제출되었습니다.");
+}
+
+function aiResumeWriteValidation() {
+    // 자기소개서 항목 및 내용
+    const titleInputs = document.querySelectorAll('[id^="resume-write-title-"]');
+
+    // 경력 필드
+    const experience = document.getElementById("resume-write-experience").value;
+    let selectExperience = false;
+
+    // 고정 입력 필드 목록
+    const inputs = [
+        {
+            element: document.getElementById("resume-write-job"),
+            name: "직업"
+        },
+        {
+            element: document.getElementById("resume-write-merit"),
+            name: "장점"
+        },
+        {
+            element: document.getElementById("resume-write-disadvantage"),
+            name: "단점"
+        }
+    ];
+
+    // 주요 키워드 배지 확인
+    const hasBadges = document.querySelectorAll("div.badge").length > 0;
+
+    // 고정 필드 입력 확인
+    for (const input of inputs) {
+        const value = input.element.tagName === "SELECT" ? input.element.value : input.element.value.trim();
+        if (!value || (input.element.tagName === "SELECT" && value === "직군을 선택해주세요")) {
+            alert(`${input.name}을(를) 채워주세요.`);
+            input.element.focus(); // 해당 입력 필드로 포커스 이동
+            event.preventDefault();
+            return; // 함수 종료
+        }
+    }
+
+    // 경력 필드 확인
+    if (experience === "신입" || experience === "경력") {
+        selectExperience = true;
+    }
+    if (!selectExperience) {
+        alert("경력을 선택해주세요.");
+        document.getElementById("resume-write-experience").focus();
+        event.preventDefault();
+        return;
+    }
+
+    // 자기소개서 항목 및 내용 확인
+    for (let i = 0; i < titleInputs.length; i++) {
+        const title = titleInputs[i].value.trim();
+        if (!title) {
+            alert(`자기소개서 항목${i + 1}을(를) 채워주세요.`);
+            titleInputs[i].focus();
+            event.preventDefault();
+            return;
+        }
+    }
+
+    // 키워드 배지 확인
+    if (!hasBadges) {
+        alert("주요 키워드를 추가해주세요.");
+        event.preventDefault();
+        return;
+    }
 }
 

@@ -19,50 +19,50 @@
 {#        "subCategory": "소분류3"#}
 {#    }#}
 {# ]%}#}
-{% set occupationList = [
-    {
-        "occupationId": 1,
-        "occupationName": "직군1",
-        "majorCategory": "대분류1",
-        "subCategory": "소분류1"
-    },
-    {
-        "occupationId": 2,
-        "occupationName": "직군2",
-        "majorCategory": "대분류2",
-        "subCategory": "소분류2"
-    },
-    {
-        "occupationId": 3,
-        "occupationName": "직군3",
-        "majorCategory": "대분류3",
-        "subCategory": "소분류3"
-    },
+{#{% set occupationList = [#}
+{#    {#}
+{#        "occupationId": 1,#}
+{#        "occupationName": "직군1",#}
+{#        "majorCategory": "대분류1",#}
+{#        "subCategory": "소분류1"#}
+{#    },#}
+{#    {#}
+{#        "occupationId": 2,#}
+{#        "occupationName": "직군2",#}
+{#        "majorCategory": "대분류2",#}
+{#        "subCategory": "소분류2"#}
+{#    },#}
+{#    {#}
+{#        "occupationId": 3,#}
+{#        "occupationName": "직군3",#}
+{#        "majorCategory": "대분류3",#}
+{#        "subCategory": "소분류3"#}
+{#    },#}
+{##}
+{# ]%}#}
 
- ]%}
-
-{% set resumes = [
-    {
-        "resumeId": 1,
-        "title": "자기소개서 제목1",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 2,
-        "title": "자기소개서 제목2",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 3,
-        "title": "자기소개서 제목3",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 4,
-        "title": "자기소개서 제목4",
-        "createdTime": "2024-10-04 02:17:32"
-    }
-]%}
+{#{% set resumes = [#}
+{#    {#}
+{#        "resumeId": 1,#}
+{#        "title": "자기소개서 제목1",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    },#}
+{#    {#}
+{#        "resumeId": 2,#}
+{#        "title": "자기소개서 제목2",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    },#}
+{#    {#}
+{#        "resumeId": 3,#}
+{#        "title": "자기소개서 제목3",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    },#}
+{#    {#}
+{#        "resumeId": 4,#}
+{#        "title": "자기소개서 제목4",#}
+{#        "createdTime": "2024-10-04 02:17:32"#}
+{#    }#}
+{#]%}#}
 
 {% set Total = resumes | length %}
 
@@ -85,6 +85,7 @@
 {#    },#}
 {#]%}#}
 
+
 {% block scripts %}
     <script>const iconAiPath = "{{url_for('static', filename = 'img/icon_ai.svg')}}";</script>
     <script>const iconRemovePath = "{{url_for('static', filename = 'img/remove.svg')}}";</script>
@@ -93,14 +94,14 @@
     <script>
         let sectionCount = {{ (list | length if list else 1) - 1 }};
     </script>
-
-
+    {% if response.jobs is none or response.jobs | length == 0 %}
+        <script>const getJob = true</script>
+    {% endif %}
     <script>let badgeCounter = {{ keywords | length }};</script>
 {% endblock %}
 
 {% block content %}
     {% include 'components/header.html' %}
-
     <div class="container">
         <div class ="saved-resume-box">
              <ul uk-accordion>
@@ -136,7 +137,7 @@
 
         <div class = "resume-write-box">
             <p class = "Medium-22">자기소개서 작성</p>
-            <form class="uk-form-stacked" id="resume_write_form">
+            <form class="uk-form-stacked" id="resume_write_form" method="POST" action="/resume/write">
                 {# 제목 #}
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-main-title">제목</label>
@@ -149,29 +150,29 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-occupation">직군</label>
                     <div class="uk-form-controls">
-                        <select class="uk-select" id="resume-write-occupation" name="occupation" onchange = "updateJobList()">
-                            {% if selectedOccupation %}
-                                <option selected value = "{{ selectedOccupation[0].occupationId }}">{{ selectedOccupation[0].occupationName }}</option>
-                                {% for oc in occupationList %}
-                                    {% if oc.occupationId != selectedOccupation[0].occupationId %}
-                                        <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                {% for oc in occupationList %}
-                                    <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
-                                {% endfor %}
-                            {% endif %}
+                        <select class="uk-select" id="resume-write-occupation" name="occupation_id" onchange = "updateJobList()">
+                             {% for occupation in response.occupations %}
+                                <option {% if occupation.isSelected %} selected {% endif %} value = "{{ occupation.occupationId }}">
+                                    {{ occupation.occupationName }}
+                                </option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
-
                 {# 직업 #}
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-job">직업</label>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="resume-write-job" name = "jobName">
-                            <option disabled>직군을 선택해주세요.</option>
+                            {% if response.jobs %}
+                                {% for job in response.jobs %}
+                                    <option value="{{ job.jobId }}" {% if job.isSelected %} selected {% endif %}>
+                                        {{ job.jobName }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option disabled selected>직군을 선택해주세요.</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>
