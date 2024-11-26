@@ -15,7 +15,6 @@
     {% else %}
         <script>let sectionCount = {{ response.resume.sections | length - 1 }};</script>
     {% endif %}
-    <script>const sectionCount = 0;</script>
 
     {% if response.jobs is none or response.jobs | length == 0 %}
         <script>const getJob = true</script>
