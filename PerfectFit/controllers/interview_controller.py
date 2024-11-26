@@ -4,7 +4,10 @@ from dataclasses import asdict
 from flask import Blueprint, request, jsonify, Response, render_template, redirect
 
 from dto.interview.interview import InterviewDto
+from exception.custom_exception import CustomException
+from exception.exception_type import ExceptionType
 from services.job_service import JobService
+from services.resume_service import ResumeService
 
 from services.interview_service import InterviewService
 from utils.jwt_factory import JWTFactory
@@ -13,24 +16,34 @@ from utils.open_ai import make_interview_based_on_resume, make_interview_based_o
 interview_bp = Blueprint('interview', __name__)
 
 
-@interview_bp.route('/interview/<interview_id>', methods=['GET'])
+@interview_bp.route('/<interview_id>', methods=['GET'])
 def get_questions(interview_id: int):
 
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    response: InterviewDto.Response.questions = InterviewService.get_questions(interview_id)
-
+    questions: InterviewDto.Response.questions = InterviewService.get_questions(interview_id)
     # json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
     # return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
-    return render_template("test/test_interview.html", questions=response.questions, total=response.total)
+    print("#############")
+    print(questions)
 
-@interview_bp.route('/interview/ispublic/<interview_id>', methods=['GET'])
+    response = {
+        "questions": [{
+            "questionId": question.question_id,
+            "question": question.question}
+            for question in questions.questions],
+        "total": questions.total
+    }
+
+    return render_template("test/test_interview.html", response=response)
+
+@interview_bp.route('/ispublic/<interview_id>', methods=['GET'])
 def get_is_public(interview_id: int):
     print(request.cookies.get('access_token'))
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     interviewList = InterviewService.get_is_public(interview_id)
     response: InterviewDto.Response.isPublicList = InterviewDto.Response.isPublicList(
@@ -41,20 +54,32 @@ def get_is_public(interview_id: int):
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
-@interview_bp.route('/interview/improvement/<interview_id>', methods=['GET'])
+@interview_bp.route('/improvement/<interview_id>', methods=['GET'])
 def get_improvement(interview_id: int):
 
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     improvementList = InterviewService.get_improvement(interview_id)
-    response: InterviewDto.Response.improvementList = InterviewDto.Response.improvementList(
-        improvements= [improvement for improvement in improvementList]
-    )
+    # response: InterviewDto.Response.improvementList = InterviewDto.Response.improvementList(
+    #     improvements= [improvement for improvement in improvementList]
+    # )
+    #
+    # json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
 
-    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+    response = {
+        "improvements": [{
+			"improvementId": improvement.improvementId,
+			"questionId": improvement.questionId,
+			"answer": improvement.answer,
+			"improvement": improvement.improvement,
+			"translatedAnswer": improvement.translatedAnswer,
+		}
+            for improvement in improvementList]
+    }
 
-    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+    return render_template("test/test.html",response=response)
 
 
 @interview_bp.route('/interview', methods=['POST'])
@@ -92,12 +117,14 @@ def make_interview_resume():
     # POST 요청에서 form 데이터를 읽어옴
     resume_id = request.form.get('resumeId', None, type=int)
     level = request.form.get('level', None, type=str)
+    title = request.form.get('title', None, type=str)
 
     # 디버깅: 데이터 출력
     # DTO 생성
     request_dto = InterviewDto.Request.postMakeInterviewResume(
         resumeId=resume_id,
-        level=level
+        level=level,
+        title=title
     )
 
     InterviewService.make_interview_resume(request_dto)
@@ -105,50 +132,56 @@ def make_interview_resume():
 @interview_bp.route('/job/select', methods=['POST'])
 def make_interview_job():
     print("들어옴")
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    user_id = 1
     # POST 요청에서 form 데이터를 읽어옴
     job_id = request.form.get('jobId', None, type=int)
     level = request.form.get('level', None, type=str)
-    print(job_id)
-    print(level)
-    print(user_id)
+    title = request.form.get('title', None, type=str)
+
     # 디버깅: 데이터 출력
     # DTO 생성
     request_dto = InterviewDto.Request.postMakeInterviewJob(
         jobId=job_id,
         userId=user_id,
-        level=level
+        level=level,
+        title=title
     )
 
     InterviewService.make_interview_job(request_dto)
 
+    return render_template("Loading-create.html")
 
 
 
-@interview_bp.route('/interview/ispublic', methods=['PATCH'])
+@interview_bp.route('/ispublic', methods=['PATCH'])
 def patch_is_public():
 
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    # jwt_factory = JWTFactory()
+    # user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
-    questionIds: list[int] = data.get('questionIds')
 
-    InterviewService.patch_ispublic(questionIds)
+    is_share_ids = data.get('isShareIds', [])
+    is_close_ids = data.get('isCloseIds', [])
 
+
+    if isinstance(is_share_ids, list):
+        InterviewService.patch_ispublic(is_share_ids)
+    if isinstance(is_close_ids, list):
+        InterviewService.patch_ispublic_cancel(is_close_ids)
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8')
-@interview_bp.route('/interview/ispublic/cancel', methods=['PATCH'])
+@interview_bp.route('/ispublic/cancel', methods=['PATCH'])
 def patch_is_public_cancel():
 
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    # jwt_factory = JWTFactory()
+    # user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
     print(data)
-    questionIds: list[int] = data.get('questionIds')
+    questionIds: list[int] = request.form.get('questionIds')
 
     InterviewService.patch_ispublic_cancel(questionIds)
 
@@ -221,6 +254,10 @@ def post_test():
 def spellcheck_test():
     return render_template('test/test_spellchecker.html')
 
+@interview_bp.route('/test/ispublic', methods=['GET'])
+def ispublic_test():
+    return render_template('test/test_ispublic.html')
+
 @interview_bp.route('/loading')
 def loading_create():
     return render_template("Loading-create.html")
@@ -243,10 +280,27 @@ def result():
 
 @interview_bp.route('/resume-select')
 def resume_select():
-    return render_template("interview_resume_select.html")
+
+    # jwt_factory = JWTFactory()
+    # user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    user_id=1
+
+    resume_list, total = ResumeService.get_my_resumes(user_id,1,100) # 일단 100개 가져오기
+
+    response = {
+        "resumes": [{
+            "resumeId": resume.resume_id,
+            "title": resume.title,
+            "jobName": resume.job.job_name,
+            "createdTime": resume.created_time.strftime("%Y-%m-%d %H:%M")}
+            for resume in resume_list],  # JSON 형태로 변환
+        "total": total
+    }
+    print(response)
+
+    return render_template("interview_resume_select.html", response = response)
 
 @interview_bp.route('/job-select')
 def job_select():
     job_list = JobService.get_all()
-    print(job_list)
     return render_template("interview_job_select.html", response = job_list)

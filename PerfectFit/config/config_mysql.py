@@ -17,7 +17,7 @@ def get_session():
 class Config:
     mysql_host = os.getenv('MYSQL_HOST') or 'localhost'
     mysql_user = os.getenv('MYSQL_USER') or 'root'
-    mysql_password = os.getenv('MYSQL_PASSWORD') or '1234'
+    mysql_password = os.getenv('MYSQL_PASSWORD') or 'root1234'
     mysql_db = os.getenv('MYSQL_DB') or 'perfectfit'
 
     SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}'
@@ -29,6 +29,6 @@ class Config:
     else:
         SQLALCHEMY_TRACK_MODIFICATIONS = False
         SQLALCHEMY_ECHO = True
-        SERVER_NAME = os.getenv('DEVELOP_SERVER_NAME') or 'localhost:5000' ## 맥북용으로 임시 변경
+        SERVER_NAME = os.getenv('DEVELOP_SERVER_NAME') or '127.0.0.1:5000' ## 맥북용으로 임시 변경
 
     SECRET_KEY = os.environ.get('FLASH_SECRET_KEY')

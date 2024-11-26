@@ -14,12 +14,14 @@ class InterviewDto:
         class postMakeInterviewResume:
             resumeId: int
             level: str
+            title: str
 
         @dataclass
         class postMakeInterviewJob:
             jobId: int
             userId: int
             level: str
+            title: str
               
         @dataclass
         class patchInterviewTitle:

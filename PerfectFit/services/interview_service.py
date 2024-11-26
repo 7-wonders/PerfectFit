@@ -74,7 +74,7 @@ class InterviewService:
         session = get_session()
 
         try:
-            make_interview_based_on_resume(request_dto.resumeId, request_dto.level)
+            make_interview_based_on_resume(request_dto.resumeId, request_dto.level, request_dto.title)
         except Exception as e:
             session.rollback()
             print("Exception Cause2 :: ", e)
@@ -85,7 +85,8 @@ class InterviewService:
         session = get_session()
 
         try:
-            make_interview_based_on_job(request_dto.jobId,request_dto.userId, request_dto.level)
+            make_interview_based_on_job(request_dto.jobId,request_dto.userId, request_dto.level, request_dto.title)
+            return
         except Exception as e:
             session.rollback()
             print("Exception Cause2 :: ", e)
@@ -175,7 +176,12 @@ class InterviewService:
         for question in questions:
             for improvement in question.interview_improvements :
                 if improvement :
-                    improvementDto = InterviewDto.Response.improvement(improvement.improvement_id, question.question_id, improvement.answer, improvement.improvement, improvement.translated_answer)
+                    improvementDto = InterviewDto.Response.improvement(
+                        improvement.improvement_id,
+                        question.question_id,
+                        improvement.answer,
+                        improvement.improvement,
+                        improvement.translated_answer)
                     improvementList.append(improvementDto)
         return improvementList
 
