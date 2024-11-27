@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify, Response, render_template, redire
 from dto.interview.interview import InterviewDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
+from middlewares.auth_middleware import jwt_factory
 from services.job_service import JobService
 from services.resume_service import ResumeService
 
@@ -19,15 +20,10 @@ interview_bp = Blueprint('interview', __name__)
 @interview_bp.route('/<interview_id>', methods=['GET'])
 def get_questions(interview_id: int):
 
-    #jwt_factory = JWTFactory()
-    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     questions: InterviewDto.Response.questions = InterviewService.get_questions(interview_id)
-    # json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    # return Response(json_response, status=200, content_type='application/json; charset=utf-8')
-
-    print("#############")
-    print(questions)
 
     response = {
         "questions": [{
@@ -39,13 +35,13 @@ def get_questions(interview_id: int):
 
     return render_template("test/test_interview.html", response=response)
 
-@interview_bp.route('/ispublic/<interview_id>', methods=['GET'])
+@interview_bp.route('/ispublic/<interview_id>', methods=['GET']) # Modal 창에 띄울 것이라 Json으로 리턴
 def get_is_public(interview_id: int):
-    print(request.cookies.get('access_token'))
-    #jwt_factory = JWTFactory()
-    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     interviewList = InterviewService.get_is_public(interview_id)
+
     response: InterviewDto.Response.isPublicList = InterviewDto.Response.isPublicList(
         interviews= [interview for interview in interviewList]
     )
@@ -57,15 +53,10 @@ def get_is_public(interview_id: int):
 @interview_bp.route('/improvement/<interview_id>', methods=['GET'])
 def get_improvement(interview_id: int):
 
-    #jwt_factory = JWTFactory()
-    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     improvementList = InterviewService.get_improvement(interview_id)
-    # response: InterviewDto.Response.improvementList = InterviewDto.Response.improvementList(
-    #     improvements= [improvement for improvement in improvementList]
-    # )
-    #
-    # json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
 
     response = {
         "improvements": [{
@@ -81,30 +72,21 @@ def get_improvement(interview_id: int):
 
     return render_template("test/test.html",response=response)
 
-
 @interview_bp.route('/interview', methods=['POST'])
 def post_question_answer():
 
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    ##data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
-    ##post_answer_request = InterviewDto.Request.postInterviewAnswer(**data)
-
-    # POST 요청에서 form 데이터를 읽어옴
     question_id = request.form.get('questionId', None, type=int)
     answer = request.form.get('answer', None, type=str)
-    print(answer)
 
-    # 디버깅: 데이터 출력
-    # DTO 생성
     post_answer_request = InterviewDto.Request.postInterviewAnswer(
         questionId=question_id,
         answer=answer
     )
-    InterviewService.post_question_answer(post_answer_request)
 
-
+    InterviewService.post_question_answer(post_answer_request) # 답변을 등록 하면서, 개선사항 도출 로직까지 수행.
 
     return redirect('/test/test_interview_post.html')
 
@@ -119,8 +101,6 @@ def make_interview_resume():
     level = request.form.get('level', None, type=str)
     title = request.form.get('title', None, type=str)
 
-    # 디버깅: 데이터 출력
-    # DTO 생성
     request_dto = InterviewDto.Request.postMakeInterviewResume(
         resumeId=resume_id,
         level=level,
@@ -129,19 +109,18 @@ def make_interview_resume():
 
     InterviewService.make_interview_resume(request_dto)
 
+    # 아마 리턴으로 로딩창 혹은 결과페이지로 보내야 할듯.
+
 @interview_bp.route('/job/select', methods=['POST'])
 def make_interview_job():
-    print("들어옴")
-    #jwt_factory = JWTFactory()
-    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-    user_id = 1
-    # POST 요청에서 form 데이터를 읽어옴
+
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
     job_id = request.form.get('jobId', None, type=int)
     level = request.form.get('level', None, type=str)
     title = request.form.get('title', None, type=str)
 
-    # 디버깅: 데이터 출력
-    # DTO 생성
     request_dto = InterviewDto.Request.postMakeInterviewJob(
         jobId=job_id,
         userId=user_id,
@@ -151,17 +130,16 @@ def make_interview_job():
 
     InterviewService.make_interview_job(request_dto)
 
-    return render_template("Loading-create.html")
-
-
+    return render_template("Loading-create.html") # 임시로 로딩창으로 넘어가게 수정.
+    # 추가로 작업 비동기 걸고 통신을 통해 넘어가야함.
 
 @interview_bp.route('/ispublic', methods=['PATCH'])
 def patch_is_public():
 
-    # jwt_factory = JWTFactory()
-    # user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
+    data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴. Patch 방식은 Form 사용이 불가능하여 Axios 방식으로 해야할 것으로 예상. 그래서 body를 받음
 
     is_share_ids = data.get('isShareIds', [])
     is_close_ids = data.get('isCloseIds', [])
@@ -172,36 +150,35 @@ def patch_is_public():
     if isinstance(is_close_ids, list):
         InterviewService.patch_ispublic_cancel(is_close_ids)
 
-    return Response(' ', status=204, content_type='application/json; charset=utf-8')
-@interview_bp.route('/ispublic/cancel', methods=['PATCH'])
+    return Response('', status=204, content_type='application/json; charset=utf-8') # 완료 후 어디로 보내야 하나
+@interview_bp.route('/ispublic/cancel', methods=['PATCH']) # deprecated
 def patch_is_public_cancel():
 
-    # jwt_factory = JWTFactory()
-    # user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
-    print(data)
     questionIds: list[int] = request.form.get('questionIds')
 
     InterviewService.patch_ispublic_cancel(questionIds)
 
 
-    return Response(' ', status=204, content_type='application/json; charset=utf-8')
+    return Response(' ', status=204, content_type='application/json; charset=utf-8') #
+
 @interview_bp.route('/interview/<interview_id>/title', methods=['PATCH'])
 def patch_title(interview_id: int):
 
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴
+    data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴. 마찬가지로 Patch 방식이라 Form 불가능
     patch_interview_title = InterviewDto.Request.patchInterviewTitle(**data, interviewId=interview_id)
 
     InterviewService.patch_interview_title(patch_interview_title)
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8')
 
-
-@interview_bp.route('/spellcheck', methods=['POST'])
+@interview_bp.route('/spellcheck', methods=['POST']) # 프론트가 나와야 테스트 가능
 def spell_check():
     if request.method == 'POST':
         # POST 요청에서 폼 데이터를 가져옵니다.
@@ -227,36 +204,7 @@ def spell_check():
         content="",
         translatedContent=""
     )
-    # data = request.get_json()  # POST 요청의 BODY 가져오기.
-    #
-    # print("debug1")
-    # response: InterviewDto.Response.spellChecked = InterviewDto.Response.spellChecked(
-    #     translatedContent= translatedContent
-    # )
-    # json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
-    # print(response.translatedContent)
-    # # return Response(json_response, status=200, content_type='application/json; charset=utf-8')
-    # return jsonify(asdict(response)), 200
 
-@interview_bp.route('/testGPT',methods=['GET'])
-def gpt():
-    make_interview_based_on_resume(1,"신입")
-
-@interview_bp.route('/testGPT2', methods=['GET'])
-def gpt2():
-    make_interview_based_on_job(254, 1,"경력")
-
-@interview_bp.route('/test/interview/post', methods=['GET'])
-def post_test():
-    return render_template('test/test_interview_post.html')
-  
-@interview_bp.route('/test/spellcheck', methods=['GET'])
-def spellcheck_test():
-    return render_template('test/test_spellchecker.html')
-
-@interview_bp.route('/test/ispublic', methods=['GET'])
-def ispublic_test():
-    return render_template('test/test_ispublic.html')
 
 @interview_bp.route('/loading')
 def loading_create():
@@ -270,20 +218,68 @@ def loading_analyze():
 def interview():
     return render_template("interview.html")
 
-@interview_bp.route('/list')
+@interview_bp.route('/list') # 모의면접 목록 페이지.
 def interviewlist():
-    return render_template("interviewlist.html")
+    """
+    기업별 리스트 가져올 모의면접.
 
-@interview_bp.route('/result')
+1. is_public : true
+2. company : not null
+3. 사용자 이름 넣고 제목 설정
+    1. 윤**님 AI 모의면접
+4. 회사가 있으니까 인재상 있으므로 넣어줌
+5. 학교이름은 그냥 명시해서 넣기.
+6. 경력도 그냥 넣기
+
+지원분야별
+
+1. is_public : true
+2. occupation_id 별로 넣기
+3. 일단 인재상 . 다빼기
+4. 최상단 회사명은 있는 경우에만 넣기
+    1. 없으면 그냥 비어두기
+5. 기타 사항은 기업별과 동일
+    :return:
+    """
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    job_interviews, company_interviews = InterviewService.get_interview_list()
+
+    response = {
+        "companyInterviews" : [{
+                "interviewId" : company_interview.interviewId,
+                "companyName" : company_interview.companyName,
+                "level" : company_interview.level,
+                "title" : company_interview.title,
+                "jobName" : company_interview.jobName, # 지원 분야
+                "university": company_interview.university, # 출신 학교
+                "companyBest": [company_best.content for company_best in company_interview.companyBest],
+                "companyWorst": company_interview.companyWorst
+            } for company_interview in company_interviews],
+        "jobInterviews": [{
+            "interviewId": job_interview.interviewId,
+            "companyName": ( job_interview.companyName if job_interview.companyName else None ),
+            "level": job_interview.level,
+            "title": job_interview.title,
+            "jobName": job_interview.jobName,  # 지원 분야
+            "university": job_interview.university  # 출신 학교
+        } for job_interview in job_interviews],
+        "total" : len(job_interviews) # job_interviews는 무조건 들어가니까 이거로
+    }
+
+    return render_template("interviewlist.html", response = response)
+
+@interview_bp.route('/result') # 모의면접 결과 페이지. Improvement
 def result():
     return render_template("result.html")
 
-@interview_bp.route('/resume-select')
+@interview_bp.route('/resume-select') # api 추가하였음.
 def resume_select():
 
-    # jwt_factory = JWTFactory()
-    # user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-    user_id=1
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
 
     resume_list, total = ResumeService.get_my_resumes(user_id,1,100) # 일단 100개 가져오기
 
@@ -296,7 +292,6 @@ def resume_select():
             for resume in resume_list],  # JSON 형태로 변환
         "total": total
     }
-    print(response)
 
     return render_template("interview_resume_select.html", response = response)
 
@@ -304,3 +299,7 @@ def resume_select():
 def job_select():
     job_list = JobService.get_all()
     return render_template("interview_job_select.html", response = job_list)
+
+@interview_bp.route('/test/public')
+def test_public():
+    return render_template("test/test_ispublic.html")

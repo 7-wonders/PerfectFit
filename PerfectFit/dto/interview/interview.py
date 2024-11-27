@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from typing import List
 
+from dto.company_best.company_best import CompanyBestDto
+
 
 class InterviewDto:
     class Request:
@@ -48,7 +50,8 @@ class InterviewDto:
             level: str
 
         @dataclass
-        class interviewQuestion:
+        class InterviewQuestion:
+            interview_id: int
             question_id: int
             question: str
 
@@ -92,10 +95,30 @@ class InterviewDto:
             created_time: str
             view_count: int
             like_count: int
-              
+
         class InterviewQuestionAnswer(BaseModel):
             Question: str
             BestAnswer: str
 
         class InterviewResponse(BaseModel):
             InterviewQuestions: List['InterviewDto.Response.InterviewQuestionAnswer']
+
+        @dataclass
+        class CompanyInterviewResponse:
+            interviewId: int
+            companyName: str
+            level: str
+            title: str
+            jobName: str
+            university: str
+            companyBest: list[CompanyBestDto.Response.CompanyBest]
+            companyWorst: str
+
+        @dataclass
+        class JobInterviewResponse:
+            interviewId: int
+            companyName: str
+            level: str
+            title: str
+            jobName: str
+            university: str

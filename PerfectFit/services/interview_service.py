@@ -1,7 +1,8 @@
 from sqlalchemy import func
 
 from config.config_mysql import get_session
-from domain.models import ResumeView, ResumeLike, InterviewImprovement
+from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, CompanyWorst
+from dto.company_best.company_best import CompanyBestDto
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -30,7 +31,7 @@ class InterviewService:
             )
 
             questions = [
-                InterviewDto.Response.interviewQuestion(question.question_id, question.question)
+                InterviewDto.Response.InterviewQuestion(question.interview_id, question.question_id, question.question)
                 for question in results
             ]
 
@@ -39,7 +40,7 @@ class InterviewService:
 
             response: InterviewDto.Response.questions = InterviewDto.Response.questions(
                 questions=
-                [InterviewDto.Response.interviewQuestion(question.question_id, question.question)
+                [InterviewDto.Response.InterviewQuestion(question.interview_id, question.question_id, question.question)
                  for question in questions],
                 total=len(questions)
             )
@@ -48,6 +49,112 @@ class InterviewService:
 
         return response
 
+    @staticmethod
+    def get_interview_list():
+        """
+        1. 인터뷰 질문 공유 true인 것 전부 들고오기
+        2. 인터뷰 질문 하나씩 for문 돌리기
+        3. JobInterviews에는 무조건 넣고, CompanyInterviews에는 Company가 있다면 넣기
+        4
+            companyName: str # company 테이블 참조
+            level: str # interview
+            title: str # interview
+            jobName: str # job 테이블 참조
+            university: str # app_user에서 참조
+            companyBest: list[CompanyBestDto.Response.CompanyBest] # company_best에서 참조
+            companyWorst: str # company_worst에서 참조
+        :return:
+        """
+        company_interviews = []
+        job_interviews = []
+        with get_session() as session:
+            results = (
+                session
+                .query(InterviewQuestion)
+                .filter(InterviewQuestion.is_shared == True)
+                .all()
+            )
+
+            questions = [
+                InterviewDto.Response.InterviewQuestion(question.interview_id, question.question_id, question.question)
+                for question in results
+            ]
+
+            if not questions:
+                raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
+
+            for question in questions:
+                interview:Interview = (
+                    session
+                    .query(Interview)
+                    .filter(Interview.interview_id == question.interview_id)
+                    .first()
+                )
+
+                user:AppUser= (
+                    session
+                    .query(AppUser)
+                    .filter(AppUser.user_id == interview.user_id)
+                    .first()
+                )
+
+                job:Job= (
+                    session
+                    .query(Job)
+                    .filter(Job.job_id == interview.job_id)
+                    .first()
+                )
+                company_name = None
+                if interview.company_id is not None :
+                    company:Company = (
+                        session
+                        .query(Company)
+                        .filter(Company.company_id == interview.company_id)
+                        .first()
+                    )
+
+                    company_bests:list[CompanyBest] = (
+                        session
+                        .query(CompanyBest)
+                        .filter(CompanyBest.company_id == interview.company_id)
+                        .all()
+                    )
+
+                    company_worst:CompanyWorst= (
+                        session
+                        .query(CompanyWorst)
+                        .filter(CompanyWorst.company_id == interview.company_id)
+                        .first()
+                    )
+
+                    company_name = company.company_name
+
+                    company_interview = InterviewDto.Response.CompanyInterviewResponse(
+                        interviewId=interview.interview_id,
+                        companyName=company_name,
+                        level=interview.level,
+                        title=interview.title,
+                        jobName=job.job_name,
+                        university=user.university,
+                        companyBest= [CompanyBestDto.Response.CompanyBest(
+                            companyBestId=company_best.company_id,
+                            content=company_best.content)
+                            for company_best in company_bests],
+                        companyWorst= company_worst.content)
+
+                    company_interviews.append(company_interview)
+
+                job_interview = InterviewDto.Response.JobInterviewResponse(
+                    interviewId=interview.interview_id,
+                    companyName=company_name if company_name is not None else None,
+                    level=interview.level,
+                    title=interview.title,
+                    jobName=job.job_name,
+                    university=user.university)
+                job_interviews.append(job_interview)
+
+            session.close()
+            return job_interviews, company_interviews
     @staticmethod
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
         session = get_session()
