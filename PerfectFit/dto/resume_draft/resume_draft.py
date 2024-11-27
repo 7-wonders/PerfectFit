@@ -1,8 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
+from dto.job.job import JobDto
+from dto.keyword.keyword import KeywordDto
+from dto.occupation.occupation import OccupationDto
 from dto.resume_section.resume_section import ResumeSectionDto
 from dto.validation_class import FormModel
+
+if TYPE_CHECKING:
+    from dto.resume.resume import ResumeDto
 
 
 class ResumeDraftDto:
@@ -29,3 +35,21 @@ class ResumeDraftDto:
             draftId: int
             title: str
             createdTime: str
+
+        @dataclass
+        class DraftWithUpdate:
+            draftId: int
+            title: str
+            level: Optional[str] = field(default=None)
+            pros: Optional[str] = field(default=None)
+            cons: Optional[str] = field(default=None)
+            keywords: Optional[list["KeywordDto.Response.Keyword"]] = field(default=None)
+            directional: Optional[str] = field(default=None)
+            sections: Optional[list["ResumeSectionDto.Response.Section"]] = field(default=None)
+            isPublic: Optional[bool] = field(default=False)
+
+        @dataclass
+        class DraftForUpdate:
+            resume: "ResumeDto.Response.DraftWithUpdate"
+            occupations: list["OccupationDto.Response.Occupation"]
+            jobs: Optional[list["JobDto.Response.Jobs"]] = field(default=None)
