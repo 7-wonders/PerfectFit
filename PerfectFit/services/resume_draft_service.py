@@ -1,5 +1,5 @@
 from flask import request, flash
-from sqlalchemy import select, literal
+from sqlalchemy import select, literal, func
 
 from config.config_mysql import get_session
 from domain.models import Job, ProsCons, Keyword, ResumeSection, Occupation
@@ -49,6 +49,17 @@ class ResumeDraftService:
             )
 
             draft = session.execute(draft_query).mappings().first()
+            query = (
+                select(
+                    ResumeDraft.draft_id,
+                    ResumeDraft.title,
+                    ResumeDraft.created_time
+                )
+                .where(ResumeDraft.user_id == user_id)
+                .order_by(ResumeDraft.draft_id.desc())
+            )
+
+            drafts = session.execute(query).mappings().all()
 
             if not draft:
                 flash('자기소개서 정보를 불러오는 중 오류가 발생했습니다.', 'danger')
@@ -120,8 +131,8 @@ class ResumeDraftService:
                     if job_id else None)
             occupations = session.execute(occupation_query).mappings().all()
 
-            response = ResumeDraftDto.Response.DraftForUpdate(
-                resume=ResumeDraftDto.Response.DraftWithUpdate(
+            response = ResumeDraftDto.Response.DraftForWrite(
+                resume=ResumeDraftDto.Response.DraftWithWrite(
                     draftId=draft.get('draftId'),
                     title=draft.get('title'),
                     level=draft.get('level'),
@@ -145,6 +156,13 @@ class ResumeDraftService:
                     ],
                     isPublic=draft.get('isPublic')
                 ),
+                drafts=[
+                    ResumeDraftDto.Response.Intro(
+                        draftId=draft.draft_id,
+                        title=draft.title,
+                        createdTime=draft.created_time,
+                    ) for draft in drafts
+                ],
                 jobs=jobs,
                 occupations=occupations
             )
@@ -156,6 +174,16 @@ class ResumeDraftService:
         user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
 
         with get_session() as session:
+            count_query = (
+                select(func.count(ResumeDraft.draft_id))
+                .where(ResumeDraft.user_id == user_id)
+            )
+
+            count = session.execute(count_query).scalar()
+            if count >= 10:
+                flash('자기소개서는 최대 10개까지 작성할 수 있습니다.', 'danger')
+                return
+
             if data.job_id:
                 job = session.query(Job).filter(Job.job_id == data.job_id).first()
                 if not job:

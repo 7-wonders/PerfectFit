@@ -329,6 +329,10 @@ class ResumeService:
             )
 
             resume = session.execute(resume_query).mappings().first()
+            if not resume:
+                flash('자기소개서 정보를 불러오는 중 오류가 발생했습니다.', 'danger')
+                return None
+
             job_id = resume.get('jobId')
             pros = resume.get('pros')
             cons = resume.get('cons')

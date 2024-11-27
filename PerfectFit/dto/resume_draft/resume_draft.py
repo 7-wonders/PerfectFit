@@ -37,7 +37,7 @@ class ResumeDraftDto:
             createdTime: str
 
         @dataclass
-        class DraftWithUpdate:
+        class DraftWithWrite:
             draftId: int
             title: str
             level: Optional[str] = field(default=None)
@@ -49,7 +49,8 @@ class ResumeDraftDto:
             isPublic: Optional[bool] = field(default=False)
 
         @dataclass
-        class DraftForUpdate:
-            resume: "ResumeDto.Response.DraftWithUpdate"
+        class DraftForWrite:
+            resume: "ResumeDraftDto.Response.DraftWithWrite"
+            drafts: list["ResumeDraftDto.Response.Intro"]
             occupations: list["OccupationDto.Response.Occupation"]
             jobs: Optional[list["JobDto.Response.Jobs"]] = field(default=None)

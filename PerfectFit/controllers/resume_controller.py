@@ -49,8 +49,11 @@ def render_resume():
 
         return jsonify(response), HTTPStatus.OK
     else:
+        occupations = OccupationService.get_occupations()
+
         response = {
             "resumes": [model_to_dict(resume) for resume in resumes],
+            "occupations": [model_to_dict(occupation) for occupation in occupations],
             "total": total
         }
 
