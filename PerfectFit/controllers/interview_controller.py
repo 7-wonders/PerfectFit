@@ -241,8 +241,8 @@ def interviewlist():
 5. 기타 사항은 기업별과 동일
     :return:
     """
-    jwt_factory = JWTFactory()
-    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     job_interviews, company_interviews = InterviewService.get_interview_list()
 
@@ -258,12 +258,16 @@ def interviewlist():
                 "companyWorst": company_interview.companyWorst
             } for company_interview in company_interviews],
         "jobInterviews": [{
-            "interviewId": job_interview.interviewId,
-            "companyName": ( job_interview.companyName if job_interview.companyName else None ),
-            "level": job_interview.level,
-            "title": job_interview.title,
-            "jobName": job_interview.jobName,  # 지원 분야
-            "university": job_interview.university  # 출신 학교
+            "occupationId": job_interview['occupationId'],
+            "interviews": [{
+                "interviewId": interview.interviewId,
+                "companyName": ( interview.companyName if interview.companyName else None ),
+                "level": interview.level,
+                "title": interview.title,
+                "jobName": interview.jobName,  # 지원 분야
+                "university": interview.university  # 출신 학교
+             } for interview in job_interview['jobInterviews']],
+            "total": job_interview['total']
         } for job_interview in job_interviews],
         "total" : len(job_interviews) # job_interviews는 무조건 들어가니까 이거로
     }

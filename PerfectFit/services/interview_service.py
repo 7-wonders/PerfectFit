@@ -1,7 +1,8 @@
 from sqlalchemy import func
 
 from config.config_mysql import get_session
-from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, CompanyWorst
+from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, \
+    CompanyWorst, Occupation
 from dto.company_best.company_best import CompanyBestDto
 
 from exception.custom_exception import CustomException
@@ -66,8 +67,21 @@ class InterviewService:
         :return:
         """
         company_interviews = []
-        job_interviews = []
+
+
         with get_session() as session:
+            occupations = (
+                session
+                .query(Occupation)
+                .all()
+            )
+
+            job_interviews = [
+                {"occupationId":occupation.occupation_id,
+                 "jobInterviews": [],
+                 "total": 0} for occupation in occupations
+            ]
+
             results = (
                 session
                 .query(InterviewQuestion)
@@ -151,7 +165,12 @@ class InterviewService:
                     title=interview.title,
                     jobName=job.job_name,
                     university=user.university)
-                job_interviews.append(job_interview)
+
+                for job_entry in job_interviews:
+                    if job_entry["occupationId"] == job.occupation_id:
+                        job_entry["jobInterviews"].append(job_interview)
+                        job_entry["total"] += 1
+                        break
 
             session.close()
             return job_interviews, company_interviews
