@@ -56,7 +56,7 @@ def get_improvement(interview_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    improvementList = InterviewService.get_improvement(interview_id)
+    improvementList = InterviewService.get_improvement(interview_id, user_id)
 
     response = {
         "improvements": [{
@@ -69,8 +69,32 @@ def get_improvement(interview_id: int):
             for improvement in improvementList]
     }
 
-
     return render_template("test/test.html",response=response)
+
+
+@interview_bp.route('/<interview_id>/like', methods=['POST'])
+def post_like(interview_id: int):
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+
+    data = request.get_json()
+    is_like = data.get("is_like")
+
+    InterviewService.post_like(interview_id,user_id)
+
+    return Response("", status=204)
+@interview_bp.route('/<interview_id>/like', methods=['DELETE'])
+def delete_like(interview_id: int):
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+
+    data = request.get_json()
+    is_like = data.get("is_like")
+    
+    InterviewService.delete_like(interview_id,user_id)
+    return Response("", status=204)
 
 @interview_bp.route('/interview', methods=['POST'])
 def post_question_answer():
@@ -165,7 +189,7 @@ def patch_is_public_cancel():
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8') #
 
-@interview_bp.route('/interview/<interview_id>/title', methods=['PATCH'])
+@interview_bp.route('/<interview_id>/title', methods=['PATCH'])
 def patch_title(interview_id: int):
 
     jwt_factory = JWTFactory()
@@ -178,29 +202,38 @@ def patch_title(interview_id: int):
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8')
 
-@interview_bp.route('/spellcheck', methods=['POST']) # 프론트가 나와야 테스트 가능
+@interview_bp.route('/spellcheck', methods=['GET','POST']) # 프론트가 나와야 테스트 가능
 def spell_check():
     if request.method == 'POST':
         # POST 요청에서 폼 데이터를 가져옵니다.
         content = request.form.get('content', None, type=str)
+        if content is None :
+            content = request.get_json().get('content', None)
+        print(content)
         if not content:
             return render_template(
-                'test/test_spellchecker.html',
+                'spelling_check.html',
                 content="",
                 translatedContent="문장을 입력해주세요."
             )
 
         spellCheckDto = InterviewDto.Request.spellCheck(content=content)
         translatedContent = InterviewService.spell_check(spellCheckDto)
+
+        response = {
+            "translatedContent": translatedContent
+        }
         # 데이터를 HTML에 전달하며 렌더링
-        return render_template(
-            'test/test_spellchecker.html',
-            content=content,
-            translatedContent=translatedContent
-        )
+        # return render_template(
+        #     'spelling_check.html',
+        #     content=content,
+        #     translatedContent=translatedContent
+        # )
+        print(jsonify(translatedContent))
+        return jsonify(translatedContent), 200
     # GET 요청 처리 (기본 빈 페이지 렌더링)
     return render_template(
-        'test/test_spellchecker.html',
+        'spelling_check.html',
         content="",
         translatedContent=""
     )
@@ -246,31 +279,74 @@ def interviewlist():
 
     job_interviews, company_interviews = InterviewService.get_interview_list()
 
-    response = {
-        "companyInterviews" : [{
-                "interviewId" : company_interview.interviewId,
-                "companyName" : company_interview.companyName,
-                "level" : company_interview.level,
-                "title" : company_interview.title,
-                "jobName" : company_interview.jobName, # 지원 분야
-                "university": company_interview.university, # 출신 학교
+    keyword = request.form.get('keyword', None, type=str)
+    if keyword is None :
+        response = {
+            "companyInterviews" : [{
+                    "interviewId" : company_interview.interviewId,
+                    "companyName" : company_interview.companyName,
+                    "level" : company_interview.level,
+                    "title" : company_interview.title,
+                    "jobName" : company_interview.jobName, # 지원 분야
+                    "university": company_interview.university, # 출신 학교
+                    "companyBest": [company_best.content for company_best in company_interview.companyBest],
+                    "companyWorst": company_interview.companyWorst
+                } for company_interview in company_interviews],
+            "jobInterviews": [{
+                "occupationId": job_interview['occupationId'],
+                "interviews": [{
+                    "interviewId": interview.interviewId,
+                    "companyName": ( interview.companyName if interview.companyName else None ),
+                    "level": interview.level,
+                    "title": interview.title,
+                    "jobName": interview.jobName,  # 지원 분야
+                    "university": interview.university  # 출신 학교
+                 } for interview in job_interview['jobInterviews']],
+                "total": job_interview['total']
+            } for job_interview in job_interviews],
+            "searchInterviews": [],
+            "total" : len(job_interviews) # job_interviews는 무조건 들어가니까 이거로
+        }
+    else :
+        search_interviews = InterviewService.get_interview_list_search(keyword)
+        response = {
+            "companyInterviews": [{
+                "interviewId": company_interview.interviewId,
+                "questionId": company_interview.questionId,
+                "companyName": company_interview.companyName,
+                "level": company_interview.level,
+                "title": company_interview.title,
+                "jobName": company_interview.jobName,  # 지원 분야
+                "university": company_interview.university,  # 출신 학교
                 "companyBest": [company_best.content for company_best in company_interview.companyBest],
                 "companyWorst": company_interview.companyWorst
             } for company_interview in company_interviews],
-        "jobInterviews": [{
-            "occupationId": job_interview['occupationId'],
-            "interviews": [{
-                "interviewId": interview.interviewId,
-                "companyName": ( interview.companyName if interview.companyName else None ),
-                "level": interview.level,
-                "title": interview.title,
-                "jobName": interview.jobName,  # 지원 분야
-                "university": interview.university  # 출신 학교
-             } for interview in job_interview['jobInterviews']],
-            "total": job_interview['total']
-        } for job_interview in job_interviews],
-        "total" : len(job_interviews) # job_interviews는 무조건 들어가니까 이거로
-    }
+            "jobInterviews": [{
+                "occupationId": job_interview['occupationId'],
+                "interviews": [{
+                    "interviewId": interview.interviewId,
+                    "questionId": interview.questionId,
+                    "companyName": (interview.companyName if interview.companyName else None),
+                    "level": interview.level,
+                    "title": interview.title,
+                    "jobName": interview.jobName,  # 지원 분야
+                    "university": interview.university  # 출신 학교
+                } for interview in job_interview['jobInterviews']],
+                "total": job_interview['total']
+            } for job_interview in job_interviews],
+            "searchInterviews": [{
+                "interviewId": search_interview.interviewId,
+                "questionId": search_interview.questionId,
+                "companyName": search_interview.companyName,
+                "level": search_interview.level,
+                "title": search_interview.title,
+                "jobName": search_interview.jobName,  # 지원 분야
+                "university": search_interview.university,  # 출신 학교
+                "companyBest": [company_best.content for company_best in search_interview.companyBest] if search_interview.companyName else None,
+                "companyWorst": search_interview.companyWorst if search_interview.companyName else None
+            } for search_interview in search_interviews],
+            "total": len(job_interviews)
+        }
 
     return render_template("interviewlist.html", response = response)
 
@@ -307,3 +383,6 @@ def job_select():
 @interview_bp.route('/test/public')
 def test_public():
     return render_template("test/test_ispublic.html")
+@interview_bp.route('/test/post')
+def test_public2():
+    return render_template("test/test_interview_post.html")

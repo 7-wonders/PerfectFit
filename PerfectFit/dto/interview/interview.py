@@ -106,6 +106,7 @@ class InterviewDto:
         @dataclass
         class CompanyInterviewResponse:
             interviewId: int
+            questionId: int
             companyName: str
             level: str
             title: str
@@ -117,6 +118,7 @@ class InterviewDto:
         @dataclass
         class JobInterviewResponse:
             interviewId: int
+            questionId: int
             companyName: str
             level: str
             title: str
