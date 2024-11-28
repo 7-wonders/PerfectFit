@@ -11,7 +11,7 @@
 <header>
     <div class="header-wrapper">
         <nav class="uk-navbar-container header-nav" uk-navbar>
-            <a href="http://127.0.0.1:5000/" class="uk-navbar-item uk-logo logo">
+            <a href="/" class="uk-navbar-item uk-logo logo">
                 <img src="{{ url_for('static', filename='img/logo.svg') }}" />
             </a>
             <div class = "main-menu">
@@ -21,8 +21,8 @@
                             <a href="#">자기소개서</a>
                             <div class="uk-navbar-dropdown">
                                 <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="http://127.0.0.1:5000/resume/list/1">자기소개서 목록</a></li>
-                                    <li><a href="http://127.0.0.1:5000/resume/select">자기소개서 작성</a></li>
+                                    <li><a href="/resume">자기소개서 목록</a></li>
+                                    <li><a href="/resume/select">자기소개서 작성</a></li>
                                 </ul>
                             </div>
                         </li>
