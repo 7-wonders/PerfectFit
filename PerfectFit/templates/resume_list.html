@@ -171,7 +171,7 @@
                 {# Previous 버튼 렌더링 조건 #}
                 {% if startPage > 1 %}
                     <li>
-                        <a href="/resume?page={{ startPage - 1 }}{% for param in [
+                        <a href="/resume?page={{ startPage - 1 }}&count=5{% for param in [
                                 ('occupation', request.args.get('occupation')),
                                 ('job', request.args.get('job')),
                                 ('level', request.args.get('level')),
@@ -190,7 +190,7 @@
                         {% if pageNum == page %}
                             <span class="Regular-20-light" aria-current="page">{{ pageNum }}</span>
                         {% else %}
-                           <a href="/resume?page={{ pageNum }}{% for param in [
+                           <a href="/resume?page={{ pageNum }}&count=5{% for param in [
                                 ('occupation', request.args.get('occupation')),
                                 ('job', request.args.get('job')),
                                 ('level', request.args.get('level')),
@@ -206,7 +206,7 @@
                 {# Next 버튼 렌더링 조건 #}
                 {% if endPage < totalPages %}
                     <li>
-                        <a href="/resume?page={{ endPage + 1 }}{% for param in [
+                        <a href="/resume?page={{ endPage + 1 }}&count=5{% for param in [
                                 ('occupation', request.args.get('occupation')),
                                 ('job', request.args.get('job')),
                                 ('level', request.args.get('level')),

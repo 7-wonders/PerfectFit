@@ -264,6 +264,12 @@ function setArray(arrayType) {
     if (currentParams.has("search")) {
         params.append("search", currentParams.get("search"));
     }
+    if (currentParams.has("count")) {
+        params.append("count", currentParams.get("count"));
+    }
+    else if (!currentParams.has("count")) {
+        params.append("count", "5");
+    }
     if (sort === "인기순") params.append("sort", 'f');
     else if (sort === "최신순") params.append("sort", 'r');
     window.location.href = `/resume?${params.toString()}`;
@@ -300,6 +306,12 @@ document.addEventListener("DOMContentLoaded", function() {
             if (currentParams.has("search")) {
                 params.delete("search", currentParams.get("search"));
             }
+            if (currentParams.has("count")) {
+                params.append("count", currentParams.get("count"));
+            }
+            else if (!currentParams.has("count")) {
+                params.append("count", "5");
+            }
             params.append("search", searchText);
             window.location.href = `/resume?${params.toString()}`;
         }
@@ -330,6 +342,12 @@ function searchBtn(button) {
     }
     if (currentParams.has("search")) {
         params.append("search", currentParams.get("search"));
+    }
+    if (currentParams.has("count")) {
+        params.append("count", currentParams.get("count"));
+    }
+    else if (!currentParams.has("count")) {
+        params.append("count", "5");
     }
 
     window.location.href = `/resume?${params.toString()}`;
