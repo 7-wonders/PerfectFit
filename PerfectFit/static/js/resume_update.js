@@ -42,6 +42,7 @@ function addSection() {
                 <button type="button" uk-tooltip="삭제" class="Regular-16-light custom-button delete-section-btn" onclick="deleteSection(${sectionCount})"><img src="${iconRemovePath}"/></button>
             </div>
         </div>
+        <input type="hidden" name="sections[][sectionId]">
         <div class="uk-form-controls">
             <input class="uk-input" id="resume-write-title-${sectionCount}" type="text" placeholder="제목을 입력해주세요." name="sections[][title]">
         </div>
@@ -193,12 +194,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     const badgeInput = document.createElement('input');
                     badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeInput.type = 'hidden';
-                    badgeInput.name = 'keywords[]';
+                    badgeInput.name = 'keywords[][content]';
                     badgeInput.value = text;
+
+                    const badgeInputId = document.createElement('input');
+                    badgeInputId.id = `badge-input-${badgeCounter}`;
+                    badgeInputId.type = 'hidden';
+                    badgeInputId.name = 'keywords[][keywordId]';
 
                     badgeButton.addEventListener('click', function() {
                         badgeContainer.removeChild(badge);
                         badgeContainer.removeChild(badgeInput);
+                        badgeContainer.removeChild(badgeInputId);
                         updateBadgeIDs();
                     });
 
@@ -206,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     badge.appendChild(badgeButton);
                     badgeContainer.appendChild(badge);
                     badgeContainer.appendChild(badgeInput);
+                    badgeContainer.appendChild(badgeInputId);
                     badgeContainer.appendChild(inputElement);
 
                     badgeCounter++;
