@@ -1,12 +1,19 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect, url_for, session, flash
 
 from dto.resume_draft.resume_draft import ResumeDraftDto
 from dto.resume_section.resume_section import ResumeSectionDto
 from logs.log import Logger
 from services.resume_draft_service import ResumeDraftService
 
-resume_draft_bp = Blueprint('resume_draft_bp', __name__)
+resume_draft_bp = Blueprint('resume_draft', __name__)
 logger = Logger(__name__)
+
+
+@resume_draft_bp.route('/<draft_id>', methods=['GET'])
+def get_draft(draft_id: int):
+    session['draft_id'] = draft_id
+    return redirect(url_for('resume.render_write'))
+
 
 @resume_draft_bp.route('/', methods=['POST'])
 def add_draft():
@@ -22,16 +29,21 @@ def add_draft():
     section_contents = request.form.getlist("sections[][content]")
     sections = zip(section_titles, section_contents)
 
-    ResumeDraftService.add_draft(ResumeDraftDto.Request.Create(
+    draft_id = ResumeDraftService.add_draft(ResumeDraftDto.Request.Create(
         title=title,
-        job_id=int(job_id),
+        job_id=int(job_id) if job_id else None,
         level=level,
         pros=pros,
         cons=cons,
-        is_shared=is_shared,
+        is_shared=bool(is_shared),
         directional=directional,
         keywords=keywords,
         sections=[ResumeSectionDto.Request.Create(title=title, content=content)
                   for title, content in sections]
     ))
 
+    if not draft_id:
+        flash('잘못된 요청입니다.', 'danger')
+        return redirect(url_for('resume.render_write'))
+
+    return redirect(url_for('resume_draft.get_draft', draft_id=draft_id))
