@@ -600,7 +600,8 @@ class ResumeService:
 
             job = session.query(Job).filter(Job.job_id == data.job_id).first()
             if not job:
-                raise CustomException(ExceptionType.INVALID_JOB_ID)
+                flash('유효하지 않은 직업 ID입니다.', 'danger')
+                return None
 
             resume.title = data.title
             resume.job_id = data.job_id

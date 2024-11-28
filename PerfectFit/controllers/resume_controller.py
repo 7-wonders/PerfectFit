@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from urllib import request
 
-from flask import Blueprint, request, jsonify, redirect, render_template, flash, url_for, session
+from flask import Blueprint, request, jsonify, redirect, render_template, flash, url_for
 
 from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
@@ -12,7 +12,6 @@ from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from services.occupation_service import OccupationService
-from services.resume_draft_service import ResumeDraftService
 from services.resume_service import ResumeService
 from tasks import add_resume_task
 from utils.model_converter import model_to_dict
@@ -150,16 +149,6 @@ def render_update_resume(resume_id: str):
 
 @resume_bp.route('/write', methods=['GET'])
 def render_write():
-    draft_id = session.get('draft_id')
-    if draft_id:
-        session.pop('draft_id')
-        response = ResumeDraftService.get_draft(draft_id)
-
-        if not response:
-            return redirect(url_for('resume.render_write'))
-
-        return render_template("resume_write_all.html", response=response)
-
     task_id = request.args.get('task_id')
     task_response: ResumeGPT.Response.FullResume.Resume | None = None
 
