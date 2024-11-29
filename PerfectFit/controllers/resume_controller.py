@@ -64,35 +64,10 @@ def render_resume_detail(resume_id: str):
     if not resume_id.isdecimal():
         redirect(url_for('resume.render_resume'))
 
-    resume, sections, increased_view = ResumeService.get_resume(resume_id)
-    if not resume or not sections:
-        return redirect(url_for('resume.render_resume'))
+    response = ResumeService.get_resume(resume_id)
 
-    response: ResumeDto.Response.Resume = ResumeDto.Response.Resume(
-        resumeId=resume.get('resumeId'),
-        title=resume.get('title'),
-        level=resume.get('level'),
-        jobName=resume.get('jobName'),
-        occupationName=resume.get('occupationName'),
-        viewCount=resume.get('viewCount') + 1 if increased_view else resume.get('viewCount'),
-        likeCount=resume.get('likeCount'),
-        createdTime=resume.get('createdTime').strftime('%Y-%m-%d %H:%M:%S'),
-        isLike=(
-            None if request.cookies.get('access_token') is None
-            else
-            resume.get('isLike') if 'isLike' in resume else False
-        ),
-        section=[ResumeSectionDto.Response.Section(
-            sectionId=section.get('sectionId'),
-            title=section.get('title'),
-            content=section.get('content')
-        ) for section in sections],
-        user=UserDto.Response.IntroUserWithProfile(
-            userId=resume.get('user.userId'),
-            username=resume.get('user.username'),
-            profilePath=resume.get('user.profilePath')
-        )
-    )
+    if not response:
+        return redirect(url_for('resume.render_resume'))
 
     return render_template("resume_detail.html", response=response)
 
