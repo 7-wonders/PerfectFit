@@ -1,51 +1,61 @@
 /* 전체 레이아웃 */
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     font-family: "Noto Sans KR", sans-serif;
+    background-color: #f9f9f9;
 }
 
 .container {
     max-width: 1200px;
     margin: 20px auto;
     padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* 제목 및 수정 버튼 */
 .title-section {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    font-size: 18px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .edit-icon {
     background: none;
     border: none;
     cursor: pointer;
-    margin-left: 5px;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 /* 제목 수정 입력란 */
 .edit-section {
     display: none;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 #edit-title-input {
-    width: 300px;
-    padding: 5px;
+    width: 60%;
+    padding: 10px;
     border: 1px solid #87CEFA;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 16px;
     outline: none;
 }
 
 .save-button {
-    margin-left: 5px;
-    padding: 5px 10px;
+    margin-left: 10px;
+    padding: 10px 20px;
     background-color: #0066ff;
     color: white;
     border: none;
@@ -57,23 +67,22 @@ body, html {
 /* 내용 섹션 */
 .content-section {
     display: flex;
-    gap: 40px;
-    align-items: center;
+    gap: 20px;
 }
 
 /* 질문 및 답변 스타일 */
 .left-panel {
     flex: 1;
     border: 1px solid #dcdcdc;
-    border-radius: 5px;
+    border-radius: 10px;
     padding: 20px;
-    background-color: #fff;
-    width: 600px;
-    height: 500px;
+    background-color: #ffffff;
+    height: auto;
+    overflow: hidden;
 }
 
 .question {
-    margin-bottom: 30px; /* 질문 블록 간 간격 */
+    margin-bottom: 20px;
 }
 
 .question-title {
@@ -82,16 +91,16 @@ body, html {
     align-items: center;
     font-weight: bold;
     font-size: 16px;
-    margin-bottom: 15px; /* 질문과 답변 사이의 간격을 넓힘 */
+    margin-bottom: 10px;
 }
 
 .answer {
     font-size: 14px;
-    line-height: 1.6; /* 답변 줄 간격 */
+    line-height: 1.6;
     color: #333;
+    text-align: left;
 }
 
-/* 개선 사항 확인 버튼 */
 .check-button {
     padding: 5px 15px;
     background-color: #0066ff;
@@ -106,10 +115,9 @@ body, html {
 .right-panel {
     flex: 1;
     border: 1px solid #dcdcdc;
-    border-radius: 5px;
+    border-radius: 10px;
     padding: 20px;
-    width: 600px;
-    height: 500px;
+    background-color: #ffffff;
 }
 
 .result-header {
@@ -121,6 +129,7 @@ body, html {
 .result-content {
     font-size: 16px;
     color: #333;
+    line-height: 1.6;
 }
 
 /* 가운데 화살표 스타일 */

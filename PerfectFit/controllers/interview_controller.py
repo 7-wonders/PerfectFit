@@ -239,7 +239,7 @@ def spell_check():
     )
 
 
-@interview_bp.route('/loading')
+@interview_bp.route('/loading-create')
 def loading_create():
     return render_template("Loading-create.html")
 
@@ -375,14 +375,9 @@ def resume_select():
 
     return render_template("interview_resume_select.html", response = response)
 
+
 @interview_bp.route('/job-select')
 def job_select():
     job_list = JobService.get_all()
     return render_template("interview_job_select.html", response = job_list)
 
-@interview_bp.route('/test/public')
-def test_public():
-    return render_template("test/test_ispublic.html")
-@interview_bp.route('/test/post')
-def test_public2():
-    return render_template("test/test_interview_post.html")
