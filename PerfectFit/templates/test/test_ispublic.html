@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patch Is Public</title>
+</head>
+<body>
+    <h1>Patch Is Public</h1>
+    <form id="patchForm">
+        <label for="isShareIds">isShareIds (comma-separated):</label><br>
+        <input type="text" id="isShareIds" name="isShareIds" value="21,22,23" required>
+        <br><br>
+        <label for="isCloseIds">isCloseIds (comma-separated):</label><br>
+        <input type="text" id="isCloseIds" name="isCloseIds" value="24,25,26" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('patchForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // 기본 폼 동작 중단
+
+            // 각 입력 필드 값 가져오기
+            const isShareIdsInput = document.getElementById('isShareIds').value;
+            const isCloseIdsInput = document.getElementById('isCloseIds').value;
+
+            // 입력값을 배열로 변환
+            const isShareIds = isShareIdsInput
+                .split(',')
+                .map(id => parseInt(id.trim()))
+                .filter(id => !isNaN(id));
+            const isCloseIds = isCloseIdsInput
+                .split(',')
+                .map(id => parseInt(id.trim()))
+                .filter(id => !isNaN(id));
+
+            try {
+                const response = await fetch('/interview/ispublic', {
+                    method: 'PATCH', // PATCH 요청
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isShareIds, isCloseIds })
+                });
+
+                if (response.status === 204) {
+                    alert('Patch request successful!');
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `Error with status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Failed: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

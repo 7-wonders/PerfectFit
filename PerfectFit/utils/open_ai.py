@@ -45,7 +45,7 @@ def get_dinner_recommendation():
         return f"Error: {response.status_code}, {response.text}"
 
 
-def make_interview_based_on_resume(resume_id: int, level: str):
+def make_interview_based_on_resume(resume_id: int, level: str,title: str):
 
     resume = get_session().query(Resume).filter_by(resume_id=resume_id).first()
     if resume is None:
@@ -119,7 +119,7 @@ def make_interview_based_on_resume(resume_id: int, level: str):
         interview_data = InterviewDto.Response.InterviewResponse.model_validate(interview_data_dict)
         interview_questions = interview_data.InterviewQuestions
 
-        new_interview = Interview(user_id=resume.user_id, resume_id=resume_id, job_id=resume.job_id, company=None, title="더미 제목", level = level)
+        new_interview = Interview(user_id=resume.user_id, resume_id=resume_id, job_id=resume.job_id, company=None, title=title, level = level)
         get_session().add(new_interview)
         get_session().flush()
 
@@ -148,7 +148,7 @@ def make_interview_based_on_resume(resume_id: int, level: str):
         print(f"Error: {e}")
         return None
 
-def make_interview_based_on_job(job_id: int, user_id: int, level: str):
+def make_interview_based_on_job(job_id: int, user_id: int, level: str, title: str):
     job = get_session().query(Job).filter_by(job_id=job_id).first()
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
 
@@ -171,20 +171,15 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str):
         result = response.choices[0].message.content.strip()
         print(result)
 
-        new_interview = Interview(user_id=user_id, resume_id=None, job_id=job.job_id, company=None, title="더미 제목", level = level)
+        new_interview = Interview(user_id=user_id, resume_id=None, job_id=job.job_id, company=None, title=title, level = level)
         get_session().add(new_interview)
         get_session().flush()
-        print("1")
         interview_id = new_interview.interview_id
-        print("1")
         # interview_data = json.loads(result)
         # interview_questions = interview_data.get("InterviewQuestions", [])
         interview_data_dict = json.loads(result)
-        print("1")
         interview_data = InterviewDto.Response.InterviewResponse.model_validate(interview_data_dict)
-        print("1")
         interview_questions = interview_data.InterviewQuestions
-        print("1a")
         print(interview_questions)
         for item in interview_questions:
             question_text = item.Question
