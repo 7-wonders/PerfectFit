@@ -221,7 +221,7 @@ def post_test():
 def spellcheck_test():
     return render_template('test/test_spellchecker.html')
 
-@interview_bp.route('/loading')
+@interview_bp.route('/loading-create')
 def loading_create():
     return render_template("Loading-create.html")
 
@@ -245,8 +245,10 @@ def result():
 def resume_select():
     return render_template("interview_resume_select.html")
 
+
 @interview_bp.route('/job-select')
 def job_select():
     job_list = JobService.get_all()
     print(job_list)
     return render_template("interview_job_select.html", response = job_list)
+

@@ -1,103 +1,116 @@
-const questions = [
-    { text: "2024년 동안 프로젝트를 총 3개를 진행하였는데, 2024년 이전에는 프로젝트를 따로 안 하신 이유가 있는지 궁금합니다." },
-    { text: "API 호출 시 발생할 수 있는 오류에 대해 설명해주세요." },
-    { text: "보안 측면에서 개발할 때 중요한 점은 무엇인가요?" },
-    { text: "보안 측면에서 개발할 때 중요한 점은 무엇인가요?" }
-];
-
 let currentQuestionIndex = 0;
 let timerInterval;
-let userAnswers = [];
+let questions = [];
 
-// DOMContentLoaded로 초기화 로직을 감쌈
-document.addEventListener("DOMContentLoaded", () => {
-    loadQuestion();
+// DOMContentLoaded 이벤트로 초기화
+document.addEventListener("DOMContentLoaded", async () => {
+    const questionsData = await fetchQuestions(); // 질문 목록 가져오기
+    questions = questionsData.questions; // 질문 리스트 저장
+    loadQuestion(); // 첫 질문 로드
 
-    // "다음 질문" 버튼 이벤트 리스너
-    document.getElementById("next-button").addEventListener("click", () => {
-        const answer = document.getElementById("answer-input").value;
-        userAnswers[currentQuestionIndex] = answer;
+    // 폼 제출 이벤트 처리
+    const form = document.getElementById("question-form");
+    form.addEventListener("submit", (event) => {
+        event.preventDefault(); // 기본 폼 제출 동작 방지
+
+        const answerInput = document.getElementById("answer-input").value.trim();
+
+        if (!answerInput) {
+            alert("답변을 입력해주세요.");
+            return;
+        }
+
+        // 답변 저장 (추후 서버로 저장 가능)
+        console.log(`Question ID: ${questions[currentQuestionIndex].questionId}, Answer: ${answerInput}`);
 
         if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
-            loadQuestion();
+            loadQuestion(); // 다음 질문 로드
         } else {
             clearInterval(timerInterval);
-            showConfirmationModal();
+            showCompletionModal(); // 모든 질문 완료 시 모달창 표시
         }
     });
 
-    // "확인" 버튼 이벤트 리스너
+    // 공개 여부 버튼 이벤트 리스너
     document.getElementById("confirm-button").addEventListener("click", () => {
-        alert("질문이 공개되었습니다.");
+        alert("질문과 답변을 공개합니다.");
     });
 
-    // "취소" 버튼 이벤트 리스너
     document.getElementById("cancel-button").addEventListener("click", () => {
-        alert("질문 공개가 취소되었습니다.");
+        alert("공개 설정이 취소되었습니다.");
     });
 });
 
+// 질문 데이터 가져오기
+async function fetchQuestions() {
+    const response = await fetch("/api/questions", {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "ACCESS TOKEN", // 실제 토큰 값으로 대체
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error("질문 데이터를 가져올 수 없습니다.");
+    }
+
+    return await response.json(); // 질문 데이터 반환
+}
+
 // 질문 로드 함수
 function loadQuestion() {
-    document.getElementById("question-text").textContent = questions[currentQuestionIndex].text;
+    if (!questions || questions.length === 0) return;
+
+    const currentQuestion = questions[currentQuestionIndex];
+
+    // 질문 내용 업데이트
+    document.getElementById("question-text").textContent = currentQuestion.question;
+    document.getElementById("question-id").value = currentQuestion.questionId; // hidden input에 설정
+    document.getElementById("question-number-hidden").value = currentQuestionIndex + 1; // hidden input에 설정
+
+    // UI 업데이트
+    document.getElementById("answer-input").value = ""; // 입력 필드 초기화
     document.getElementById("question-number").textContent = `${currentQuestionIndex + 1}/${questions.length}`;
-    document.getElementById("answer-input").value = "";
+
+    // 타이머 시작
     startTimer(60);
 }
 
 // 타이머 시작 함수
 function startTimer(seconds) {
-    clearInterval(timerInterval);
+    clearInterval(timerInterval); // 이전 타이머 정리
     let timeRemaining = seconds;
 
     timerInterval = setInterval(() => {
         const minutes = Math.floor(timeRemaining / 60);
         const seconds = timeRemaining % 60;
-        document.getElementById("timer").textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        document.getElementById("timer").textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
         if (timeRemaining > 0) {
             timeRemaining--;
         } else {
             clearInterval(timerInterval);
-            alert("시간이 종료되었습니다. 다음 질문으로 이동해 주세요.");
+            alert("시간이 종료되었습니다. 다음 질문으로 이동합니다.");
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showCompletionModal(); // 모든 질문 완료 시 모달창 표시
+            }
         }
     }, 1000);
 }
 
-// 공개 확인 모달 표시 함수
-function showConfirmationModal() {
-    UIkit.modal("#confirmation-modal").show();
-    const questionList = document.getElementById("question-list");
-    questionList.innerHTML = "";
-
-    questions.forEach((question, index) => {
-        const questionItem = document.createElement("div");
-        questionItem.classList.add("question-item");
-        questionItem.innerHTML = `
-            <div style="display: flex; align-items: center;">
-                <input type="checkbox" class="question-checkbox">
-                <label class="question-item-content">
-                    ${index + 1}. ${question.text}
-                </label>
-                <span class="toggle-arrow" onclick="toggleAnswer(this)">▼</span>
-            </div>
-            <div class="answer-text" style="display: none;">${userAnswers[index] || "답변이 없습니다."}</div>
-        `;
-        questionList.appendChild(questionItem);
-    });
+// 완료 모달 표시 함수
+function showCompletionModal() {
+    const modal = document.getElementById("confirmation-modal");
+    UIkit.modal(modal).show(); // 공개 여부 모달 표시
 }
 
-// 답변 표시/숨김 토글 함수
-function toggleAnswer(element) {
-    const questionItem = element.closest(".question-item");
-    const answerText = questionItem.querySelector(".answer-text");
-
-    questionItem.classList.toggle("open"); // open 클래스 토글
-
-    if (answerText.style.display === "none" || !answerText.style.display) {
-        answerText.style.display = "block";
-    } else {
-        answerText.style.display = "none";
-    }
-}
+// 모달창 닫기
+document.getElementById("cancel-button").addEventListener("click", () => {
+    const modal = document.getElementById("confirmation-modal");
+    UIkit.modal(modal).hide(); // 공개 여부 모달 숨기기
+});
