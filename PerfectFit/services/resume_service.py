@@ -1,3 +1,5 @@
+import json
+
 from celery.exceptions import NotRegistered
 from flask import request, flash
 from kombu.exceptions import OperationalError
@@ -115,11 +117,11 @@ class ResumeService:
 
         # 조회수 및 좋아요 수 계산
         for resume in resumes:
-            resume.view_count = session.query(func.sum(ResumeView.view_count)).filter(
+            resume.view_count = session.query(func.sum(ResumeView.view_id)).filter(
                 ResumeView.resume_id == resume.resume_id
             ).scalar() or 0
 
-            resume.like_count = session.query(func.sum(ResumeLike.like_count)).filter(
+            resume.like_count = session.query(func.sum(ResumeLike.like_id)).filter(
                 ResumeLike.resume_id == resume.resume_id
             ).scalar() or 0
 

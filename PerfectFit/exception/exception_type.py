@@ -26,6 +26,7 @@ class ExceptionType(Enum):
     NOT_FOUND_INTERVIEW = ("404", "N40430", "모의 면접을 찾을 수 없습니다.")
     NOT_FOUND_QUESTION = ("404", "N40431", "질문을 찾을 수 없습니다.")
     NOT_FOUND_RESUME = ("404", "N40432", "자기소개서를 찾을 수 없습니다.")
+    NOT_FOUND_LIKE = ("404", "N40433", "좋아요를 찾을 수 없습니다.")
 
     INTERNAL_SERVER_ERROR = ("500", "I500", "서버 내부에서 오류가 발생하였습니다.")
     GOOGLE_LOGIN_ERROR = ("500", "I50010", "구글 로그인에 문제가 발생하였습니다.")
