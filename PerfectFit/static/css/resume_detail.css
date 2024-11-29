@@ -94,6 +94,8 @@ a:hover {
     display : flex;
     justify-content: flex-end;
     margin-bottom : 20px;
+    align-items: center;
+    margin-top : 15px;
 }
 
 /*=================자기소개서 목록 관련 css 코드==============*/
@@ -173,4 +175,12 @@ a:hover {
     -webkit-text-stroke-width: 0.2px;
     font-style: normal;
     font-weight : 300;
+}
+
+/*========================조회수, 좋아요 열 맞추기 ===============*/
+canvas, img, svg, video {
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    padding-bottom: 3px;
 }

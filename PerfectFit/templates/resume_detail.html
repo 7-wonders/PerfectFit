@@ -16,8 +16,12 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_detail.js') }}"></script>
-{#    <script>let isLike = {{ isLike | tojson }};</script>#}
-{#    <script>let likeCount = {{ response.likeCount | tojson }};</script>#}
+    {% if response.isLike is none or response.isLike == 0 %}
+        <script>let isLike = false;</script>
+    {% else %}
+        <script>let isLike = true;</script>
+    {% endif %}
+    <script>let likeCount = {{ response.likeCount | tojson }};</script>
     <script>
         {#const startPage = {{ startPage }};#}
         {#const endPage = {{ endPage }};#}
@@ -65,23 +69,27 @@
                 </div>
             {% endfor %}
 {#             조회수 및 좋아요#}
-             <div class = "resume-detail-Engagement" style = "margin-top : 15px">
+             <div class = "resume-detail-Engagement">
 {#                 조회수#}
                 <div style = "margin-right: 10px;">
                     <span uk-icon="icon: eye; ratio: 1.4;"></span>
                     <span class = "Regular-20-light">{{ response.viewCount + 1 }}</span>
                 </div>
 {#                 좋아요#}
-                <div style = "display : flex; align-items: center;">
-                    <button id="like-button" class="like-btn" onclick="actionLike()"></button>
-                    <span id="like-count" class="Regular-20-light">{{ response.likeCount }}</span>
+                <div style = "display : flex; align-items: center; padding-bottom: 2px;">
+                    {% if response.isLike %}
+                        <button id="like-button" class="like-btn liked" onclick="actionLike({{ response.resumeId }})"></button>
+                    {% else %}
+                        <button id="like-button" class="like-btn" onclick="actionLike({{ response.resumeId }})"></button>
+                    {% endif %}
+                    <span id="like-count" class="Regular-20-light" style = "padding-bottom: 2px; margin-left: 2px; font-size : 22px !important;">{{ response.likeCount }}</span>
                 </div>
             </div>
         </div>
         <hr>
 {#         ========================== 자기소개서 목록 ============================#}
          <p class = "Bold-30-none-weight" style = "margin-top: 30px !important;">자기소개서 목록</p>
-{#        <div id="resume-list-container">#}
+        <div id="resume-list-container">
 {#            {% for i in range(5) %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
 {#                <div class = "resume-list">#}
 {#                    게시물 왼쪽 부분#}
@@ -113,10 +121,10 @@
 {#                </div>#}
 {#                <hr>#}
 {#            {% endfor %}#}
-{#        </div>#}
+        </div>
         {# 페이지네이션 #}
-{#       <nav aria-label="Pagination">#}
-{#            <ul class="uk-pagination uk-flex-center" uk-margin>#}
+       <nav aria-label="Pagination">
+            <ul class="uk-pagination uk-flex-center" uk-margin>
                 {# Previous 버튼 렌더링 조건 #}
 {#                {% if startPage > 1 %}#}
 {#                    <li>#}
@@ -147,7 +155,7 @@
 {#                        </button>#}
 {#                    </li>#}
 {#                {% endif %}#}
-{#            </ul>#}
-{#        </nav>#}
+            </ul>
+        </nav>
     </div>
 {% endblock %}
