@@ -14,7 +14,7 @@
 {% block content %}
 <div class="container">
     <!-- Form 시작 -->
-    <form id="resumeForm" action="/submit/resume" method="POST">
+    <form id="resumeForm" action="/interview/resume/select" method="POST">
         <!-- 제목 입력란 -->
         <label for="title" class="title-label">제목</label>
         <input type="text" id="title" name="title" placeholder="제목을 입력해주세요." class="title-input" required />
@@ -48,6 +48,18 @@
                 </thead>
                 <tbody id="data-body">
                     <!-- 데이터가 JS로 동적으로 추가됩니다 -->
+                    {% for resume in response.resumes %}
+                        <tr>
+                            <td>
+                                <input type="radio" name="resumeId" value={{  resume.resumeId }} required />
+                            </td>
+                            <td>{{ resume.title }}</td>
+                            <td>{{ resume.jobName }}</td>
+                            <td>{{ resume.level }}</td>
+                            <td>{{ resume.createdTime }}</td>
+                        </tr>
+                    {% endfor %}
+
                 </tbody>
             </table>
         </div>

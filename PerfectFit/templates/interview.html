@@ -8,7 +8,7 @@
 
 {% block content %}
 <div class="uk-container uk-margin-large-top question-section" id="question-section">
-    <form id="question-form" action="/submit-answer" method="POST">
+    <form id="question-form" action="/interview" method="POST">
         <div class="question-header">
             <span class="uk-text-large uk-text-muted">Q.</span>
             <span id="timer" class="uk-align-right uk-text-primary">01:00</span>
@@ -52,14 +52,22 @@
             <p>질문과 답변을 공개하여 다른 사용자에게 도움을 줄 수 있습니다.</p>
         </div>
         <div class="uk-modal-body question-list" id="question-list">
-            <!-- 질문과 답변 목록이 동적으로 추가됩니다 -->
+            <form id="public-selection-form" action="/interview/ispublic">
+                <div id="questions-container">
+                    <!-- 질문과 답변 체크박스가 동적으로 추가됩니다 -->
+                </div>
+            </form>
         </div>
         <div class="uk-modal-footer confirmation-buttons" style="display: flex; justify-content: flex-end;">
-            <form action="/submit-public" method="POST">
-                <button class="uk-button uk-button-default" id="cancel-button" type="button">공개 안함</button>
-                <button class="uk-button uk-button-primary" id="confirm-button" type="submit">공개</button>
-            </form>
+            <button class="uk-button uk-button-default" id="cancel-button" type="button">공개 안함</button>
+            <button class="uk-button uk-button-primary" id="confirm-button" type="button">선택된 항목 공개</button>
         </div>
     </div>
 </div>
+
+<script>
+    const interviewId = {{ interviewId | tojson | default('null') }};
+</script>
+<script src="{{ url_for('static', filename='js/interview.js') }}"></script>
+
 {% endblock %}

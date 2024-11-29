@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
         // 이력서 데이터를 가져오는 API 호출
-        const resumes = await fetchResumes();
 
+        const resumes = await fetchResumes();
         // 데이터를 렌더링
         renderResumes(resumes, dataBody);
 
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // API 호출로 이력서 데이터를 가져오는 함수
 async function fetchResumes() {
-    const response = await fetch("/user/mypage/resume?page=1&count=10", {
+    const response = await fetch("/interview/resume-select", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -36,7 +36,6 @@ async function fetchResumes() {
     if (!response.ok) {
         throw new Error("이력서 데이터를 가져오지 못했습니다.");
     }
-
     const data = await response.json();
     return data.resumes; // 이력서 리스트 반환
 }

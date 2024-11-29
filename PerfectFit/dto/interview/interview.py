@@ -57,7 +57,7 @@ class InterviewDto:
 
         @dataclass
         class questions:
-            questions: list['InterviewDto.Response.interviewQuestion']
+            questions: list['InterviewDto.Response.InterviewQuestion']
             total: int
 
         @dataclass
@@ -70,6 +70,11 @@ class InterviewDto:
         @dataclass
         class isPublicList:
             interviews: list['InterviewDto.Response.isPublicInterview']
+
+        @dataclass
+        class QuestionList:
+            questions: list['InterviewDto.Response.InterviewQuestion']
+            total: int
 
         @dataclass
         class improvement:

@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // 질문 및 답변 가져오기 API 호출
 async function fetchQuestions() {
-    const response = await fetch("/api/questions", {
+    const interviewId = 15;
+    const response = await fetch(`/interview/${interviewId}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -70,7 +71,7 @@ async function fetchImprovement(questionId) {
         const formData = new FormData();
         formData.append("questionId", questionId);
 
-        const response = await fetch(`/api/improvements/${questionId}`, {
+        const response = await fetch(`/interview/improvements/${questionId}`, {
             method: "POST",
             body: formData,
         });

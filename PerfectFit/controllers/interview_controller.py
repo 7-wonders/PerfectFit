@@ -25,15 +25,27 @@ def get_questions(interview_id: int):
 
     questions: InterviewDto.Response.questions = InterviewService.get_questions(interview_id)
 
-    response = {
-        "questions": [{
-            "questionId": question.question_id,
-            "question": question.question}
-            for question in questions.questions],
-        "total": questions.total
-    }
+    # response = {
+    #     "questions": [{
+    #         "questionId": question.question_id,
+    #         "question": question.question}
+    #         for question in questions.questions],
+    #     "total": questions.total
+    # }
 
-    return render_template("test/test_interview.html", response=response)
+
+    response: InterviewDto.Response.QuestionList = InterviewDto.Response.QuestionList(
+        questions= [question for question in questions.questions],
+        total=questions.total
+    )
+
+    json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
+
+    return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
+
+
+    # return render_template("test/test_interview.html", response=response)
 
 @interview_bp.route('/ispublic/<interview_id>', methods=['GET']) # Modal 창에 띄울 것이라 Json으로 리턴
 def get_is_public(interview_id: int):
@@ -69,7 +81,7 @@ def get_improvement(interview_id: int):
             for improvement in improvementList]
     }
 
-    return render_template("test/test.html",response=response)
+    return render_template("result.html",response=response)
 
 
 @interview_bp.route('/<interview_id>/like', methods=['POST'])
@@ -96,7 +108,7 @@ def delete_like(interview_id: int):
     InterviewService.delete_like(interview_id,user_id)
     return Response("", status=204)
 
-@interview_bp.route('/interview', methods=['POST'])
+@interview_bp.route('/', methods=['POST'])
 def post_question_answer():
 
     jwt_factory = JWTFactory()
@@ -112,8 +124,8 @@ def post_question_answer():
 
     InterviewService.post_question_answer(post_answer_request) # 답변을 등록 하면서, 개선사항 도출 로직까지 수행.
 
-    return redirect('/test/test_interview_post.html')
-
+    # return redirect('/test/test_interview_post.html')
+    return ""
 @interview_bp.route('/resume/select', methods=['POST'])
 def make_interview_resume():
 
@@ -367,11 +379,13 @@ def resume_select():
         "resumes": [{
             "resumeId": resume.resume_id,
             "title": resume.title,
+            "level": resume.level,
             "jobName": resume.job.job_name,
             "createdTime": resume.created_time.strftime("%Y-%m-%d %H:%M")}
             for resume in resume_list],  # JSON 형태로 변환
         "total": total
     }
+    print(response)
 
     return render_template("interview_resume_select.html", response = response)
 
@@ -380,4 +394,8 @@ def resume_select():
 def job_select():
     job_list = JobService.get_all()
     return render_template("interview_job_select.html", response = job_list)
+
+@interview_bp.route('/run/<interview_id>')
+def interview_run(interview_id: int):
+    return render_template("interview.html", interviewId = interview_id)
 
