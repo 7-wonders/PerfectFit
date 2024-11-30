@@ -194,7 +194,7 @@ async function removeResumeDetail(resumeId) {
 
         if (response.status === 204) {
             alert('이력서가 삭제되었습니다.');
-            window.location.href = "localhost:5000/user/mypage/resume"
+            window.location.href = "/user/mypage/resume"
         }
     } catch (error) {
         console.error('이력서 삭제 오류:', error);

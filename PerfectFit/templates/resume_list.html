@@ -114,7 +114,7 @@
 {#         ======================= 최신, 인기순, 검색창 ============================= #}
         <div class="array-and-search">
             <div class="recent-or-popular">
-                {% if request.args.get('sort') == "r" %}
+                {% if request.args.get('sort') == "f" %}
                     <button type="button" class="none-style-btn Regular-16 select-array" onclick="setArray('최신순')">최신순</button>
                     <button type="button" class="none-style-btn Regular-16 selected select-array" onclick="setArray('인기순')">인기순</button>
                 {% else %}
