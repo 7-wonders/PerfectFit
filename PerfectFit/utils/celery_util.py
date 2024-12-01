@@ -1,7 +1,6 @@
 from typing import Optional
 
 from config.config_mysql import get_session
-from domain.models.celery_task import CeleryTask
 from dotenv import load_dotenv
 import redis, os
 
