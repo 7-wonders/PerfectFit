@@ -24,17 +24,25 @@ def get_draft(draft_id: str):
 
 @resume_draft_bp.route('/', methods=['POST'])
 def add_draft():
-    title = request.form.get("title")
-    job_id = request.form.get("job_id")
-    level = request.form.get("level")
-    pros = request.form.get("pros")
-    cons = request.form.get("cons")
-    is_shared = request.form.get("is_shared") or False
-    directional = request.form.get("directional")
-    keywords = request.form.getlist("keywords[]")
-    section_titles = request.form.getlist("sections[][title]")
-    section_contents = request.form.getlist("sections[][content]")
-    sections = zip(section_titles, section_contents)
+    request_json = request.get_json()
+    title = request_json.get("title")
+    job_id = request_json.get("job_id")
+    level = request_json.get("level")
+    pros = request_json.get("pros")
+    cons = request_json.get("cons")
+    is_shared = request_json.get("is_shared") or False
+    directional = request_json.get("directional")
+    keywords = [
+        keyword["content"]
+        for keyword in request_json.get("keywords", None)
+    ]
+    sections = [
+        ResumeSectionDto.Request.Create(
+            title=section["title"],
+            content=section["content"]
+        )
+        for section in request_json.get("sections", None)
+    ]
 
     draft_id = ResumeDraftService.add_draft(ResumeDraftDto.Request.Create(
         title=title,
@@ -45,8 +53,7 @@ def add_draft():
         is_shared=bool(is_shared),
         directional=directional,
         keywords=keywords,
-        sections=[ResumeSectionDto.Request.Create(title=title, content=content)
-                  for title, content in sections]
+        sections=sections
     ))
 
     if not draft_id:
