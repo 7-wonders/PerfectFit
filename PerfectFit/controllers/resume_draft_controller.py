@@ -55,7 +55,7 @@ def add_draft():
     return {"draftId": draft_id}, 201
 
 
-@resume_draft_bp.route('/<draft_id>', methods=['PUT'])
+@resume_draft_bp.route('/<draft_id>', methods=['POST'])
 def update_draft(draft_id: str):
     if not draft_id or not draft_id.isdigit():
         raise CustomException(ExceptionType.INVALID_DRAFT_ID)
