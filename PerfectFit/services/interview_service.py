@@ -1,9 +1,13 @@
+from typing import Tuple, Any
+
 import celery
-from sqlalchemy import func
+from sqlalchemy import func, desc
+from flask import current_app
+
 
 from config.config_mysql import get_session
 from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, \
-    CompanyWorst, Occupation, InterviewView, InterviewLike
+    CompanyWorst, Occupation, InterviewView, InterviewLike, InterviewAnswer
 from dto.company_best.company_best import CompanyBestDto
 from dto.resume.resume import ResumeDto
 
@@ -14,7 +18,7 @@ from dto.interview.interview import InterviewDto
 from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
 from tasks import start_async_ai_task, add_resume_task
-from utils.celery_util import update_task_status, create_task
+from utils.celery_util import update_task_status, create_task, generate_unique_task_id
 
 from utils.open_ai import answer_improvement, make_interview_based_on_resume, make_interview_based_on_job
 
@@ -171,7 +175,7 @@ class InterviewService:
                     title=interview.title,
                     jobName=job.job_name,
                     university=user.university)
-
+                print(job_interview)
                 for job_entry in job_interviews:
                     if job_entry["occupationId"] == job.occupation_id:
                         job_entry["jobInterviews"].append(job_interview)
@@ -290,33 +294,77 @@ class InterviewService:
             return interviews
     @staticmethod
     def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer, user_id: int) -> None:
-        session = get_session()
-        print("!")
-        try:
-            # 상태 저장 (PENDING)
-            task_id = create_task(user_id, question_answer.questionId, status='PENDING')
-            print("2")
-            # 비동기 AI 작업 시작
-            # async_result = start_async_ai_task.apply_async(kwargs={
-            #     "user_answer":question_answer.answer,
-            #     "question_id":question_answer.questionId,
-            #     "task_id":task_id})
-            job = get_session().query(Job).filter(Job.job_id == 253).first()
+        from app import app  # Flask 애플리케이션 가져오기
+        with app.app_context():  # Flask 애플리케이션 컨텍스트 활성화
+            session = get_session()
+            print("!")
+            task_id = None
+            questions = []
+            best_answers = []
+            try:
+                # 상태 저장 (PENDING)
+                print("2")
 
-            async_result = add_resume_task.apply_async(kwargs={
-                "job": job,
-                "user": AppUser(),
-                "resume": ResumeDto.Request.CreateFullResume
-            })
+                for question_id in question_answer.questionIds :
+                    question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
+                    best_answer = session.query(InterviewAnswer).filter_by(question_id=question_id).first()
+                    questions.append(question.question)
+                    best_answers.append(best_answer.answer)
 
-            print("3")
+                print("3")
+                print("user_answers :: ", question_answer.answers)
+                print("question_ids :: ", question_answer.questionIds)
+                print("questions :: ", questions)
+                print("best_answers :: ", best_answers)
+                # 비동기 AI 작업 시작
+                async_result = start_async_ai_task.apply_async(kwargs={
+                    "user_answers":question_answer.answers,
+                    "question_ids":question_answer.questionIds,
+                    "questions":questions,
+                    "best_answers":best_answers})
 
-            # 작업 ID 반환
-            return async_result
-        except Exception as e:
-            session.rollback()
-            print("Exception Cause2 ::", e)
-            raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+                print("3a2")
+                # improvements = async_result.get(timeout=30)
+                #
+                # for improvement in improvements['InterviewImprovement']:
+                #     new_improvement = InterviewImprovement(
+                #         question_id=int(question_answer.questionId),
+                #         answer=improvement['UserAnswer'],
+                #         improvement=improvement['Improvement'],
+                #         translated_answer=improvement['TranslatedAnswer']
+                #     )
+                #     session.add(new_improvement)
+                session.commit()
+
+                print("석세스")
+
+                # 작업 ID 반환
+                return async_result
+            except Exception as e:
+                session.rollback()
+                if task_id is not None :
+                    update_task_status(task_id, status='FAILED')
+                print("Exception Cause2 ::", e)
+                raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+
+    @staticmethod
+    def post_question_answer_after(task_id: str):
+        with get_session() as session:
+            task = start_async_ai_task.AsyncResult(task_id)
+            improvements = task.get()
+            print(improvements)
+            for interview_improvement in improvements:
+                improvement = interview_improvement['InterviewImprovement']
+                new_improvement = InterviewImprovement(
+                    question_id=improvement['questionId'],
+                    answer=improvement['UserAnswer'],
+                    improvement=improvement['Improvement'],
+                    translated_answer=improvement['TranslatedAnswer']
+                )
+                session.add(new_improvement)
+            # 상태 업데이트 (COMPLETED)
+            # update_task_status(task_id, status='COMPLETED')
+            session.commit()
 
 
     @staticmethod
@@ -416,25 +464,33 @@ class InterviewService:
         return isPublicInterviews
 
     @staticmethod
-    def get_improvement(interview_id: int, user_id: int) -> list[InterviewDto.Response.improvement] :
+    def get_improvement(task_id: int, user_id: int) -> list[InterviewDto.Response.improvement] :
         with get_session() as session :
+            task = start_async_ai_task.AsyncResult(task_id)
+            question_id = task.get()[0]['InterviewImprovement']['questionId']
+
+            question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
+            interview_id = question.interview_id
+
             interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
-            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
+            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
             improvementList = []
 
             if not questions :
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
             for question in questions:
-                for improvement in question.interview_improvements :
-                    if improvement :
-                        improvementDto = InterviewDto.Response.improvement(
-                            improvement.improvement_id,
-                            question.question_id,
-                            improvement.answer,
-                            improvement.improvement,
-                            improvement.translated_answer)
-                        improvementList.append(improvementDto)
+                improvement = session.query(InterviewImprovement).filter(InterviewImprovement.question_id == question.question_id).order_by(desc(InterviewImprovement.created_time)).first()
+
+                if improvement :
+                    improvementDto = InterviewDto.Response.improvement(
+                        improvementId = improvement.improvement_id,
+                        questionId = question.question_id,
+                        question = question.question,
+                        answer = improvement.answer,
+                        improvement = improvement.improvement,
+                        translatedAnswer = improvement.translated_answer)
+                    improvementList.append(improvementDto)
 
             view = session.query(InterviewView).filter_by(user_id=user_id).first()
 
@@ -444,6 +500,46 @@ class InterviewService:
                 session.commit()
 
             return improvementList
+    @staticmethod
+    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.improvement] :
+        with get_session() as session :
+            interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
+            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
+            improvementList = []
+
+            if not questions :
+                raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
+
+            for question in questions:
+                improvement = session.query(InterviewImprovement).filter(InterviewImprovement.question_id == question.question_id).order_by(desc(InterviewImprovement.created_time)).first()
+
+                if improvement :
+                    improvementDto = InterviewDto.Response.improvement(
+                        improvementId = improvement.improvement_id,
+                        questionId = question.question_id,
+                        question = question.question,
+                        answer = improvement.answer,
+                        improvement = improvement.improvement,
+                        translatedAnswer = improvement.translated_answer)
+                    improvementList.append(improvementDto)
+
+            view = session.query(InterviewView).filter_by(user_id=user_id).first()
+
+            if view is None:
+                new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
+                session.add(new_view)
+                session.commit()
+
+            return improvementList
+    @staticmethod
+    def get_interview_title(question_id: int, interview_id: int):
+        with get_session() as session :
+            if interview_id is None :
+                question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
+                return question.title, question.interview_id
+            else :
+                interview = session.query(Interview).filter_by(interview_id=interview_id).first()
+                return interview.title, interview.interview_id
 
     @staticmethod
     def post_like(interview_id: int, user_id: int) -> None:

@@ -205,47 +205,47 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str, title: st
         return None
 
 
-def answer_improvement(user_answer: str, question_id: int):
-    session = get_session()
-    question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
-    best_answer = session.query(InterviewAnswer).filter_by(question_id=question_id).first()
+def answer_improvement(user_answers: list[str], question_ids: list[int],questions: list[str], best_answers: list[str]):
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        response_format={"type": "json_object"},
-        temperature=0.7,
-        messages=[
-            {"role": "system",
-             "content": f"You are an interviewer. Please ensure to return the response as a JSON object with exactly 10 'UserAnswer' and 'Improvement' and 'TranslatedAnswer', wrapped under the key 'InterviewImprovement'."
-                        f"'UserAnswer' muse be included from '{user_answer}'"
-                        f"you must 'TranslatedAnswer' and 'Improvement' used Korean"},
-            {"role": "user",
-             "content": f"당신은 면접관으로서 {question.question}라는 질문을 하였었습니다."},
-            {"role": "user",
-             "content": f"당신은 {best_answer.answer}라는 답변이 가장 이상적인 답변이라고 생각합니다.."},
-            {"role": "user",
-             "content": f"하지만, 지원자는 {user_answer}라는 답변을 당신에게 하였습니다."},
-            {"role": "user",
-             "content": f"당신이 판단하기에 지원자의 답변의 부족한 점과 보완할 점을 찾아 개선사항을 도출하고, 지원자의 답변을 개선하여 알려주세요. 개선 사항과 개선된 문장 모두 한국어로 해주세요."},
+    results = []
+    for question, user_answer, best_answer in zip(questions, user_answers, best_answers):
 
-        ]
-    )
-    try:
-        result = response.choices[0].message.content.strip()
-        print(result)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            temperature=0.7,
+            messages=[
+                {"role": "system",
+                 "content": f"You are an interviewer. Please ensure to return the response as a JSON object with exactly 10 'UserAnswer' and 'Improvement' and 'TranslatedAnswer', wrapped under the key 'InterviewImprovement'."
+                            f"'UserAnswer' muse be included from '{user_answer}'"
+                            f"you must 'TranslatedAnswer' and 'Improvement' used Korean"},
+                {"role": "user",
+                 "content": f"당신은 면접관으로서 {question}라는 질문을 하였었습니다."},
+                {"role": "user",
+                 "content": f"당신은 {best_answer}라는 답변이 가장 이상적인 답변이라고 생각합니다.."},
+                {"role": "user",
+                 "content": f"하지만, 지원자는 {user_answer}라는 답변을 당신에게 하였습니다."},
+                {"role": "user",
+                 "content": f"당신이 판단하기에 지원자의 답변의 부족한 점과 보완할 점을 찾아 개선사항을 도출하고, 지원자의 답변을 개선하여 알려주세요. 개선 사항과 개선된 문장 모두 한국어로 해주세요."},
+
+            ]
+        )
+
         try:
-            # JSON 문자열을 Python 객체로 변환
-            result_dict = json.loads(result)
-            print("Parsed result as dict:", result_dict)
-            return result_dict
-        except json.JSONDecodeError as e:
-            # JSON 디코딩 실패 시 에러 로그 출력
-            print("JSONDecodeError:", e)
-            raise ValueError("The result is not a valid JSON string.")
-    except KeyError as e:
-        session.rollback()
-        print(f"Error: {e}")
-        return None
+            result = response.choices[0].message.content.strip()
+            print(result)
+            try:
+                # JSON 문자열을 Python 객체로 변환
+                result_dict = json.loads(result)
+                print("Parsed result as dict:", result_dict)
+                results.append(result_dict)
+            except json.JSONDecodeError as e:
+                # JSON 디코딩 실패 시 에러 로그 출력
+                print("JSONDecodeError:", e)
+                raise ValueError("The result is not a valid JSON string.")
+        except KeyError as e:
+            print(f"Error: {e}")
+            return None
 
 
 # # Llama API 키 가져오기 (가정)

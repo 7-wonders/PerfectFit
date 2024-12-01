@@ -51,13 +51,13 @@
             <h3 class="uk-heading-line-omit"><span>공개 여부 확인</span></h3>
             <p>질문과 답변을 공개하여 다른 사용자에게 도움을 줄 수 있습니다.</p>
         </div>
-        <div class="uk-modal-body question-list" id="question-list">
-            <form id="public-selection-form" action="/interview/ispublic">
-                <div id="questions-container">
-                    <!-- 질문과 답변 체크박스가 동적으로 추가됩니다 -->
-                </div>
-            </form>
-        </div>
+        <form id="public-selection-form" action="/interview/ispublic">
+            <div class="uk-modal-body question-list" id="question-list">
+                    <div id="questions-container">
+                        <!-- 질문과 답변 체크박스가 동적으로 추가됩니다 -->
+                    </div>
+            </div>
+        </form>
         <div class="uk-modal-footer confirmation-buttons" style="display: flex; justify-content: flex-end;">
             <button class="uk-button uk-button-default" id="cancel-button" type="button">공개 안함</button>
             <button class="uk-button uk-button-primary" id="confirm-button" type="button">선택된 항목 공개</button>

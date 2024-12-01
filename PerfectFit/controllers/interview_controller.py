@@ -1,5 +1,6 @@
 import json
 from dataclasses import asdict
+from http import HTTPStatus
 
 from flask import Blueprint, request, jsonify, Response, render_template, redirect
 
@@ -15,6 +16,7 @@ from utils.celery_util import check_task_status
 from utils.jwt_factory import JWTFactory
 
 from utils.open_ai import make_interview_based_on_resume, make_interview_based_on_job
+from tasks import start_async_ai_task
 interview_bp = Blueprint('interview', __name__)
 
 
@@ -63,23 +65,50 @@ def get_is_public(interview_id: int):
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
-@interview_bp.route('/improvement/<interview_id>', methods=['GET'])
-def get_improvement(interview_id: int):
+@interview_bp.route('/improvement/task/<task_id>', methods=['GET'])
+def get_improvement(task_id: int):
 
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    improvementList = InterviewService.get_improvement(interview_id, user_id)
-
+    improvementList = InterviewService.get_improvement(task_id, user_id)
+    title, interview_id = InterviewService.get_interview_title(improvementList[0]["improvements"]["questionId"], None)
     response = {
         "improvements": [{
 			"improvementId": improvement.improvementId,
 			"questionId": improvement.questionId,
+            "question": improvement.question,
+			"answer": improvement.answer,
+			"improvement": improvement.improvement,
+			"translatedAnswer": improvement.translatedAnswer,
+		} for improvement in improvementList],
+        "title" : title,
+        "interviewId" : interview_id,
+
+    }
+
+    return render_template("result.html",response=response)
+
+@interview_bp.route('/improvement/<interview_id>', methods=['GET'])
+def get_improvement_with_id(interview_id: int):
+    print("in1")
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    improvementList = InterviewService.get_improvement_based_id(interview_id, user_id)
+    title, interview_id = InterviewService.get_interview_title(None, interview_id)
+    response = {
+        "improvements": [{
+			"improvementId": improvement.improvementId,
+			"questionId": improvement.questionId,
+            "question": improvement.question,
 			"answer": improvement.answer,
 			"improvement": improvement.improvement,
 			"translatedAnswer": improvement.translatedAnswer,
 		}
-            for improvement in improvementList]
+            for improvement in improvementList],
+        "title" : title,
+        "interviewId" : interview_id
     }
 
     return render_template("result.html",response=response)
@@ -113,28 +142,46 @@ def delete_like(interview_id: int):
 def post_question_answer():
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+    print(request.form.get('questionIds'))
+    print(request.form.get('answers'))
+    question_ids = [int(qid) for qid in request.form.get('questionIds').split('|') if qid]
 
-    question_id = request.form.get('questionId', None, type=int)
-    answer = request.form.get('answer', None, type=str)
-    print("Asd")
+    answers = request.form.get('answers').split("|")  # ['Answer 1', 'Answer 2', 'Answer 3']
+    # question_id = request.form.get('questionIds', None, type=int)
+    # answer = request.form.get('answers', None, type=str)
     # 이전 요청 상태 확인
-    existing_task = check_task_status(user_id, question_id)
-    print(existing_task)
-    if existing_task and existing_task["status"] == 'PENDING':
-        return jsonify({"error": "Previous task is still in progress."}), 409
+    # existing_task = check_task_status(user_id, question_ids)
+    # print(existing_task)
+    # if existing_task and existing_task["status"] == 'PENDING':
+    #     return jsonify({"error": "Previous task is still in progress."}), 409
 
     # 새 작업 추가
     post_answer_request = InterviewDto.Request.postInterviewAnswer(
-        questionId=question_id,
-        answer=answer
+        questionIds=question_ids,
+        answers=answers
     )
 
     task = InterviewService.post_question_answer(post_answer_request, user_id)
+    print("controller ========" , task.id)
 
-    print(task)
+    return jsonify(task.id)
+    # return jsonify({"message": "Answer submitted successfully.", "task_id": task.id})
 
-    return jsonify({"message": "Answer submitted successfully.", "task_id": task.id})
+@interview_bp.route('/task/<task_id>', methods=['POST'])
+def get_task(task_id):
+    task = start_async_ai_task.AsyncResult(task_id)
+    state = task.state.lower()
 
+    if state == 'success':
+        
+        #여기서 DB 작업
+        InterviewService.post_question_answer_after(task_id)
+        
+        return jsonify({"task_id": task.id}), HTTPStatus.OK
+    elif state == 'failure':
+        raise CustomException(ExceptionType.CELERY_ERROR)
+    else:
+        return {}, HTTPStatus.ACCEPTED
 
 
 @interview_bp.route('/resume/select', methods=['POST'])
@@ -266,9 +313,9 @@ def spell_check():
 def loading_create():
     return render_template("Loading-create.html")
 
-@interview_bp.route('/loading-analyze')
-def loading_analyze():
-    return render_template("Loading-analyze.html")
+@interview_bp.route('/loading-analyze/<task_id>')
+def loading_analyze(task_id: int):
+    return render_template("Loading-analyze.html", task_id=task_id)
 
 @interview_bp.route('/')
 def interview():

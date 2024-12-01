@@ -5,18 +5,22 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
 {% endblock %}
-
 {% block content %}
-
 <div class="container">
     <!-- 제목 및 수정 버튼 -->
     <div class="title-section">
         <div class="title-wrapper">
-            <span id="display-title">2024-10-11 웹개발자 분야 모의면접</span>
+            <span id="display-title">{{ response.title }}</span>
             <button id="edit-button" class="edit-icon">✏️</button>
         </div>
     </div>
 
+    <div class="title-section">
+        <div class="title-wrapper">
+            <span id="display-title">임시 공개 여부 수정 벝ㄴ</span>
+            <button id="public-button" class="edit-icon" value={{ response.interviewId }}>✏️</button>
+        </div>
+    </div>
     <!-- 내용 섹션 -->
     <div class="content-section">
         <!-- 질문 및 답변 박스 -->
@@ -37,5 +41,202 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/result.js') }}"></script>
+<div id="confirmation-modal" class="uk-modal" uk-modal>
+    <div class="uk-modal-dialog">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <div class="uk-modal-header">
+            <h3 class="uk-heading-line-omit"><span>공개 여부 확인</span></h3>
+            <p>질문과 답변을 공개하여 다른 사용자에게 도움을 줄 수 있습니다.</p>
+        </div>
+        <form id="public-selection-form" action="/interview/ispublic">
+            <div class="uk-modal-body question-list" id="question-list">
+                    <div id="questions-container">
+                        <!-- 질문과 답변 체크박스가 동적으로 추가됩니다 -->
+                    </div>
+            </div>
+        </form>
+        <div class="uk-modal-footer confirmation-buttons" style="display: flex; justify-content: flex-end;">
+            <button class="uk-button uk-button-default" id="cancel-button" type="button">공개 안함</button>
+            <button class="uk-button uk-button-primary" id="confirm-button" type="button">선택된 항목 공개</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // {{ response }} 안에 있는 데이터를 JavaScript 객체로 변환
+    const response = {{ response|tojson }};
+
+    // 질문 및 답변 렌더링
+    const questions = response.improvements;
+
+    const form = document.getElementById("questions-form");
+
+    // 기존 질문 초기화
+    form.innerHTML = "";
+
+    questions.forEach((questionData) => {
+        // 각 질문 및 답변 렌더링
+        const questionBlock = document.createElement("div");
+        questionBlock.classList.add("question");
+
+        // Form 요소 추가
+        questionBlock.innerHTML = `
+            <label for="answer-${questionData.questionId}" class="question-title">
+                ${questionData.question}
+            </label>
+            <textarea
+                id="answer-${questionData.questionId}"
+                name="answer-${questionData.questionId}"
+                rows="3"
+                class="answer"
+                readonly
+            >${questionData.answer || "아직 답변이 작성되지 않았습니다."}</textarea>
+            <button
+                type="button"
+                class="check-button"
+                onclick="renderImprovement(${questionData.questionId}, '${questionData.improvement}', '${questionData.translatedAnswer}')"
+            >
+                개선 사항 확인
+            </button>
+            <hr class="divider">
+        `;
+        form.appendChild(questionBlock);
+
+        document.getElementById("confirm-button").addEventListener("click", handleConfirmPublic);
+        document.getElementById("cancel-button").addEventListener("click", handleCancelPublic);
+    });
+});
+
+// 개선 사항 렌더링
+function renderImprovement(questionId, improvement, translatedAnswer) {
+    const rightPanel = document.querySelector(".right-panel .result-content");
+
+    // 개선 사항과 다듬은 내용을 함께 표시
+    rightPanel.innerHTML = `
+        <p><strong>개선 사항:</strong> ${improvement || "개선 사항이 없습니다."}</p>
+        <p><strong>다듬은 내용:</strong> ${translatedAnswer || "다듬은 내용이 없습니다."}</p>
+    `;
+}
+document.getElementById('edit-button').addEventListener('click', function () {
+    // 현재 제목을 가져와서 입력 필드에 표시
+    const currentTitle = document.getElementById('display-title').innerText;
+    const newTitle = prompt("새 제목을 입력하세요:", currentTitle);
+
+    // 사용자가 새 제목을 입력한 경우에만 요청을 보냄
+    if (newTitle !== null && newTitle !== currentTitle) {
+        // PATCH 요청 보내기
+        fetch(`/interview/{{ response.interviewId }}/title`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: newTitle,
+            }),
+        })
+        .then(response => {
+            if (response.ok) {
+                // 서버에서 성공적으로 응답이 오면 화면에 제목을 업데이트
+                document.getElementById('display-title').innerText = newTitle;
+                alert("제목이 업데이트되었습니다.");
+            } else {
+                alert("제목 업데이트에 실패했습니다.");
+            }
+        })
+        .catch(error => {
+            console.error("Error updating title:", error);
+            alert("서버와의 연결에 문제가 발생했습니다.");
+        });
+    }
+});
+
+document.getElementById('public-button').addEventListener('click', function () {
+    showCompletionModal();
+});
+
+async function showCompletionModal() {
+    try {
+        await loadModalQuestions(); // 모달 데이터 로드
+        const modal = document.getElementById("confirmation-modal");
+        UIkit.modal(modal).show();
+    } catch (error) {
+        console.error("모달 데이터 로드 실패:", error);
+        alert("모달 데이터를 가져오는 중 문제가 발생했습니다.");
+    }
+}
+
+async function loadModalQuestions() {
+    const questionListElement = document.getElementById("question-list");
+    questionListElement.innerHTML = ""; // 초기화
+    for(let i = 0 ; i < 10 ; ++i) {
+        const questionAnswerItem = document.createElement("div");
+        const responseData = {{ response | tojson }}
+        questionAnswerItem.classList.add("uk-margin");
+        console.log( responseData)
+
+        questionAnswerItem.innerHTML = `
+        <p class="uk-text-bold">Q${i + 1}. ${responseData['improvements'][i]['question']}</p>
+        <p class="uk-text-muted">A: ${responseData['improvements'][i]['answer'] || "답변 없음"}</p>
+        <label class="uk-checkbox-wrapper" style="display: flex; align-items: center;">
+            <input type="checkbox" name="publish_question" value="${responseData['improvements'][i]['questionId']}" class="uk-checkbox">
+            <span style="margin-left: 8px;">공개 여부</span>
+        </label>
+    `;
+
+        console.log("gogo3")
+        questionListElement.appendChild(questionAnswerItem);
+    }
+}
+
+// 공개 여부 확인 버튼
+async function handleConfirmPublic() {
+    const selectedQuestions = Array.from(
+        document.querySelectorAll("#question-list input[type='checkbox']:checked")
+    ).map((checkbox) => checkbox.value);
+    const unSelectedQuestions = Array.from(
+        document.querySelectorAll("#question-list input[type='checkbox']:not(:checked)")
+    ).map((checkbox) => parseInt(checkbox.value, 10));
+
+    if (selectedQuestions.length === 0) {
+        alert("선택된 항목이 없습니다.");
+        return;
+    }
+    try {
+        const requestBody = {
+        isShareIds: selectedQuestions,
+        isCloseIds: unSelectedQuestions,
+        };
+
+        const response = await fetch("/interview/ispublic", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "ACCESS TOKEN",
+            },
+            body: JSON.stringify(requestBody), // JSON 문자열로 변환
+        });
+
+        if (!response.ok) {
+            throw new Error("공개 설정 실패");
+        }
+
+        alert("공개 여부 수정 성공 ! ");
+
+        const modal = document.getElementById("confirmation-modal");
+        UIkit.modal(modal).hide();
+    } catch (error) {
+        console.error("공개 설정 중 오류:", error);
+    }
+}
+
+// 모달 닫기 버튼
+function handleCancelPublic() {
+    const modal = document.getElementById("confirmation-modal");
+    UIkit.modal(modal).hide();
+}
+
+
+</script>
+
 {% endblock %}

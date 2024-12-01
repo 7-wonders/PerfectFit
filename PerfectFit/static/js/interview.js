@@ -1,6 +1,8 @@
 let currentQuestionIndex = 0;
 let timerInterval;
 let questions = [];
+let questionIds = [];
+let answers = [];
 
 // 페이지 로드 후 초기화
 document.addEventListener("DOMContentLoaded", async () => {
@@ -48,25 +50,16 @@ async function handleFormSubmit(event) {
     }
 
     try {
-        // 서버에 답변 저장
-        const formData = new FormData(event.target);
-        formData.append("questionId", questions[currentQuestionIndex]["question_id"]);
-        formData.append("answer", answerInput);
-
-        const response = await fetch(event.target.action, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error("답변 저장 실패");
-        }
+        // 답변 저장
+        questionIds.push(questions[currentQuestionIndex]["question_id"]);
+        answers.push(answerInput);
 
         // 다음 질문 로드
         if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
             loadQuestion();
         } else {
+
             clearInterval(timerInterval);
             showCompletionModal(); // 모든 질문 완료 시 모달 표시
         }
@@ -137,72 +130,87 @@ async function showCompletionModal() {
 async function loadModalQuestions() {
     const questionListElement = document.getElementById("question-list");
     questionListElement.innerHTML = ""; // 초기화
+    for(let i = 0 ; i < 10 ; ++i) {
 
-    const response = await fetch(`/interview/ispublic/${interviewId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "ACCESS TOKEN",
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("질문과 답변 데이터를 가져올 수 없습니다.");
-    }
-
-    const data = await response.json();
-    data.forEach((item, index) => {
         const questionAnswerItem = document.createElement("div");
         questionAnswerItem.classList.add("uk-margin");
-
         questionAnswerItem.innerHTML = `
-            <p class="uk-text-bold">Q${index + 1}. ${item.title}</p>
-            <p class="uk-text-muted">A: ${item.answer || "답변 없음"}</p>
-            <label class="uk-checkbox-wrapper" style="display: flex; align-items: center;">
-                <input type="checkbox" name="publish_question" value="${item.questionId}" class="uk-checkbox">
-                <span style="margin-left: 8px;">공개 여부</span>
-            </label>
-        `;
+        <p class="uk-text-bold">Q${i + 1}. ${questions[i]['question']}</p>
+        <p class="uk-text-muted">A: ${answers[i] || "답변 없음"}</p>
+        <label class="uk-checkbox-wrapper" style="display: flex; align-items: center;">
+            <input type="checkbox" name="publish_question" value="${questionIds[i]}" class="uk-checkbox">
+            <span style="margin-left: 8px;">공개 여부</span>
+        </label>
+    `;
 
+        console.log("5");
         questionListElement.appendChild(questionAnswerItem);
-    });
+    }
 }
 
 // 공개 여부 확인 버튼
 async function handleConfirmPublic() {
+    console.log("in");
     const selectedQuestions = Array.from(
-        document.querySelectorAll("#questions-container input[type='checkbox']:checked")
+        document.querySelectorAll("#question-list input[type='checkbox']:checked")
     ).map((checkbox) => checkbox.value);
-
+    console.log(selectedQuestions);
     const unSelectedQuestions = Array.from(
-        document.querySelectorAll("#questions-container input[type='checkbox']:not(:checked)")
-    ).map((checkbox) => checkbox.value);
+        document.querySelectorAll("#question-list input[type='checkbox']:not(:checked)")
+    ).map((checkbox) => parseInt(checkbox.value, 10));
 
     if (selectedQuestions.length === 0) {
         alert("선택된 항목이 없습니다.");
         return;
     }
-
+    console.log("s :: " + selectedQuestions[0]);
+    console.log("us :: " + unSelectedQuestions);
     try {
+        const requestBody = {
+        isShareIds: selectedQuestions,
+        isCloseIds: unSelectedQuestions,
+        };
+
         const response = await fetch("/interview/ispublic", {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: "ACCESS TOKEN",
             },
-            body: JSON.stringify({
-                isShareIds: selectedQuestions,
-                isCloseIds: unSelectedQuestions,
-            }),
+            body: JSON.stringify(requestBody), // JSON 문자열로 변환
         });
 
         if (!response.ok) {
             throw new Error("공개 설정 실패");
         }
+        else {
+            const form = document.getElementById("question-form");
 
-        alert("공개 설정이 완료되었습니다.");
+            const formData = new FormData(form);
+            console.log(questionIds)
+            console.log(answers)
+            alert(questionIds.join(","))
+            formData.append("questionIds", questionIds.join("|"));
+            formData.append("answers", answers.join("|"));
+
+            const response = await fetch(form.action, {
+                    method: "POST",
+                    body: formData,
+                });
+
+          if (response.ok) {
+                // 서버에서 task_id를 받았다고 가정
+
+                const data = await response.json();  // JSON으로 파싱
+                const task_id = data;  // task_id를 받아옴
+
+                window.location.href = `/interview/loading-analyze/${task_id}`;
+           } else {
+                alert("답변 저장 실패");
+           }
+        }
     } catch (error) {
         console.error("공개 설정 중 오류:", error);
-        alert("공개 설정 중 문제가 발생했습니다.");
     }
 }
 
@@ -211,3 +219,4 @@ function handleCancelPublic() {
     const modal = document.getElementById("confirmation-modal");
     UIkit.modal(modal).hide();
 }
+

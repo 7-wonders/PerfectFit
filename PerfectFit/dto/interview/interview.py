@@ -9,8 +9,8 @@ class InterviewDto:
     class Request:
         @dataclass
         class postInterviewAnswer:
-            questionId: int
-            answer: str
+            questionIds: list[int]
+            answers: list[str]
               
         @dataclass
         class postMakeInterviewResume:
@@ -80,6 +80,7 @@ class InterviewDto:
         class improvement:
             improvementId: int
             questionId: int
+            question: str
             answer: str
             improvement: str
             translatedAnswer: str
