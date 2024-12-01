@@ -12,6 +12,7 @@ from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
 from dto.resume_section.resume_section import ResumeSectionDto
+from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
@@ -203,7 +204,7 @@ class ResumeService:
             return occupations, resume_intro_drafts
 
     @staticmethod
-    def get_resume(resume_id: str) -> tuple[RowMapping | None, RowMapping | None, bool]:
+    def get_resume(resume_id: str) -> Resume | None:
         access_token = request.cookies.get('access_token')
         user_id = None
         increased_view = False
@@ -265,7 +266,7 @@ class ResumeService:
             resume = session.execute(resume_query).mappings().first()
 
             if not resume:
-                return None, None, increased_view
+                return None
 
             sections_query = (
                 select(
@@ -278,7 +279,7 @@ class ResumeService:
 
             sections = session.execute(sections_query).mappings().all()
             if not sections:
-                return None, None, increased_view
+                return None
 
             if user_id and resume.get('user.userId') != user_id and not resume.get('isView'):
                 session.add(ResumeView(
@@ -289,7 +290,36 @@ class ResumeService:
                 session.commit()
                 increased_view = True
 
-            return resume, sections, increased_view
+            response: ResumeDto.Response.Resume = ResumeDto.Response.Resume(
+                resumeId=resume.get('resumeId'),
+                title=resume.get('title'),
+                level=resume.get('level'),
+                jobName=resume.get('jobName'),
+                occupationName=resume.get('occupationName'),
+                viewCount=resume.get('viewCount') + 1 if increased_view else resume.get('viewCount'),
+                likeCount=resume.get('likeCount'),
+                createdTime=resume.get('createdTime').strftime('%Y-%m-%d %H:%M:%S'),
+                isMine=resume.get('user.userId') == user_id,
+                isLike=(
+                    None if request.cookies.get('access_token') is None
+                    else
+                    resume.get('isLike') if 'isLike' in resume else False
+                ),
+                section=[ResumeSectionDto.Response.Section(
+                    sectionId=section.get('sectionId'),
+                    title=section.get('title'),
+                    content=section.get('content')
+                ) for section in sections],
+                user=UserDto.Response.IntroUserWithProfile(
+                    userId=resume.get('user.userId'),
+                    username=resume.get('user.username'),
+                    profilePath=resume.get('user.profilePath')
+                )
+            )
+
+            print(response)
+
+            return response
 
     @staticmethod
     def get_resume_with_update(resume_id: str):
@@ -600,7 +630,8 @@ class ResumeService:
 
             job = session.query(Job).filter(Job.job_id == data.job_id).first()
             if not job:
-                raise CustomException(ExceptionType.INVALID_JOB_ID)
+                flash('유효하지 않은 직업 ID입니다.', 'danger')
+                return None
 
             resume.title = data.title
             resume.job_id = data.job_id

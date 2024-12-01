@@ -51,6 +51,5 @@ class ResumeDraftDto:
         @dataclass
         class DraftForWrite:
             resume: "ResumeDraftDto.Response.DraftWithWrite"
-            drafts: list["ResumeDraftDto.Response.Intro"]
             occupations: list["OccupationDto.Response.Occupation"]
             jobs: Optional[list["JobDto.Response.Jobs"]] = field(default=None)

@@ -5,8 +5,11 @@ from config.config_mysql import get_session
 from domain.models import Job, ProsCons, Keyword, ResumeSection, Occupation
 from domain.models.resume_draft import ResumeDraft
 from dto.keyword.keyword import KeywordDto
+from dto.resume.resume import ResumeDto
 from dto.resume_draft.resume_draft import ResumeDraftDto
 from dto.resume_section.resume_section import ResumeSectionDto
+from exception.custom_exception import CustomException
+from exception.exception_type import ExceptionType
 from utils.jwt_factory import JWTFactory
 
 
@@ -14,9 +17,6 @@ class ResumeDraftService:
     @staticmethod
     def get_draft(draft_id: str):
         user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
-        if not user_id:
-            flash('로그인이 필요합니다.', 'danger')
-            return None
 
         with (get_session() as session):
             pros_subquery = (
@@ -49,25 +49,12 @@ class ResumeDraftService:
             )
 
             draft = session.execute(draft_query).mappings().first()
-            query = (
-                select(
-                    ResumeDraft.draft_id,
-                    ResumeDraft.title,
-                    ResumeDraft.created_time
-                )
-                .where(ResumeDraft.user_id == user_id)
-                .order_by(ResumeDraft.draft_id.desc())
-            )
-
-            drafts = session.execute(query).mappings().all()
 
             if not draft:
-                flash('자기소개서 정보를 불러오는 중 오류가 발생했습니다.', 'danger')
-                return None
+                raise CustomException(ExceptionType.NOT_FOUND_RESUME)
 
             if draft.get('userId') != user_id:
-                flash('본인의 자기소개서만 수정할 수 있습니다.', 'danger')
-                return None
+                raise CustomException(ExceptionType.FORBIDDEN_RESUME)
 
             sections_query = (
                 select(
@@ -122,7 +109,7 @@ class ResumeDraftService:
                     Occupation.occupation_id.label('occupationId'),
                     Occupation.occupation_name.label('occupationName'),
                     (
-                            Occupation.occupation_id == selected_job_query if job_id else literal(False)
+                        Occupation.occupation_id == selected_job_query if job_id else literal(False)
                     ).label('isSelected')
                 )
             )
@@ -156,15 +143,8 @@ class ResumeDraftService:
                     ],
                     isPublic=draft.get('isPublic')
                 ),
-                drafts=[
-                    ResumeDraftDto.Response.Intro(
-                        draftId=draft.draft_id,
-                        title=draft.title,
-                        createdTime=draft.created_time,
-                    ) for draft in drafts
-                ],
-                jobs=jobs,
-                occupations=occupations
+                jobs=[dict(job) for job in jobs] if jobs else None,
+                occupations=[dict(occupation) for occupation in occupations]
             )
 
             return response
@@ -187,8 +167,7 @@ class ResumeDraftService:
             if data.job_id:
                 job = session.query(Job).filter(Job.job_id == data.job_id).first()
                 if not job:
-                    flash('선택된 직업이 존재하지 않습니다.', 'danger')
-                    return
+                    raise CustomException(ExceptionType.NOT_FOUND_JOB)
 
             draft = ResumeDraft(
                 user_id=user_id,
@@ -240,3 +219,136 @@ class ResumeDraftService:
             session.commit()
 
             return draft.draft_id
+
+    @staticmethod
+    def update_draft(draft_id: str, data: ResumeDto.Request.Update):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with (get_session() as session):
+            draft = session.query(ResumeDraft).filter(ResumeDraft.draft_id == draft_id).first()
+            if not draft:
+                raise CustomException(ExceptionType.INVALID_DRAFT_ID)
+
+            if draft.user_id != user_id:
+                raise CustomException(ExceptionType.FORBIDDEN_RESUME)
+
+            if data.job_id:
+                job = session.query(Job).filter(Job.job_id == data.job_id).first()
+                if not job:
+                    raise CustomException(ExceptionType.INVALID_JOB_ID)
+
+                draft.job_id = data.job_id
+
+            draft.title = data.title
+            draft.level = data.level
+            draft.directional = data.directional
+            draft.is_shared = data.is_shared
+
+            pros = session.query(ProsCons).filter(ProsCons.draft_id == draft_id, ProsCons.type == 'pros').first()
+
+            if pros and (not data.pros or not data.pros.strip()):
+                session.delete(pros)
+            elif pros:
+                pros.content = data.pros
+            else:
+                pros = ProsCons(
+                    draft_id=draft_id,
+                    type='pros',
+                    content=data.pros
+                )
+                session.add(pros)
+
+            cons = session.query(ProsCons).filter(ProsCons.draft_id == draft_id, ProsCons.type == 'cons').first()
+            if cons and (not data.cons or not data.cons.strip()):
+                session.delete(cons)
+            elif cons:
+                cons.content = data.cons
+            else:
+                cons = ProsCons(
+                    draft_id=draft_id,
+                    type='cons',
+                    content=data.cons
+                )
+                session.add(cons)
+
+            session.query(Keyword).filter(Keyword.draft_id == draft_id).delete()
+            if data.keywords:
+                keywords = [
+                    Keyword(
+                        draft_id=draft_id,
+                        job_id=data.job_id,
+                        content=keyword.content
+                    )
+                    for keyword in data.keywords
+                ]
+                session.add_all(keywords)
+
+            db_section = session.query(ResumeSection).filter(ResumeSection.draft_id == draft_id).all()
+            if data.sections and len(data.sections) > 0:
+                new_sections = []
+
+                # 사용자가 추가한 섹션 ID 기준으로 나누기
+                data_sections_by_id = {int(section.section_id): section
+                                       for section in data.sections
+                                       if section.section_id not in [None, "None", "", "null"]}
+                # DB에 저장된 섹션 ID 기준으로 나누기
+                db_sections = {section.resume_section_id: section
+                               for section in db_section}
+                # 사용자가 추가한 섹션
+                new_sections_by_data = [section
+                                        for section in data.sections
+                                        if section.section_id in [None, "None", "", "null"]]
+
+                db_sections_ids = set(db_sections.keys())
+                data_sections_ids = set(data_sections_by_id.keys())
+
+                # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되지 않았다면 삭제
+                for section_id in db_sections_ids - data_sections_ids:
+                    session.delete(db_sections[section_id])
+
+                # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되어 있다면 수정
+                for section_id in db_sections_ids & data_sections_ids:
+                    if not db_sections[section_id].title.strip() \
+                            or not db_sections[section_id].content.strip():
+                        continue
+
+                    db_section = db_sections[section_id]
+                    db_section.title = data_sections_by_id[section_id].title
+                    db_section.content = data_sections_by_id[section_id].content
+
+                # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되지 않았다면 추가
+                for section in new_sections_by_data:
+                    if not section.title.strip() or not section.content.strip():
+                        continue
+
+                    new_sections.append(ResumeSection(
+                        draft_id=draft_id,
+                        title=section.title,
+                        content=section.content
+                    ))
+
+                session.add_all(new_sections)
+            else:
+                session.query(ResumeSection).filter(ResumeSection.draft_id == draft_id).delete()
+
+            session.commit()
+
+    @staticmethod
+    def delete_draft(draft_id: str):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with get_session() as session:
+            draft = session.query(ResumeDraft).filter(ResumeDraft.draft_id == draft_id).first()
+            if not draft:
+                raise CustomException(ExceptionType.INVALID_DRAFT_ID)
+
+            if draft.user_id != user_id:
+                raise CustomException(ExceptionType.FORBIDDEN_RESUME)
+
+            session.query(ResumeSection).filter(ResumeSection.draft_id == draft_id).delete(synchronize_session='fetch')
+            session.query(Keyword).filter(Keyword.draft_id == draft_id).delete(synchronize_session='fetch')
+            session.query(ProsCons).filter(ProsCons.draft_id == draft_id, ProsCons.type == 'pros').delete()
+            session.query(ProsCons).filter(ProsCons.draft_id == draft_id, ProsCons.type == 'cons').delete()
+
+            session.delete(draft)
+            session.commit()

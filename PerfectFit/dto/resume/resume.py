@@ -139,6 +139,7 @@ class ResumeDto:
             createdTime: str
             user: "UserDto.Response.IntroUserWithProfile"
             section: list["ResumeSectionDto.Response.Section"]
+            isMine: bool
             isLike: Optional[bool] = field(default=None)
 
         @dataclass
