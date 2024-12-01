@@ -11,6 +11,7 @@ from services.job_service import JobService
 from services.resume_service import ResumeService
 
 from services.interview_service import InterviewService
+from utils.celery_util import check_task_status
 from utils.jwt_factory import JWTFactory
 
 from utils.open_ai import make_interview_based_on_resume, make_interview_based_on_job
@@ -110,22 +111,32 @@ def delete_like(interview_id: int):
 
 @interview_bp.route('/', methods=['POST'])
 def post_question_answer():
-
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     question_id = request.form.get('questionId', None, type=int)
     answer = request.form.get('answer', None, type=str)
+    print("Asd")
+    # 이전 요청 상태 확인
+    existing_task = check_task_status(user_id, question_id)
+    print(existing_task)
+    if existing_task and existing_task["status"] == 'PENDING':
+        return jsonify({"error": "Previous task is still in progress."}), 409
 
+    # 새 작업 추가
     post_answer_request = InterviewDto.Request.postInterviewAnswer(
         questionId=question_id,
         answer=answer
     )
 
-    InterviewService.post_question_answer(post_answer_request) # 답변을 등록 하면서, 개선사항 도출 로직까지 수행.
+    task = InterviewService.post_question_answer(post_answer_request, user_id)
 
-    # return redirect('/test/test_interview_post.html')
-    return ""
+    print(task)
+
+    return jsonify({"message": "Answer submitted successfully.", "task_id": task.id})
+
+
+
 @interview_bp.route('/resume/select', methods=['POST'])
 def make_interview_resume():
 

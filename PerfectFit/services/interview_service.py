@@ -1,9 +1,11 @@
+import celery
 from sqlalchemy import func
 
 from config.config_mysql import get_session
 from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, \
     CompanyWorst, Occupation, InterviewView, InterviewLike
 from dto.company_best.company_best import CompanyBestDto
+from dto.resume.resume import ResumeDto
 
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -11,12 +13,14 @@ from dto.interview.interview import InterviewDto
 
 from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
+from tasks import start_async_ai_task, add_resume_task
+from utils.celery_util import update_task_status, create_task
 
 from utils.open_ai import answer_improvement, make_interview_based_on_resume, make_interview_based_on_job
 
 from hanspell import spell_checker
 
-
+from celery import Celery
 class InterviewService:
 
     @staticmethod
@@ -285,25 +289,35 @@ class InterviewService:
             session.close()
             return interviews
     @staticmethod
-    def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer) -> None:
+    def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer, user_id: int) -> None:
         session = get_session()
-
-        # QuestionId와 Answer가 넘어오는데 여기서 answer는 사용자가 작성한 답변이다.
-
+        print("!")
         try:
-            improvements = answer_improvement(question_answer.answer, question_answer.questionId)
-            for improvement in improvements['InterviewImprovement']:
-                new_improvement = InterviewImprovement(question_id=int(question_answer.questionId),
-                                               answer=improvement['UserAnswer'],
-                                               improvement=improvement['Improvement'],
-                                               translated_answer=improvement['TranslatedAnswer'])
-                session.add(new_improvement)
-            session.commit()
+            # 상태 저장 (PENDING)
+            task_id = create_task(user_id, question_answer.questionId, status='PENDING')
+            print("2")
+            # 비동기 AI 작업 시작
+            # async_result = start_async_ai_task.apply_async(kwargs={
+            #     "user_answer":question_answer.answer,
+            #     "question_id":question_answer.questionId,
+            #     "task_id":task_id})
+            job = get_session().query(Job).filter(Job.job_id == 253).first()
+
+            async_result = add_resume_task.apply_async(kwargs={
+                "job": job,
+                "user": AppUser(),
+                "resume": ResumeDto.Request.CreateFullResume
+            })
+
+            print("3")
+
+            # 작업 ID 반환
+            return async_result
         except Exception as e:
             session.rollback()
-            print("Exception Cause2 :: ",e)
+            print("Exception Cause2 ::", e)
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
-        get_session().commit()
+
 
     @staticmethod
     def make_interview_resume(request_dto: InterviewDto.Request.postMakeInterviewResume) -> None:

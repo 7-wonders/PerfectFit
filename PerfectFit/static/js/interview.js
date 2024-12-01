@@ -2,109 +2,102 @@ let currentQuestionIndex = 0;
 let timerInterval;
 let questions = [];
 
-// DOMContentLoaded 이벤트로 초기화
+// 페이지 로드 후 초기화
 document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const questionsData = await fetchQuestions(interviewId); // 질문 목록 가져오기
+        questions = questionsData.questions;
+        loadQuestion(); // 첫 질문 로드
+    } catch (error) {
+        console.error("질문 데이터 로드 실패:", error);
+        alert("질문 데이터를 가져오는 중 문제가 발생했습니다.");
+    }
 
-    const questionsData = await fetchQuestions(interviewId); // 질문 목록 가져오기
-
-    questions = questionsData.questions; // 질문 리스트 저장
-    console.log(questions);
-    loadQuestion(); // 첫 질문 로드
-
-    // 폼 제출 이벤트 처리
+    // 폼 제출 이벤트
     const form = document.getElementById("question-form");
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault(); // 기본 폼 제출 동작 방지
+    form.addEventListener("submit", handleFormSubmit);
 
-        const answerInput = document.getElementById("answer-input").value.trim();
-
-        if (!answerInput) {
-            alert("답변을 입력해주세요.");
-            return;
-        }
-
-        // 답변 저장 (추후 서버로 저장 가능)
-        console.log(`Question ID: ${questions[currentQuestionIndex]["question_id"]}, Answer: ${answerInput}`);
-
-        if (currentQuestionIndex < questions.length - 1) {
-            currentQuestionIndex++;
-            const formData = new FormData(form); // 폼 데이터 생성
-            formData.append("questionId", questions[currentQuestionIndex]["question_id"]);
-            formData.append("answer", answerInput);
-
-            fetch(form.action, {
-                method: "POST",
-                body: formData,
-            })
-                .then((response) => {
-                    if (response.ok) {
-
-                    } else {
-                        alert("답변 제출 중 문제가 발생했습니다.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error submitting form:", error);
-                    alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
-                });
-
-            loadQuestion(); // 다음 질문 로드
-        } else {
-            clearInterval(timerInterval);
-            showCompletionModal(); // 모든 질문 완료 시 모달창 표시
-        }
-    });
-
-
-    // 공개 여부 버튼 이벤트 리스너
-    document.getElementById("confirm-button").addEventListener("click", () => {
-        alert("질문과 답변을 공개합니다.");
-    });
-
-    document.getElementById("cancel-button").addEventListener("click", () => {
-        alert("공개 설정이 취소되었습니다.");
-    });
+    // 모달 버튼 이벤트
+    document.getElementById("confirm-button").addEventListener("click", handleConfirmPublic);
+    document.getElementById("cancel-button").addEventListener("click", handleCancelPublic);
 });
 
 // 질문 데이터 가져오기
 async function fetchQuestions(interviewId) {
-    console.log("id : "+ interviewId);
     const response = await fetch(`/interview/${interviewId}`, {
         headers: {
             "Content-Type": "application/json",
-            Authorization: "ACCESS TOKEN", // 실제 토큰 값으로 대체
+            Authorization: "ACCESS TOKEN",
         },
     });
-    console.log(response)
+
     if (!response.ok) {
         throw new Error("질문 데이터를 가져올 수 없습니다.");
     }
-
-    return await response.json(); // 질문 데이터 반환
+    return await response.json();
 }
 
-// 질문 로드 함수
+// 폼 제출 처리
+async function handleFormSubmit(event) {
+    event.preventDefault();
+
+    const answerInput = document.getElementById("answer-input").value.trim();
+    if (!answerInput) {
+        alert("답변을 입력해주세요.");
+        return;
+    }
+
+    try {
+        // 서버에 답변 저장
+        const formData = new FormData(event.target);
+        formData.append("questionId", questions[currentQuestionIndex]["question_id"]);
+        formData.append("answer", answerInput);
+
+        const response = await fetch(event.target.action, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error("답변 저장 실패");
+        }
+
+        // 다음 질문 로드
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            clearInterval(timerInterval);
+            showCompletionModal(); // 모든 질문 완료 시 모달 표시
+        }
+    } catch (error) {
+        console.error("답변 제출 중 오류:", error);
+        alert("답변 제출 중 문제가 발생했습니다.");
+    }
+}
+
+// 질문 로드
 function loadQuestion() {
     if (!questions || questions.length === 0) return;
 
     const currentQuestion = questions[currentQuestionIndex];
 
-    // 질문 내용 업데이트
+    // 질문 UI 업데이트
     document.getElementById("question-text").textContent = currentQuestion.question;
-    document.getElementById("question-id").value = currentQuestion.questionId; // hidden input에 설정
-    document.getElementById("question-number-hidden").value = currentQuestionIndex + 1; // hidden input에 설정
+    document.getElementById("question-id").value = currentQuestion.questionId;
+    document.getElementById("question-number-hidden").value = currentQuestionIndex + 1;
 
-    // UI 업데이트
-    document.getElementById("answer-input").value = ""; // 입력 필드 초기화
+    // UI 초기화
+    document.getElementById("answer-input").value = "";
     document.getElementById("question-number").textContent = `${currentQuestionIndex + 1}/${questions.length}`;
 
     // 타이머 시작
     startTimer(60);
 }
 
-// 타이머 시작 함수
+// 타이머
 function startTimer(seconds) {
-    clearInterval(timerInterval); // 이전 타이머 정리
+    clearInterval(timerInterval); // 기존 타이머 초기화
     let timeRemaining = seconds;
 
     timerInterval = setInterval(() => {
@@ -122,121 +115,99 @@ function startTimer(seconds) {
                 currentQuestionIndex++;
                 loadQuestion();
             } else {
-                showCompletionModal(); // 모든 질문 완료 시 모달창 표시
+                showCompletionModal();
             }
         }
     }, 1000);
 }
 
-// 완료 모달 표시 함수
-function showCompletionModal() {
-    loadModalQuestions(); // 질문과 답변 로드
-    const modal = document.getElementById("confirmation-modal");
-    UIkit.modal(modal).show(); // 공개 여부 모달 표시
+// 완료 모달 표시
+async function showCompletionModal() {
+    try {
+        await loadModalQuestions(); // 모달 데이터 로드
+        const modal = document.getElementById("confirmation-modal");
+        UIkit.modal(modal).show();
+    } catch (error) {
+        console.error("모달 데이터 로드 실패:", error);
+        alert("모달 데이터를 가져오는 중 문제가 발생했습니다.");
+    }
 }
 
-// 모달창 닫기
-document.getElementById("cancel-button").addEventListener("click", () => {
-    const modal = document.getElementById("confirmation-modal");
-    UIkit.modal(modal).hide(); // 공개 여부 모달 숨기기
-});
+// 모달 데이터 로드
+async function loadModalQuestions() {
+    const questionListElement = document.getElementById("question-list");
+    questionListElement.innerHTML = ""; // 초기화
 
-// 체크박스 선택 및 처리
-document.getElementById("confirm-button").addEventListener("click", () => {
-    const selectedQuestions = [];
-    const unSelectedQuestions = [];
-    document.querySelectorAll("#questions-container input[type='checkbox']:checked").forEach((checkbox) => {
-        selectedQuestions.push(checkbox.value); // 선택된 질문 ID 저장
+    const response = await fetch(`/interview/ispublic/${interviewId}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "ACCESS TOKEN",
+        },
     });
-    document.querySelectorAll("#questions-container input[type='checkbox']:not(:checked)").forEach((checkbox) => {
-        unSelectedQuestions.push(checkbox.value); // 선택된 질문 ID 저장
+
+    if (!response.ok) {
+        throw new Error("질문과 답변 데이터를 가져올 수 없습니다.");
+    }
+
+    const data = await response.json();
+    data.forEach((item, index) => {
+        const questionAnswerItem = document.createElement("div");
+        questionAnswerItem.classList.add("uk-margin");
+
+        questionAnswerItem.innerHTML = `
+            <p class="uk-text-bold">Q${index + 1}. ${item.title}</p>
+            <p class="uk-text-muted">A: ${item.answer || "답변 없음"}</p>
+            <label class="uk-checkbox-wrapper" style="display: flex; align-items: center;">
+                <input type="checkbox" name="publish_question" value="${item.questionId}" class="uk-checkbox">
+                <span style="margin-left: 8px;">공개 여부</span>
+            </label>
+        `;
+
+        questionListElement.appendChild(questionAnswerItem);
     });
+}
+
+// 공개 여부 확인 버튼
+async function handleConfirmPublic() {
+    const selectedQuestions = Array.from(
+        document.querySelectorAll("#questions-container input[type='checkbox']:checked")
+    ).map((checkbox) => checkbox.value);
+
+    const unSelectedQuestions = Array.from(
+        document.querySelectorAll("#questions-container input[type='checkbox']:not(:checked)")
+    ).map((checkbox) => checkbox.value);
 
     if (selectedQuestions.length === 0) {
         alert("선택된 항목이 없습니다.");
         return;
     }
-    const form = document.getElementById("public-selection-form");
 
-    const formData = new FormData(form); // 폼 데이터 생성
-    formData.append("isShareIds", selectedQuestions);
-    formData.append("isCloseIds", unSelectedQuestions);
-
-    fetch(form.action, {
-    method: "PATCH",
-    body: formData,
-    })
-        .then((response) => {
-            if (response.ok) {
-
-            } else {
-                alert("공개 설정 중 에러 발생.");
-            }
-        })
-        .catch((error) => {
-            console.error("Error submitting form:", error);
-            alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+    try {
+        const response = await fetch("/interview/ispublic", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "ACCESS TOKEN",
+            },
+            body: JSON.stringify({
+                isShareIds: selectedQuestions,
+                isCloseIds: unSelectedQuestions,
+            }),
         });
 
-});
+        if (!response.ok) {
+            throw new Error("공개 설정 실패");
+        }
 
-// 질문과 답변 데이터를 가져와서 모달에 표시
-async function loadModalQuestions() {
-    const questionListElement = document.getElementById("question-list");
-    questionListElement.innerHTML = ""; // 기존 내용 초기화
-
-    const response = await fetch(`/interview/ispublic/${interviewId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "ACCESS TOKEN", // 실제 토큰 값으로 대체
-        },
-    });
-
-    if (!response.ok) {
-        alert("질문과 답변 데이터를 가져올 수 없습니다.");
-        return;
+        alert("공개 설정이 완료되었습니다.");
+    } catch (error) {
+        console.error("공개 설정 중 오류:", error);
+        alert("공개 설정 중 문제가 발생했습니다.");
     }
+}
 
-    const data = await response.json(); // 질문과 답변 데이터
-
-    // 일반 for 루프 사용
-    for (let index = 0; index < data.length; index++) {
-        const item = data[index];
-
-        // 각 질문과 답변에 대한 HTML 요소 생성
-        const questionAnswerItem = document.createElement("div");
-        questionAnswerItem.classList.add("uk-margin");
-
-        const questionText = document.createElement("p");
-        questionText.classList.add("uk-text-bold");
-        questionText.textContent = `Q${index + 1}. ${item.title}`;
-
-        const answerText = document.createElement("p");
-        answerText.classList.add("uk-text-muted");
-        answerText.textContent = `A: ${item.answer || "답변 없음"}`;
-
-        // 체크박스 생성
-        const checkboxWrapper = document.createElement("label");
-        checkboxWrapper.classList.add("uk-checkbox-wrapper");
-        checkboxWrapper.style.display = "flex";
-        checkboxWrapper.style.alignItems = "center";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.name = "publish_question";
-        checkbox.value = item.questionId;
-        checkbox.classList.add("uk-checkbox");
-        checkboxWrapper.appendChild(checkbox);
-
-        const checkboxLabel = document.createElement("span");
-        checkboxLabel.style.marginLeft = "8px";
-        checkboxLabel.textContent = "공개 여부";
-        checkboxWrapper.appendChild(checkboxLabel);
-
-        // 모달에 추가
-        questionAnswerItem.appendChild(questionText);
-        questionAnswerItem.appendChild(answerText);
-        questionAnswerItem.appendChild(checkboxWrapper);
-        questionListElement.appendChild(questionAnswerItem);
-    }
+// 모달 닫기 버튼
+function handleCancelPublic() {
+    const modal = document.getElementById("confirmation-modal");
+    UIkit.modal(modal).hide();
 }

@@ -3,12 +3,17 @@ import os
 from celery import Celery
 from dotenv import load_dotenv
 
-from domain.models import AppUser, Job
+from domain.models import AppUser, Job, InterviewImprovement
 from dto.job.job import JobDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
+from utils.celery_util import update_task_status
+from utils.open_ai import answer_improvement
 from utils.openai.resume.full_resume_strategy import FullResumeStrategy
 from utils.openai.resume.resume_helper import ResumeHelper
+from config.config_mysql import Config, get_session
+
+# os.environ['FORKED_BY_MULTIPROCESSING'] = '1'
 
 load_dotenv()
 
@@ -58,3 +63,25 @@ def add_resume_task(job: Job, user: AppUser, resume: ResumeDto.Request.CreateFul
         level=resume.level,
         sections=answer.sections,
     )
+
+
+@app.task
+def start_async_ai_task(user_answer: str, question_id: int, task_id: str):
+    session = get_session()
+    try:
+        improvements = answer_improvement(user_answer, question_id)
+        for improvement in improvements['InterviewImprovement']:
+            new_improvement = InterviewImprovement(
+                question_id=int(question_id),
+                answer=improvement['UserAnswer'],
+                improvement=improvement['Improvement'],
+                translated_answer=improvement['TranslatedAnswer']
+            )
+            session.add(new_improvement)
+        # 상태 업데이트 (COMPLETED)
+        update_task_status(task_id, status='COMPLETED')
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        update_task_status(task_id, status='FAILED')
+        raise e

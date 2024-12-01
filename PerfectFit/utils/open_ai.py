@@ -207,14 +207,9 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str, title: st
 
 def answer_improvement(user_answer: str, question_id: int):
     session = get_session()
-    print("debug31")
     question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
-    print("debug32")
     best_answer = session.query(InterviewAnswer).filter_by(question_id=question_id).first()
-    print("debug33")
-    print(OPENAI_API_KEY)
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
-    print("debug34")
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         response_format={"type": "json_object"},
