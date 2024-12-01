@@ -26,14 +26,14 @@ def get_draft(draft_id: str):
 def add_draft():
     request_json = request.get_json()
     title = request_json.get("title")
-    job_id = request_json.get("job_id")
+    job_id = request_json.get("jobId")
     level = request_json.get("level")
     pros = request_json.get("pros")
     cons = request_json.get("cons")
-    is_shared = request_json.get("is_shared") or False
+    is_shared = request_json.get("isShared") or False
     directional = request_json.get("directional")
     keywords = [
-        keyword["content"]
+        keyword
         for keyword in request_json.get("keywords", None)
     ]
     sections = [
