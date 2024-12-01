@@ -36,7 +36,7 @@
             {#각 기능별 카드#}
             <div class="uk-grid-small uk-child-width-expand@s uk-text-center" uk-grid>
 
-                <a href = "http://127.0.0.1:5000/resume/select" class = "link-deco">
+                <a href = "/resume/select" class = "link-deco">
                     <div>
                         <div class="uk-card uk-card-default uk-card-body function-card">
                             <img src="{{ url_for('static', filename='img/resume.svg') }}"  width = "350" height = "250" alt="resume"/>
@@ -74,7 +74,7 @@
             <p class = "Bold-24">자기소개서</p>
             <div class = "sub-comment-box">
                 <p class="Medium-22">지금 가장 <span class="highlight">HOT</span> 한 자기소개서</p>
-                <a href = "http://127.0.0.1:5000/resume/list/1"><p class = "Medium-18-light">더보기 ></p></a>
+                <a href = "/resume?page=1&count=5"><p class = "Medium-18-light">더보기 ></p></a>
             </div>
                 <div class = "resume-tab">
                         <div class="uk-child-width-1-2@s" uk-grid>

@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% set page = request.args.get('page', 1) | default(1) | int %}
-{% set pageRange = 2 %}
+{% set pageRange = 5 %}
 {% set totalPages = ( response.total + pageRange - 1) // pageRange %}
 {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
 {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
@@ -24,21 +24,13 @@
         <ul class="uk-subnav uk-subnav-pill search-filter-wrapper" uk-switcher style = "margin-top: 20px !important">
             <li>
                 <a href="#" class = "Regular-16-light search-box">
-                    {% if request.args.get('occupation') %}
-                        <span id = "occupation">{{ request.args.get('occupation') }}</span>
-                    {% else %}
-                        <span id = "occupation">직군 선택</span>
-                    {% endif %}
+                    <span id = "occupation">직군 선택</span>
                     <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
                 </a>
             </li>
             <li>
                 <a href="#" class = "Regular-16-light search-box">
-                    {% if request.args.get('job') %}
-                        <span id = "job">{{ request.args.get('job') }}</span>
-                    {% else %}
-                        <span id = "job">직업 선택</span>
-                    {% endif %}
+                    <span id = "job">직업 선택</span>
                     <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
                 </a>
             </li>
@@ -61,17 +53,29 @@
             <div class = "search-content" id = "occupation-list-box">
                 <table class="uk-table">
                     <tbody>
-                        {% if response.resumes %}
-                            {% for occupation in resumes %}
+                        {% if response.occupations %}
+                            {% for i in range(0, response.occupations|length, 5) %}
                                 <tr>
-                                    {% for occupation in occupations %}
-                                        <td class = "list-array">
-                                            <button type = "button" class = "none-style-btn Regular-16-light"
-                                                    id = "select-occupation"
+                                    {% for occupation in response.occupations[i:i + 5] %}
+                                        {% if request.args.get('occupation_id') | int == occupation.occupationId %}
+                                            <td class="list-array">
+                                                <button type="button" class="none-style-btn Regular-16-light" style = "color : #2B7FFF !important;"
+                                                        id="select-occupation"
+                                                        value="{{ occupation.occupationId }}"
+                                                        onclick="showJobList(this)">
+                                                    {{ occupation.occupationName }}
+                                                </button>
+                                            </td>
+                                        {% else %}
+                                        <td class="list-array">
+                                            <button type="button" class="none-style-btn Regular-16-light"
+                                                    id="select-occupation"
                                                     value="{{ occupation.occupationId }}"
-                                                    onclick="showJobList(this)">{{ occupation.occupationName }}
+                                                    onclick="showJobList(this)">
+                                                {{ occupation.occupationName }}
                                             </button>
                                         </td>
+                                        {% endif %}
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -110,7 +114,7 @@
 {#         ======================= 최신, 인기순, 검색창 ============================= #}
         <div class="array-and-search">
             <div class="recent-or-popular">
-                {% if request.args.get('sort') == "인기순" %}
+                {% if request.args.get('sort') == "f" %}
                     <button type="button" class="none-style-btn Regular-16 select-array" onclick="setArray('최신순')">최신순</button>
                     <button type="button" class="none-style-btn Regular-16 selected select-array" onclick="setArray('인기순')">인기순</button>
                 {% else %}
@@ -120,7 +124,11 @@
             </div>
             <div class="search-space" id="search-space">
                 <img src="{{ url_for('static', filename='img/search_icon.svg') }}" width="20px" height="20px" />
-                <input class="search-input Regular-16-light" id="search-input" type="text" placeholder="검색어 입력" style="margin-left: 5px" />
+                <input class="search-input Regular-16-light" id="search-input" type="text" placeholder="검색어 입력" style="margin-left: 5px"
+                    {% if request.args.get('search') and request.args.get('search') != "" %}
+                        value="{{ request.args.get('search') }}"
+                    {% endif %}
+                />
             </div>
         </div>
 
@@ -134,7 +142,7 @@
                         <span class = "title-category">{{ resume.occupationName }} |</span>
                         <span class = "title-category">{{ resume.jobName }} |</span>
                         <span class = "title-category">{{ resume.level }}</span>
-                        <a href = "http://127.0.0.1:5000/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
+                        <a href = "/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
                     </div>
                     <div style = "margin-top: 10px;">
                         <img src="{{ resume.profilePath }}" class = "user-profile" />
@@ -163,12 +171,12 @@
                 {# Previous 버튼 렌더링 조건 #}
                 {% if startPage > 1 %}
                     <li>
-                        <a href="/resume?page={{ startPage - 1 }}{% for param in [
+                        <a href="/resume?page={{ startPage - 1 }}&count=5{% for param in [
                                 ('occupation', request.args.get('occupation')),
                                 ('job', request.args.get('job')),
                                 ('level', request.args.get('level')),
                                 ('sort', request.args.get('sort')),
-                                ('keyword', request.args.get('keyword'))
+                                ('search', request.args.get('search'))
                                 ] if param[1] %}&{{ param[0] }}={{ param[1] }}{% endfor %}"
                                 class="Regular-20-light">
                             <span class="Regular-20-light" uk-pagination-previous></span>
@@ -182,12 +190,12 @@
                         {% if pageNum == page %}
                             <span class="Regular-20-light" aria-current="page">{{ pageNum }}</span>
                         {% else %}
-                           <a href="/resume?page={{ pageNum }}{% for param in [
+                           <a href="/resume?page={{ pageNum }}&count=5{% for param in [
                                 ('occupation', request.args.get('occupation')),
                                 ('job', request.args.get('job')),
                                 ('level', request.args.get('level')),
                                 ('sort', request.args.get('sort')),
-                                ('keyword', request.args.get('keyword'))
+                                ('search', request.args.get('search'))
                                 ] if param[1] %}&{{ param[0] }}={{ param[1] }}{% endfor %}"
                                 class="Regular-20-light">{{ pageNum }}
                            </a>
@@ -198,12 +206,12 @@
                 {# Next 버튼 렌더링 조건 #}
                 {% if endPage < totalPages %}
                     <li>
-                        <a href="/resume?page={{ endPage + 1 }}{% for param in [
+                        <a href="/resume?page={{ endPage + 1 }}&count=5{% for param in [
                                 ('occupation', request.args.get('occupation')),
                                 ('job', request.args.get('job')),
                                 ('level', request.args.get('level')),
                                 ('sort', request.args.get('sort')),
-                                ('keyword', request.args.get('keyword'))
+                                ('search', request.args.get('search'))
                                 ] if param[1] %}&{{ param[0] }}={{ param[1] }}{% endfor %}"
                                 class="Regular-20-light">
                             <span class="Regular-20-light" uk-pagination-next></span>

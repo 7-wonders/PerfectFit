@@ -131,4 +131,5 @@ async function aiResumeWrite(idNumber) {
         button.disabled = false;
         textarea.disabled = false;
     }
+    checkFormCompletion();
 }
