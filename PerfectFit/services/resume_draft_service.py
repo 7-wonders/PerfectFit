@@ -284,6 +284,7 @@ class ResumeDraftService:
                 session.add_all(keywords)
 
             db_section = session.query(ResumeSection).filter(ResumeSection.draft_id == draft_id).all()
+
             if data.sections and len(data.sections) > 0:
                 new_sections = []
 
@@ -308,19 +309,12 @@ class ResumeDraftService:
 
                 # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되어 있다면 수정
                 for section_id in db_sections_ids & data_sections_ids:
-                    if not db_sections[section_id].title.strip() \
-                            or not db_sections[section_id].content.strip():
-                        continue
-
                     db_section = db_sections[section_id]
                     db_section.title = data_sections_by_id[section_id].title
                     db_section.content = data_sections_by_id[section_id].content
 
                 # 사용자가 추가한 섹션 ID가 DB에 저장된 섹션 ID에 포함되지 않았다면 추가
                 for section in new_sections_by_data:
-                    if not section.title.strip() or not section.content.strip():
-                        continue
-
                     new_sections.append(ResumeSection(
                         draft_id=draft_id,
                         title=section.title,

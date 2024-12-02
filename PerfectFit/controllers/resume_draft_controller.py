@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Blueprint, request, redirect, url_for, flash, jsonify
 
 from dto.keyword.keyword import KeywordDto
@@ -59,7 +61,7 @@ def add_draft():
     if not draft_id:
         raise CustomException(ExceptionType.INVALID_DRAFT_ID)
 
-    return {"draftId": draft_id}, 201
+    return {"draftId": draft_id}, HTTPStatus.CREATED
 
 
 @resume_draft_bp.route('/<draft_id>', methods=['POST'])
@@ -83,15 +85,16 @@ def update_draft(draft_id: str):
             for keyword in request_json.get("keywords", None)]
         if request_json.get("keywords") else None,
         sections=[ResumeSectionDto.Request.Update(
-            section_id=section["sectionId"] if section.get("sectionId") else None,
-            title=section["title"] if section.get("title") else None,
-            content=section["content"]) if section.get("content") else None
-            for section in request_json.get("sections", None)]
+            section_id=section.get("sectionId") if section.get("sectionId") else None,
+            title=section.get("title") if section.get("title") else None,
+            content=section.get("content") if section.get("content") else None
+        )
+        for section in request_json.get("sections", None)]
         if request_json.get("sections") else None
     )
 
     ResumeDraftService.update_draft(draft_id, data)
-    return {}, 204
+    return {}, HTTPStatus.NO_CONTENT
 
 
 @resume_draft_bp.route('/<draft_id>', methods=['DELETE'])
@@ -100,4 +103,4 @@ def delete_draft(draft_id: str):
         raise CustomException(ExceptionType.INVALID_DRAFT_ID)
 
     ResumeDraftService.delete_draft(draft_id)
-    return {}, 204
+    return {}, HTTPStatus.NO_CONTENT
