@@ -32,7 +32,7 @@ function addSection() {
     // 새로운 섹션 추가
     const newSection = document.createElement('div');
     newSection.className = "resume-container";
-    newSection.id = `resume-write-container${sectionCount}`;
+    newSection.id = `resume-write-container-${sectionCount}`;
 
     newSection.innerHTML = `
         <div class="resume-write-header">
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (badgeText && badgeButton && badgeInput) {
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeButton.id = `badge-btn-${badgeCounter}`;
-                    badgeInput.id = `badge-input-${badgeCounter}`;
+                    // badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeCounter++;
                 }
             });
@@ -372,7 +372,6 @@ async function loadResumeData(resumeId) {
         const occupations = response.data.occupations;
         const jobs = response.data.jobs;
         const drafts = response.data.drafts;
-        console.log(resume.keywords[0].content);
         document.getElementById("resume-write-tmp-submit").onclick = () => updateDraft(Number(resume.draftId)); // 임시저장 버튼을 임시저장 수정으로 변경
 
          badgeCounter = resume.keywords.length;
@@ -387,6 +386,11 @@ async function loadResumeData(resumeId) {
         document.getElementById("resume-write-experience").value = resume.level; // 경력
         document.getElementById("resume-write-disadvantage").value = resume.cons; // 단점
         document.getElementById("resume-write-directionality").value = resume.directional; // 방향성
+        
+        // 방향성이 길 경우 크기 조절
+        document.getElementById("resume-write-directionality").style.height = 'auto'; // 초기화
+        document.getElementById("resume-write-directionality").style.height = `${document.getElementById("resume-write-directionality").scrollHeight}px`;
+        
 
         addSectionIfNeeded(resume.sections.length - 1);
 
@@ -448,9 +452,13 @@ async function loadResumeData(resumeId) {
         resume.sections.forEach((section, index) => {
             // 여기에 섹션 쪽에 hidden input sectionId 추가(상의 필요)
             if (titleInputs[index]) titleInputs[index].value = section.title;
-            if (contentInputs[index]) contentInputs[index].value = section.content;
+            if (contentInputs[index]) {
+                contentInputs[index].value = section.content;
+                contentInputs[index].style.height = 'auto'; // 초기화
+                contentInputs[index].style.height = `${contentInputs[index].scrollHeight}px`;
+            }
 
-            // 1201 추가 - sectionId hidden으로 삽입(섹션 삭제하기에서 처리 필요)
+
             const container = document.getElementById(`resume-write-container-${index}`);
             if (container) {
                 // hidden input 생성
@@ -494,6 +502,7 @@ async function loadResumeData(resumeId) {
             // 버튼 클릭 시 배지 삭제
             badgeButton.addEventListener('click', function() {
                 badgeContainer.removeChild(badge);
+                badgeContainer.removeChild(badgeInput);
                 updateBadgeIDs();
             });
         });
@@ -503,6 +512,7 @@ async function loadResumeData(resumeId) {
         inputElement.className = 'keyword-input Regular-16';
         inputElement.id = 'resume-write-keyword';
         inputElement.type = 'text';
+        inputElement.style.width = '10px';
         badgeContainer.appendChild(inputElement);
 
         // 입력 필드 너비 조정 함수
@@ -576,12 +586,12 @@ async function loadResumeData(resumeId) {
                 badges.forEach(badge => {
                     const badgeText = badge.querySelector('.badge-text');
                     const badgeButton = badge.querySelector('.badge-button');
-                    const badgeInput = badge.querySelector('.badge-input');
+                    const badgeInput = badge.querySelector('.badge-input-tmp');
 
                     if (badgeText && badgeButton) {
                         badgeText.id = `badge-text-${badgeCounter}`;
                         badgeButton.id = `badge-btn-${badgeCounter}`;
-                        badgeInput.id = `badge-input-${badgeCounter}`;
+                        // badgeInput.id = `badge-input-${badgeCounter}`;
                         badgeCounter++;
                     }
                 });
@@ -787,7 +797,10 @@ async function submitDraft(){
         title: section.querySelector(`#resume-write-title-${index}`).value,
         content: section.querySelector(`#resume-write-content-${index}`).value
     }));
-    const keywords = Array.from(document.querySelectorAll('input[name="keywords[]"]')).map(input => input.value);
+    // const keywords = Array.from(document.querySelectorAll('input[name="keywords[]"]')).map(input => input.value);
+    // 아래와 같이 textContent를 보내줘야 한다.
+    const keywords = Array.from(document.querySelectorAll('span.badge-text')).map(span => span.textContent.trim());
+
 
     if(title === "" || title === null) {
         alert("제목을 작성해주세요.");
@@ -827,31 +840,24 @@ async function updateDraft(draftId) {
     const isShared = document.querySelector('input[name="is_shared"]:checked').value;
     const directional = document.getElementById('resume-write-directionality').value;
     const sections = Array.from(document.querySelectorAll('.resume-container')).map((section, index) => ({
+        sectionId: section.querySelector(`#resume-write-id-${index}`) ? section.querySelector(`#resume-write-id-${index}`).value : null,
         title: section.querySelector(`#resume-write-title-${index}`).value,
         content: section.querySelector(`#resume-write-content-${index}`).value
     }));
-    const keywords = Array.from(document.querySelectorAll('input[name="keywords[]"]')).map(input => input.value);
-
-    console.log('Title:', title);
-    console.log('Job ID:', jobId);
-    console.log('Level:', level);
-    console.log('Pros:', pros);
-    console.log('Cons:', cons);
-    console.log('Is Shared:', isShared);
-    console.log('Directional:', directional);
-    console.log('Sections:', sections);
-    console.log('Keywords:', keywords);
+    // const keywords = Array.from(document.querySelectorAll('input[name="keywords[]"]')).map(input => input.value);
+    // 아래와 같이 textContent를 보내줘야 한다.
+    const keywords = Array.from(document.querySelectorAll('span.badge-text')).map(span => span.textContent.trim());
 
     if(title === "" || title === null) {
         alert("제목을 작성해주세요.");
     }
     // POST 요청 보내기
     try {
-        const response = await instance.post('/resume/draft', JSON.stringify({
+        const response = await instance.post(`/resume/draft/${draftId}`, JSON.stringify({
                 title : title,
                 keywords: keywords,
                 jobId: Number(jobId),
-                isShared : isShared,
+                isPublic : isShared,
                 level: level,
                 sections: sections,
                 pros: pros,
@@ -859,9 +865,9 @@ async function updateDraft(draftId) {
                 directional: directional
             }));
         console.log('Response:', response.data); // 백엔드 응답 처리
-        window.reload();
+        location.reload();
     } catch (error) {
         console.error('Error:', error);
-        alert('임시저장 실패');
+        alert('임시저장 수정 실패');
     }
-} // 이 부분은 form이 GET과 POST만 가능하므로 상의 필요
+}
