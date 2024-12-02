@@ -72,7 +72,8 @@ def get_improvement(task_id: int):
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     improvementList = InterviewService.get_improvement(task_id, user_id)
-    title, interview_id = InterviewService.get_interview_title(improvementList[0]["improvements"]["questionId"], None)
+    print(improvementList[0].improvement)
+    title, interview_id = InterviewService.get_interview_title(improvementList[0].questionId, None)
     response = {
         "improvements": [{
 			"improvementId": improvement.improvementId,

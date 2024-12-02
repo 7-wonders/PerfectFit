@@ -536,7 +536,8 @@ class InterviewService:
         with get_session() as session :
             if interview_id is None :
                 question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
-                return question.title, question.interview_id
+                interview = session.query(Interview).filter_by(interview_id=question.interview_id).first()
+                return interview.title, question.interview_id
             else :
                 interview = session.query(Interview).filter_by(interview_id=interview_id).first()
                 return interview.title, interview.interview_id
