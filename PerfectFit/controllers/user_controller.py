@@ -47,7 +47,7 @@ def get_users():
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.user_id, user.username)
-    return render_template("testusers.html", user=response)
+    return render_template("testusers.html", response = response)
 
 
 @user_bp.route('/user/mypage/info')
@@ -65,7 +65,8 @@ def get_info():
     #     )
     user = UserService.get_user()
 
-    response = UserDto.Response.DetailedUser(
+    response = (
+        UserDto.Response.DetailedUser(
         user_id=user.user_id,
         username=user.username,
         age=user.age,
@@ -105,9 +106,9 @@ def get_info():
             )
             for proj in user.project_experiences
         ]
-    )
+    ))
 
-    return render_template("testusers.html", user=asdict(response))  # JSON 데이터 전달
+    return render_template("mypage_information.html", user=asdict(response))  # JSON 데이터 전달
 
 
 @user_bp.route('/user/profile')
@@ -118,8 +119,11 @@ def get_profile():
         "profilePath": user.profile_path
     }
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return render_template("testusers.html", user=response)
+    return Response(
+        json.dumps(response, ensure_ascii=False, indent=2),  ##  한글이 깨지지 않도록 처리하였습니다!
+        status=200,
+        content_type='application/json; charset=utf-8'
+    )
 
 
 @user_bp.route('/user/mypage/resume')
@@ -162,7 +166,7 @@ def get_resumes():
         total=total
     )
 
-    return render_template("testusers.html", user=response)
+    return render_template("mypage_resume.html", response = response)
 
 
 @user_bp.route('/user/mypage/interview')
@@ -187,7 +191,7 @@ def get_interviews():
         ]
     )
 
-    return render_template("testusers.html", user=response)
+    return render_template("mypage_interview.html", response = response)
 
 
 @user_bp.route('/user/requirements', methods=['POST'])
