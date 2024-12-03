@@ -372,7 +372,8 @@ class InterviewService:
         session = get_session()
 
         try:
-            make_interview_based_on_resume(request_dto.resumeId, request_dto.level, request_dto.title)
+            interview_id = make_interview_based_on_resume(request_dto.resumeId, request_dto.level, request_dto.title)
+            return interview_id
         except Exception as e:
             session.rollback()
             print("Exception Cause2 :: ", e)

@@ -183,8 +183,10 @@ def make_interview_resume():
         title=title
     )
 
-    InterviewService.make_interview_resume(request_dto)
+    interview_id = InterviewService.make_interview_resume(request_dto)
 
+
+    return redirect(f"/interview/run/{interview_id}")
     # 아마 리턴으로 로딩창 혹은 결과페이지로 보내야 할듯.
 
 @interview_bp.route('/job/select', methods=['POST'])
