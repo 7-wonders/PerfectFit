@@ -529,6 +529,12 @@ class ResumeService:
 
                 keywords.append(keyword)
 
+            if request_resume.draft_id:
+                session.query(ResumeDraft).filter(ResumeDraft.draft_id == request_resume.draft_id).delete()
+                session.query(ResumeSection).filter(ResumeSection.draft_id == request_resume.draft_id).delete()
+                session.query(Keyword).filter(Keyword.draft_id == request_resume.draft_id).delete()
+                session.query(ProsCons).filter(ProsCons.draft_id == request_resume.draft_id).delete()
+
             session.add_all(keywords)
             session.commit()
 

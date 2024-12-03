@@ -26,6 +26,7 @@ class ResumeDto:
             cons: str
             is_shared: bool
             sections: list["ResumeSectionDto.Request.Create"]
+            draft_id: Optional[str] = field(default=None)
             directional: Optional[str] = field(default=None)
 
             def __validation__(self):
@@ -43,8 +44,6 @@ class ResumeDto:
                     return "장점은 필수입니다."
                 elif not self.cons.strip():
                     return "단점은 필수입니다."
-                elif not self.is_shared:
-                    return "공개 여부는 필수입니다."
                 elif not self.sections or len(self.sections) < 1:
                     return "자기소개서 단락은 1개 이상이어야 합니다."
 
