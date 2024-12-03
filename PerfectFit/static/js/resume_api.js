@@ -61,7 +61,8 @@ async function aiResumeWrite(idNumber) {
     const titleInput = document.getElementById(`resume-write-title-${idNumber}`);
     const textarea = document.getElementById(`resume-write-content-${idNumber}`);
     const button = document.getElementById(`ai-resume-write-${idNumber}`);
-    const keywords = Array.from(document.querySelectorAll('[id^="badge-input-"]')).map(input => input.value.trim());
+    // const keywords = Array.from(document.querySelectorAll('[id^="badge-input-"]')).map(input => input.value.trim());
+    const keywords = Array.from(document.querySelectorAll('span.badge-text')).map(span => span.textContent.trim());
     const directional = document.getElementById("resume-write-directionality").value.trim() || null;
     const jobId = document.getElementById("resume-write-job").value;
     const level = document.getElementById("resume-write-experience").value;
@@ -107,6 +108,8 @@ async function aiResumeWrite(idNumber) {
             if (index < text.length) {
                 textarea.value += text.charAt(index);
                 index++;
+                textarea.style.height = 'auto'; // 초기화
+                textarea.style.height = `${textarea.scrollHeight}px`;
                 setTimeout(typeWriter, 15); // 타이핑 속도 조절
             } else {
                 // 버튼 활성화

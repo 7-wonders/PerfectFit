@@ -27,13 +27,15 @@
             </div>
             <div class = "resume-detail-title-and-edit">
                 <p class = "Bold-24-none-weight" style = "margin : 0 !important;">{{ response.title }}</p>
-                <div class="uk-inline">
-                    <button class="uk-button uk-button-default" type="button"></button>
-                    <div uk-dropdown="mode: click; pos: bottom-center;">
-                        <a class = "Regular-16-light" href="/resume/{{ response.resumeId }}/update">수정하기</a>
-                        <button class = "remove-btn Regular-16-light" onclick = "removeResumeDetail({{ response.resumeId }})">삭제하기</button>
+                {% if response.isMine %}
+                    <div class="uk-inline">
+                        <button class="uk-button uk-button-default" type="button"></button>
+                        <div uk-dropdown="mode: click; pos: bottom-center;">
+                            <a class = "Regular-16-light" href="/resume/{{ response.resumeId }}/update">수정하기</a>
+                            <button class = "remove-btn Regular-16-light" onclick = "removeResumeDetail({{ response.resumeId }})">삭제하기</button>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
             <div>
                 <img src="{{ response.user.profilePath }}" class = "user-profile" />

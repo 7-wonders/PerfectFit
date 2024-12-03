@@ -32,7 +32,7 @@ function addSection() {
     // 새로운 섹션 추가
     const newSection = document.createElement('div');
     newSection.className = "resume-container";
-    newSection.id = `resume-write-container${sectionCount}`;
+    newSection.id = `resume-write-container-${sectionCount}`;
 
     newSection.innerHTML = `
         <div class="resume-write-header">
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (badgeText && badgeButton && badgeInput) {
                     badgeText.id = `badge-text-${badgeCounter}`;
                     badgeButton.id = `badge-btn-${badgeCounter}`;
-                    badgeInput.id = `badge-input-${badgeCounter}`;
+                    // badgeInput.id = `badge-input-${badgeCounter}`;
                     badgeCounter++;
                 }
             });
@@ -372,7 +372,7 @@ async function loadResumeData(resumeId) {
         const occupations = response.data.occupations;
         const jobs = response.data.jobs;
         const drafts = response.data.drafts;
-        document.getElementById("resume-write-tmp-submit").onclick = updateDraft(Number(resume.draftId)); // 임시저장 버튼을 임시저장 수정으로 변경
+        document.getElementById("resume-write-tmp-submit").onclick = () => updateDraft(Number(resume.draftId)); // 임시저장 버튼을 임시저장 수정으로 변경
 
          badgeCounter = resume.keywords.length;
 
@@ -383,8 +383,14 @@ async function loadResumeData(resumeId) {
         // 기존 필드 업데이트
         document.getElementById("resume-write-main-title").value = resume.title; // 자기소개서 제목
         document.getElementById("resume-write-merit").value = resume.pros; // 장점
+        document.getElementById("resume-write-experience").value = resume.level; // 경력
         document.getElementById("resume-write-disadvantage").value = resume.cons; // 단점
         document.getElementById("resume-write-directionality").value = resume.directional; // 방향성
+        
+        // 방향성이 길 경우 크기 조절
+        document.getElementById("resume-write-directionality").style.height = 'auto'; // 초기화
+        document.getElementById("resume-write-directionality").style.height = `${document.getElementById("resume-write-directionality").scrollHeight}px`;
+        
 
         addSectionIfNeeded(resume.sections.length - 1);
 
@@ -392,6 +398,20 @@ async function loadResumeData(resumeId) {
         const occupationSelect = document.getElementById("resume-write-occupation");
         const jobSelect = document.getElementById("resume-write-job");
         const experienceSelect = document.getElementById("resume-write-experience");
+
+        const draftSearch = document.getElementById("draft-id");
+
+        // 기존 form에 draft-id가 있을 경우 삭제, 아닐 경우 추가(12/04 업데이트)
+        if(draftSearch != null) {
+            document.getElementById("draft-id").remove();
+        }
+        const formContainer = document.getElementById(`resume_write_form`);
+        const draftIdInput = document.createElement("input");
+        draftIdInput.type = "hidden";
+        draftIdInput.value = resume.draftId;
+        draftIdInput.id = "draft-id";
+        draftIdInput.name = "draft_id";
+        formContainer.appendChild(draftIdInput);
 
         if (occupationSelect) {
             // 기존 옵션 초기화
@@ -429,7 +449,7 @@ async function loadResumeData(resumeId) {
                     option.selected = true;
                 }
                 // <select>에 추가
-                occupationSelect.appendChild(option);
+                jobSelect.appendChild(option);
             });
         }
 
@@ -446,9 +466,13 @@ async function loadResumeData(resumeId) {
         resume.sections.forEach((section, index) => {
             // 여기에 섹션 쪽에 hidden input sectionId 추가(상의 필요)
             if (titleInputs[index]) titleInputs[index].value = section.title;
-            if (contentInputs[index]) contentInputs[index].value = section.content;
+            if (contentInputs[index]) {
+                contentInputs[index].value = section.content;
+                contentInputs[index].style.height = 'auto'; // 초기화
+                contentInputs[index].style.height = `${contentInputs[index].scrollHeight}px`;
+            }
 
-            // 1201 추가 - sectionId hidden으로 삽입(섹션 삭제하기에서 처리 필요)
+
             const container = document.getElementById(`resume-write-container-${index}`);
             if (container) {
                 // hidden input 생성
@@ -463,6 +487,7 @@ async function loadResumeData(resumeId) {
             }
         });
 
+
         // keywords 배열을 순회하여 배지 생성
         resume.keywords.forEach((keyword, index) => {
             const badge = document.createElement('div');
@@ -471,7 +496,7 @@ async function loadResumeData(resumeId) {
             const badgeText = document.createElement('span');
             badgeText.className = 'badge-text';
             badgeText.id = `badge-text-${index}`;
-            badgeText.textContent = keyword;
+            badgeText.textContent = keyword.content;
 
             const badgeButton = document.createElement('button');
             badgeButton.className = 'badge-button';
@@ -482,7 +507,7 @@ async function loadResumeData(resumeId) {
             badgeInput.id = `badge-input-${index}`;
             badgeInput.type = 'hidden';
             badgeInput.name = 'keywords[]';
-            badgeInput.value = keyword;
+            badgeInput.value = keyword.content;
 
             badge.appendChild(badgeText);
             badge.appendChild(badgeButton);
@@ -492,6 +517,7 @@ async function loadResumeData(resumeId) {
             // 버튼 클릭 시 배지 삭제
             badgeButton.addEventListener('click', function() {
                 badgeContainer.removeChild(badge);
+                badgeContainer.removeChild(badgeInput);
                 updateBadgeIDs();
             });
         });
@@ -501,7 +527,7 @@ async function loadResumeData(resumeId) {
         inputElement.className = 'keyword-input Regular-16';
         inputElement.id = 'resume-write-keyword';
         inputElement.type = 'text';
-        badgeContainer.appendChild(inputElement);
+        inputElement.style.width = '10px';
 
         // 입력 필드 너비 조정 함수
         function adjustInputWidth() {
@@ -574,12 +600,12 @@ async function loadResumeData(resumeId) {
                 badges.forEach(badge => {
                     const badgeText = badge.querySelector('.badge-text');
                     const badgeButton = badge.querySelector('.badge-button');
-                    const badgeInput = badge.querySelector('.badge-input');
+                    const badgeInput = badge.querySelector('.badge-input-tmp');
 
                     if (badgeText && badgeButton) {
                         badgeText.id = `badge-text-${badgeCounter}`;
                         badgeButton.id = `badge-btn-${badgeCounter}`;
-                        badgeInput.id = `badge-input-${badgeCounter}`;
+                        // badgeInput.id = `badge-input-${badgeCounter}`;
                         badgeCounter++;
                     }
                 });
@@ -587,10 +613,13 @@ async function loadResumeData(resumeId) {
                 badgeCounter = badges.length;
         }
 
+
+
         checkFormCompletion(); // 폼 완료 여부 체크
     }
     catch(error) {
         console.log(error.status);
+        console.log(error);
         alert("임시저장 목록을 불러오는데 실패하였습니다 다시 시도해주세요.")
     }
 }
@@ -604,6 +633,10 @@ async function removeResumeData(resumeId) {
         const resumeRow = document.getElementById(`resume-${resumeId}`);
         if (resumeRow) {
             resumeRow.remove();
+        }
+        // 임시작성 중이던 임시작성을 삭제했을 때 draft-id 삭제(12/04 업데이트)
+        if(Number(document.getElementById("draft-id").value) === Number(resumeId)) {
+            document.getElementById("draft-id").remove();
         }
     }
     catch (error) {
@@ -772,25 +805,89 @@ function aiResumeWriteValidation() {
 }
 
 // 자기소개서 "임시저장" 버튼 클릭 시 동작
-function submitDraft(){
-    let form = document.getElementById('resume_write_form');
-    let title = document.getElementById('resume-write-main-title').value;
+async function submitDraft(){
+    const title = document.getElementById('resume-write-main-title').value;
+    const jobId = document.getElementById('resume-write-job').value;
+    const level = document.getElementById('resume-write-experience').value;
+    const pros = document.getElementById('resume-write-merit').value;
+    const cons = document.getElementById('resume-write-disadvantage').value;
+    const isShared = document.querySelector('input[name="is_shared"]:checked').value;
+    const directional = document.getElementById('resume-write-directionality').value;
+    const sections = Array.from(document.querySelectorAll('.resume-container')).map((section, index) => ({
+        title: section.querySelector(`#resume-write-title-${index}`).value,
+        content: section.querySelector(`#resume-write-content-${index}`).value
+    }));
+    // const keywords = Array.from(document.querySelectorAll('input[name="keywords[]"]')).map(input => input.value);
+    // 아래와 같이 textContent를 보내줘야 한다.
+    const keywords = Array.from(document.querySelectorAll('span.badge-text')).map(span => span.textContent.trim());
+
+
     if(title === "" || title === null) {
         alert("제목을 작성해주세요.");
+        return;
     }
-    form.action = '/resume/draft';
-    form.method = 'POST';
-    form.submit();
+    // POST 요청 보내기
+    try {
+        const response = await instance.post('/resume/draft', JSON.stringify({
+                title : title,
+                keywords: keywords,
+                jobId: Number(jobId),
+                isShared : isShared,
+                level: level,
+                sections: sections,
+                pros: pros,
+                cons: cons,
+                directional: directional
+            }));
+        console.log('Response:', response.data); // 백엔드 응답 처리
+        if(response.status === 201) {
+            alert("임시저장이 완료되었습니다.");
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('임시저장 실패');
+    }
 }
 
 // 자기소개서 임시저장 수정
-function updateDraft(draftId) {
-    let form = document.getElementById('resume_write_form');
-    let title = document.getElementById('resume-write-main-title').value;
+async function updateDraft(draftId) {
+    const title = document.getElementById('resume-write-main-title').value;
+    const jobId = document.getElementById('resume-write-job').value;
+    const level = document.getElementById('resume-write-experience').value;
+    const pros = document.getElementById('resume-write-merit').value;
+    const cons = document.getElementById('resume-write-disadvantage').value;
+    const isShared = document.querySelector('input[name="is_shared"]:checked').value;
+    const directional = document.getElementById('resume-write-directionality').value;
+    const sections = Array.from(document.querySelectorAll('.resume-container')).map((section, index) => ({
+        sectionId: section.querySelector(`#resume-write-id-${index}`) ? section.querySelector(`#resume-write-id-${index}`).value : null,
+        title: section.querySelector(`#resume-write-title-${index}`).value,
+        content: section.querySelector(`#resume-write-content-${index}`).value
+    }));
+    // const keywords = Array.from(document.querySelectorAll('input[name="keywords[]"]')).map(input => input.value);
+    // 아래와 같이 textContent를 보내줘야 한다.
+    const keywords = Array.from(document.querySelectorAll('span.badge-text')).map(span => span.textContent.trim());
+
     if(title === "" || title === null) {
         alert("제목을 작성해주세요.");
     }
-    form.action = `/resume/draft/${draftId}`;
-    form.method = 'POST';
-    form.submit();
-} // 이 부분은 form이 GET과 POST만 가능하므로 상의 필요
+    // POST 요청 보내기
+    try {
+        const response = await instance.post(`/resume/draft/${draftId}`, JSON.stringify({
+                title : title,
+                keywords: keywords,
+                jobId: Number(jobId),
+                isPublic : isShared,
+                level: level,
+                sections: sections,
+                pros: pros,
+                cons: cons,
+                directional: directional
+            }));
+        console.log('Response:', response.data); // 백엔드 응답 처리
+        location.reload();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('임시저장 수정 실패');
+    }
+}

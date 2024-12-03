@@ -24,7 +24,6 @@
 {% endblock %}
 
 {% block content %}
-    {{ response }}
     {% include 'components/header.html' %}
     <div class="container">
         <div class ="saved-resume-box">
@@ -215,7 +214,7 @@
                 </div>
 
                 <div class = "resume-submit-box">
-                    <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "submit" onclick = "submitDraft()">임시저장</button>
+                    <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "button" onclick = "submitDraft()">임시저장</button>
                     <button class = "save-btn Medium-18" id = "resume-write-submit" type="submit" onclick = "submitResume()">저장</button>
                 </div>
             </form>
