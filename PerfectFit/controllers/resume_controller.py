@@ -83,7 +83,7 @@ def render_update_resume(resume_id: str):
         level = request.form.get("level")
         pros = request.form.get("pros")
         cons = request.form.get("cons")
-        is_shared = request.form.get("is_shared") or False
+        is_shared = True if request.form.get("is_shared").lower() == 'true' else False
         directional = request.form.get("directional")
         keyword_ids = request.form.getlist("keywords[][keywordId]")
         keyword_contents = request.form.getlist("keywords[][content]")
@@ -100,7 +100,7 @@ def render_update_resume(resume_id: str):
             level=level,
             pros=pros,
             cons=cons,
-            is_shared=bool(is_shared),
+            is_shared=is_shared,
             directional=directional,
             keywords=[KeywordDto.Request.Update(keywordId=keyword_id, content=content)
                       for keyword_id, content in keywords],
@@ -177,7 +177,7 @@ def create_resume():
     level = request.form.get("level")
     pros = request.form.get("pros")
     cons = request.form.get("cons")
-    is_shared = request.form.get("is_shared") or False
+    is_shared = True if request.form.get("is_shared").lower() == 'true' else False
     directional = request.form.get("directional")
     keywords = request.form.getlist("keywords[]")
     section_titles = request.form.getlist("sections[][title]")
@@ -190,7 +190,7 @@ def create_resume():
         level=level,
         pros=pros,
         cons=cons,
-        is_shared=bool(is_shared),
+        is_shared=is_shared,
         directional=directional,
         keywords=keywords,
         sections=[ResumeSectionDto.Request.Create(title=title, content=content)
