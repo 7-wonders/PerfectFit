@@ -383,8 +383,8 @@ class InterviewService:
         session = get_session()
 
         try:
-            make_interview_based_on_job(request_dto.jobId,request_dto.userId, request_dto.level, request_dto.title)
-            return
+            interview_id = make_interview_based_on_job(request_dto.jobId,request_dto.userId, request_dto.level, request_dto.title)
+            return interview_id
         except Exception as e:
             session.rollback()
             print("Exception Cause2 :: ", e)
@@ -541,6 +541,12 @@ class InterviewService:
             else :
                 interview = session.query(Interview).filter_by(interview_id=interview_id).first()
                 return interview.title, interview.interview_id
+    @staticmethod
+    def get_question_is_shared(question_id: int):
+        with get_session() as session :
+            if question_id is not None :
+                question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
+                return question.is_shared
 
     @staticmethod
     def post_like(interview_id: int, user_id: int) -> None:

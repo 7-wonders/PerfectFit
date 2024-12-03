@@ -7,15 +7,12 @@ from flask import Blueprint, request, jsonify, Response, render_template, redire
 from dto.interview.interview import InterviewDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
-from middlewares.auth_middleware import jwt_factory
 from services.job_service import JobService
 from services.resume_service import ResumeService
 
 from services.interview_service import InterviewService
-from utils.celery_util import check_task_status
 from utils.jwt_factory import JWTFactory
 
-from utils.open_ai import make_interview_based_on_resume, make_interview_based_on_job
 from tasks import start_async_ai_task
 interview_bp = Blueprint('interview', __name__)
 
@@ -27,14 +24,6 @@ def get_questions(interview_id: int):
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     questions: InterviewDto.Response.questions = InterviewService.get_questions(interview_id)
-
-    # response = {
-    #     "questions": [{
-    #         "questionId": question.question_id,
-    #         "question": question.question}
-    #         for question in questions.questions],
-    #     "total": questions.total
-    # }
 
 
     response: InterviewDto.Response.QuestionList = InterviewDto.Response.QuestionList(
@@ -80,8 +69,9 @@ def get_improvement(task_id: int):
 			"questionId": improvement.questionId,
             "question": improvement.question,
 			"answer": improvement.answer,
-			"improvement": improvement.improvement,
-			"translatedAnswer": improvement.translatedAnswer,
+            "improvement": improvement.improvement.replace("'", '').replace('"', ""),
+            "translatedAnswer": improvement.translatedAnswer.replace("'", '').replace('"', ""),
+            "isShared": InterviewService.get_question_is_shared(improvement.questionId)
 		} for improvement in improvementList],
         "title" : title,
         "interviewId" : interview_id,
@@ -147,16 +137,8 @@ def post_question_answer():
     print(request.form.get('answers'))
     question_ids = [int(qid) for qid in request.form.get('questionIds').split('|') if qid]
 
-    answers = request.form.get('answers').split("|")  # ['Answer 1', 'Answer 2', 'Answer 3']
-    # question_id = request.form.get('questionIds', None, type=int)
-    # answer = request.form.get('answers', None, type=str)
-    # 이전 요청 상태 확인
-    # existing_task = check_task_status(user_id, question_ids)
-    # print(existing_task)
-    # if existing_task and existing_task["status"] == 'PENDING':
-    #     return jsonify({"error": "Previous task is still in progress."}), 409
+    answers = request.form.get('answers').split("|")
 
-    # 새 작업 추가
     post_answer_request = InterviewDto.Request.postInterviewAnswer(
         questionIds=question_ids,
         answers=answers
@@ -166,7 +148,6 @@ def post_question_answer():
     print("controller ========" , task.id)
 
     return jsonify(task.id)
-    # return jsonify({"message": "Answer submitted successfully.", "task_id": task.id})
 
 @interview_bp.route('/task/<task_id>', methods=['POST'])
 def get_task(task_id):
@@ -223,10 +204,10 @@ def make_interview_job():
         title=title
     )
 
-    InterviewService.make_interview_job(request_dto)
+    interview_id = InterviewService.make_interview_job(request_dto)
 
-    return render_template("Loading-create.html") # 임시로 로딩창으로 넘어가게 수정.
-    # 추가로 작업 비동기 걸고 통신을 통해 넘어가야함.
+    return redirect(f"/interview/run/{interview_id}")
+    # return render_template("interview.html",interview_id=interview_id)
 
 @interview_bp.route('/ispublic', methods=['PATCH'])
 def patch_is_public():
