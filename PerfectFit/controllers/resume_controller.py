@@ -172,6 +172,7 @@ def render_write():
 
 @resume_bp.route('/write', methods=['POST'])
 def create_resume():
+    draft_id = request.form.get("draft_id") if request.form.get("draft_id") else None
     title = request.form.get("title")
     job_id = request.form.get("job_id") or -1
     level = request.form.get("level")
@@ -185,6 +186,7 @@ def create_resume():
     sections = zip(section_titles, section_contents)
 
     data = ResumeDto.Request.Create(
+        draft_id=draft_id,
         title=title,
         job_id=int(job_id),
         level=level,

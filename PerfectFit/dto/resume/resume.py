@@ -26,6 +26,7 @@ class ResumeDto:
             cons: str
             is_shared: bool
             sections: list["ResumeSectionDto.Request.Create"]
+            draft_id: Optional[str] = field(default=None)
             directional: Optional[str] = field(default=None)
 
             def __validation__(self):
