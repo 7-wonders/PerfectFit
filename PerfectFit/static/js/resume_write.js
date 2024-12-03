@@ -399,6 +399,20 @@ async function loadResumeData(resumeId) {
         const jobSelect = document.getElementById("resume-write-job");
         const experienceSelect = document.getElementById("resume-write-experience");
 
+        const draftSearch = document.getElementById("draft-id");
+
+        // 기존 form에 draft-id가 있을 경우 삭제, 아닐 경우 추가(12/04 업데이트)
+        if(draftSearch != null) {
+            document.getElementById("draft-id").remove();
+        }
+        const formContainer = document.getElementById(`resume_write_form`);
+        const draftIdInput = document.createElement("input");
+        draftIdInput.type = "hidden";
+        draftIdInput.value = resume.draftId;
+        draftIdInput.id = "draft-id";
+        draftIdInput.name = "draft_id";
+        formContainer.appendChild(draftIdInput);
+
         if (occupationSelect) {
             // 기존 옵션 초기화
             occupationSelect.innerHTML = "";
@@ -473,6 +487,7 @@ async function loadResumeData(resumeId) {
             }
         });
 
+
         // keywords 배열을 순회하여 배지 생성
         resume.keywords.forEach((keyword, index) => {
             const badge = document.createElement('div');
@@ -492,7 +507,7 @@ async function loadResumeData(resumeId) {
             badgeInput.id = `badge-input-${index}`;
             badgeInput.type = 'hidden';
             badgeInput.name = 'keywords[]';
-            badgeInput.value = keyword.keywordId;
+            badgeInput.value = keyword.content;
 
             badge.appendChild(badgeText);
             badge.appendChild(badgeButton);
@@ -513,7 +528,6 @@ async function loadResumeData(resumeId) {
         inputElement.id = 'resume-write-keyword';
         inputElement.type = 'text';
         inputElement.style.width = '10px';
-        badgeContainer.appendChild(inputElement);
 
         // 입력 필드 너비 조정 함수
         function adjustInputWidth() {
@@ -599,6 +613,8 @@ async function loadResumeData(resumeId) {
                 badgeCounter = badges.length;
         }
 
+
+
         checkFormCompletion(); // 폼 완료 여부 체크
     }
     catch(error) {
@@ -617,6 +633,10 @@ async function removeResumeData(resumeId) {
         const resumeRow = document.getElementById(`resume-${resumeId}`);
         if (resumeRow) {
             resumeRow.remove();
+        }
+        // 임시작성 중이던 임시작성을 삭제했을 때 draft-id 삭제(12/04 업데이트)
+        if(Number(document.getElementById("draft-id").value) === Number(resumeId)) {
+            document.getElementById("draft-id").remove();
         }
     }
     catch (error) {
