@@ -528,6 +528,7 @@ async function loadResumeData(resumeId) {
         inputElement.id = 'resume-write-keyword';
         inputElement.type = 'text';
         inputElement.style.width = '10px';
+        badgeContainer.appendChild(inputElement);
 
         // 입력 필드 너비 조정 함수
         function adjustInputWidth() {
