@@ -8,47 +8,34 @@ from dto.company_best.company_best import CompanyBestDto
 class InterviewDto:
     class Request:
         @dataclass
-        class postInterviewAnswer:
+        class PostInterviewAnswer:
             questionIds: list[int]
             answers: list[str]
               
         @dataclass
-        class postMakeInterviewResume:
+        class PostMakeInterviewResume:
             resumeId: int
             level: str
             title: str
 
         @dataclass
-        class postMakeInterviewJob:
+        class PostMakeInterviewJob:
             jobId: int
             userId: int
             level: str
             title: str
               
         @dataclass
-        class patchInterviewTitle:
+        class PatchInterviewTitle:
             interviewId: int
             title: str
 
         @dataclass
-        class spellCheck:
+        class SpellCheck:
             content: str
 
-        @dataclass
-        class isPublicIds:
-            questionIds: list[int]
 
     class Response:
-        @dataclass
-        class interview:
-            interview_id: int
-            user_id: int
-            resume_id: int
-            job_id: int
-            company_id: int
-            title: str
-            level: str
-
         @dataclass
         class InterviewQuestion:
             interview_id: int
@@ -56,20 +43,20 @@ class InterviewDto:
             question: str
 
         @dataclass
-        class questions:
+        class Questions:
             questions: list['InterviewDto.Response.InterviewQuestion']
             total: int
 
         @dataclass
-        class isPublicInterview:
+        class IsPublicInterview:
             questionId: int
             title: str
             answer: str
             isPublic: bool
 
         @dataclass
-        class isPublicList:
-            interviews: list['InterviewDto.Response.isPublicInterview']
+        class IsPublicList:
+            interviews: list['InterviewDto.Response.IsPublicInterview']
 
         @dataclass
         class QuestionList:
@@ -77,7 +64,7 @@ class InterviewDto:
             total: int
 
         @dataclass
-        class improvement:
+        class Improvement:
             improvementId: int
             questionId: int
             question: str
@@ -85,17 +72,9 @@ class InterviewDto:
             improvement: str
             translatedAnswer: str
 
-        @dataclass
-        class improvementList:
-            improvements: list['InterviewDto.Response.improvement']
-
-        @dataclass
-        class spellChecked:
-            translatedContent: str
-
         # 새로 추가된 interviewSummary
         @dataclass
-        class interviewSummary:
+        class InterviewSummary:
             interview_id: int
             title: str
             created_time: str
@@ -112,7 +91,6 @@ class InterviewDto:
         @dataclass
         class CompanyInterviewResponse:
             interviewId: int
-            questionId: int
             companyName: str
             level: str
             title: str
@@ -124,7 +102,6 @@ class InterviewDto:
         @dataclass
         class JobInterviewResponse:
             interviewId: int
-            questionId: int
             companyName: str
             level: str
             title: str

@@ -1,13 +1,13 @@
-from typing import Tuple, Any
+from typing import Tuple, Any, List
 
 import celery
 from sqlalchemy import func, desc
-from flask import current_app
-
+from flask import current_app, flash
 
 from config.config_mysql import get_session
 from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, \
     CompanyWorst, Occupation, InterviewView, InterviewLike, InterviewAnswer
+from domain.models.competencies import Competencies
 from dto.company_best.company_best import CompanyBestDto
 from dto.resume.resume import ResumeDto
 
@@ -28,7 +28,7 @@ from celery import Celery
 class InterviewService:
 
     @staticmethod
-    def get_questions(interview_id: int) -> InterviewDto.Response.questions:
+    def get_questions(interview_id: int) -> InterviewDto.Response.Questions:
         with get_session() as session:
             # join을 해서 results에 일단 담기
             results = (
@@ -47,7 +47,7 @@ class InterviewService:
             if not questions:
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
-            response: InterviewDto.Response.questions = InterviewDto.Response.questions(
+            response: InterviewDto.Response.Questions = InterviewDto.Response.Questions(
                 questions=
                 [InterviewDto.Response.InterviewQuestion(question.interview_id, question.question_id, question.question)
                  for question in questions],
@@ -75,7 +75,8 @@ class InterviewService:
         :return:
         """
         company_interviews = []
-
+        job_total = 0
+        company_total = 0
 
         with get_session() as session:
             occupations = (
@@ -83,9 +84,10 @@ class InterviewService:
                 .query(Occupation)
                 .all()
             )
-
             job_interviews = [
                 {"occupationId":occupation.occupation_id,
+                 "occupationName": occupation.occupation_name,
+                 "competencies": [ coms.content  for coms in session.query(Competencies).filter(Competencies.occupation_id == occupation.occupation_id).all()],
                  "jobInterviews": [],
                  "total": 0} for occupation in occupations
             ]
@@ -105,13 +107,17 @@ class InterviewService:
             if not questions:
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
-            for question in questions:
-                interview:Interview = (
-                    session
-                    .query(Interview)
-                    .filter(Interview.interview_id == question.interview_id)
-                    .first()
-                )
+            interviews: List[Interview] = (
+                session
+                .query(Interview)
+                .filter(Interview.interview_id.in_(
+                    session.query(InterviewQuestion.interview_id)
+                    .filter(InterviewQuestion.is_shared == True)
+                ))
+                .all()
+            )
+
+            for interview in interviews:
 
                 user:AppUser= (
                     session
@@ -153,7 +159,6 @@ class InterviewService:
 
                     company_interview = InterviewDto.Response.CompanyInterviewResponse(
                         interviewId=interview.interview_id,
-                        questionId=question.question_id,
                         companyName=company_name,
                         level=interview.level,
                         title=interview.title,
@@ -162,64 +167,52 @@ class InterviewService:
                         companyBest= [CompanyBestDto.Response.CompanyBest(
                             companyBestId=company_best.company_id,
                             content=company_best.content)
-                            for company_best in company_bests],
+                            for company_best in company_bests[:2]],
                         companyWorst= company_worst.content)
 
                     company_interviews.append(company_interview)
+                    company_total += 1
 
                 job_interview = InterviewDto.Response.JobInterviewResponse(
                     interviewId=interview.interview_id,
-                    questionId=question.question_id,
                     companyName=company_name if company_name is not None else None,
                     level=interview.level,
                     title=interview.title,
                     jobName=job.job_name,
-                    university=user.university)
-                print(job_interview)
+                    university=user.university
+                    )
+
                 for job_entry in job_interviews:
                     if job_entry["occupationId"] == job.occupation_id:
                         job_entry["jobInterviews"].append(job_interview)
                         job_entry["total"] += 1
+                        job_total += 1
                         break
 
             session.close()
-            return job_interviews, company_interviews
+            return job_interviews, company_interviews, job_total, company_total
 
     def get_interview_list_search(keyword: str):
-        interviews = []
-
+        response = []
         with get_session() as session:
-            occupations = (
+
+            interviews: List[Interview] = (
                 session
-                .query(Occupation)
+                .query(Interview)
+                .filter(Interview.interview_id.in_(
+                    session.query(InterviewQuestion.interview_id)
+                    .filter(
+                        InterviewQuestion.is_shared == True,
+                        InterviewQuestion.question.like(f"%{keyword}%")  # LIKE 조건 추가
+                    )
+                ))
                 .all()
             )
 
-            results = (
-                session
-                .query(InterviewQuestion)
-                .filter(
-                    InterviewQuestion.is_shared == True,
-                    InterviewQuestion.question.like(f'%{keyword}%'))
-                .all()
-            )
+            total = 0
 
-            questions = [
-                InterviewDto.Response.InterviewQuestion(question.interview_id, question.question_id, question.question)
-                for question in results
-            ]
-
-            if not questions:
-                raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
-
-            for question in questions:
-                interview:Interview = (
-                    session
-                    .query(Interview)
-                    .filter(Interview.interview_id == question.interview_id)
-                    .first()
-                )
-
+            for interview in interviews:
+                print(interview)
                 user:AppUser= (
                     session
                     .query(AppUser)
@@ -262,7 +255,6 @@ class InterviewService:
 
                     search_interview = InterviewDto.Response.CompanyInterviewResponse(
                         interviewId=interview.interview_id,
-                        questionId=question.question_id,
                         companyName=company_name,
                         level=interview.level,
                         title=interview.title,
@@ -271,14 +263,13 @@ class InterviewService:
                         companyBest= [CompanyBestDto.Response.CompanyBest(
                             companyBestId=company_best.company_id,
                             content=company_best.content)
-                            for company_best in company_bests],
+                            for company_best in company_bests[:2]],
                         companyWorst= company_worst.content)
 
-                    interviews.append(search_interview)
+                    response.append(search_interview)
                 else :
                     search_interview = InterviewDto.Response.CompanyInterviewResponse(
                         interviewId=interview.interview_id,
-                        questionId=question.question_id,
                         companyName=company_name if company_name is not None else None,
                         level=interview.level,
                         title=interview.title,
@@ -287,13 +278,13 @@ class InterviewService:
                         companyBest=None,
                         companyWorst=None)
 
-                    interviews.append(search_interview)
-
+                    response.append(search_interview)
+                total += 1
 
             session.close()
-            return interviews
+            return response, total
     @staticmethod
-    def post_question_answer(question_answer: InterviewDto.Request.postInterviewAnswer, user_id: int) -> None:
+    def post_question_answer(question_answer: InterviewDto.Request.PostInterviewAnswer, user_id: int) -> None:
         from app import app  # Flask 애플리케이션 가져오기
         with app.app_context():  # Flask 애플리케이션 컨텍스트 활성화
             session = get_session()
@@ -368,7 +359,7 @@ class InterviewService:
 
 
     @staticmethod
-    def make_interview_resume(request_dto: InterviewDto.Request.postMakeInterviewResume) -> None:
+    def make_interview_resume(request_dto: InterviewDto.Request.PostMakeInterviewResume) -> None:
         session = get_session()
 
         try:
@@ -380,7 +371,7 @@ class InterviewService:
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
-    def make_interview_job(request_dto: InterviewDto.Request.postMakeInterviewJob) -> None:
+    def make_interview_job(request_dto: InterviewDto.Request.PostMakeInterviewJob) -> None:
         session = get_session()
 
         try:
@@ -393,7 +384,7 @@ class InterviewService:
 
 
     @staticmethod
-    def patch_interview_title(interview_title: InterviewDto.Request.patchInterviewTitle) -> None:
+    def patch_interview_title(interview_title: InterviewDto.Request.PatchInterviewTitle) -> None:
 
         try:
             session = get_session()
@@ -451,7 +442,7 @@ class InterviewService:
             print("Exception Cause :: ",e)
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
     @staticmethod
-    def get_is_public(interview_id: int) -> list[InterviewDto.Response.isPublicInterview] :
+    def get_is_public(interview_id: int) -> list[InterviewDto.Response.IsPublicInterview] :
         questions: list[InterviewQuestion] = get_session().query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).all()
         isPublicInterviews = []
 
@@ -460,14 +451,22 @@ class InterviewService:
 
         for question in questions:
             for answer in question.interview_answers :
-                isPublicInterviewDto = InterviewDto.Response.isPublicInterview(question.question_id, question.question, answer .answer, question.is_shared)
+                isPublicInterviewDto = InterviewDto.Response.IsPublicInterview(question.question_id, question.question, answer .answer, question.is_shared)
                 isPublicInterviews.append(isPublicInterviewDto)
+
         return isPublicInterviews
 
     @staticmethod
-    def get_improvement(task_id: int, user_id: int) -> list[InterviewDto.Response.improvement] :
+    def get_improvement(task_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] :
+
         with get_session() as session :
+
             task = start_async_ai_task.AsyncResult(task_id)
+
+            if task is None:
+                flash("Celery 작업에 문제가 생겼습니다.")
+                return None
+
             question_id = task.get()[0]['InterviewImprovement']['questionId']
 
             question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
@@ -484,14 +483,17 @@ class InterviewService:
                 improvement = session.query(InterviewImprovement).filter(InterviewImprovement.question_id == question.question_id).order_by(desc(InterviewImprovement.created_time)).first()
 
                 if improvement :
-                    improvementDto = InterviewDto.Response.improvement(
-                        improvementId = improvement.improvement_id,
-                        questionId = question.question_id,
-                        question = question.question,
-                        answer = improvement.answer,
-                        improvement = improvement.improvement,
-                        translatedAnswer = improvement.translated_answer)
-                    improvementList.append(improvementDto)
+                    if (improvement.question.interview.user_id == user_id) or \
+                            (improvement.question.interview.user_id != user_id and \
+                             improvement.question.is_shared == True):
+                        improvementDto = InterviewDto.Response.Improvement(
+                            improvementId = improvement.improvement_id,
+                            questionId = question.question_id,
+                            question = question.question,
+                            answer = improvement.answer,
+                            improvement = improvement.improvement,
+                            translatedAnswer = improvement.translated_answer)
+                        improvementList.append(improvementDto)
 
             view = session.query(InterviewView).filter_by(user_id=user_id).first()
 
@@ -502,8 +504,8 @@ class InterviewService:
 
             return improvementList
     @staticmethod
-    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.improvement] :
-        with get_session() as session :
+    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] :
+        with (get_session() as session) :
             interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
             questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
             improvementList = []
@@ -515,14 +517,17 @@ class InterviewService:
                 improvement = session.query(InterviewImprovement).filter(InterviewImprovement.question_id == question.question_id).order_by(desc(InterviewImprovement.created_time)).first()
 
                 if improvement :
-                    improvementDto = InterviewDto.Response.improvement(
-                        improvementId = improvement.improvement_id,
-                        questionId = question.question_id,
-                        question = question.question,
-                        answer = improvement.answer,
-                        improvement = improvement.improvement,
-                        translatedAnswer = improvement.translated_answer)
-                    improvementList.append(improvementDto)
+                    if (improvement.question.interview.user_id == user_id) or \
+                        (improvement.question.interview.user_id != user_id and \
+                         improvement.question.is_shared == True) :
+                        improvementDto = InterviewDto.Response.Improvement(
+                            improvementId = improvement.improvement_id,
+                            questionId = question.question_id,
+                            question = question.question,
+                            answer = improvement.answer,
+                            improvement = improvement.improvement,
+                            translatedAnswer = improvement.translated_answer)
+                        improvementList.append(improvementDto)
 
             view = session.query(InterviewView).filter_by(user_id=user_id).first()
 
@@ -573,7 +578,7 @@ class InterviewService:
             session.commit()
 
     @staticmethod
-    def spell_check(spellCheckDto: InterviewDto.Request.spellCheck) -> str:
+    def spell_check(spellCheckDto: InterviewDto.Request.SpellCheck) -> str:
         text = spellCheckDto.content
 
         try:
@@ -590,7 +595,7 @@ class InterviewService:
             print("Error occurred:", e)
 
     @staticmethod
-    def get_interviews(user_id: int, page: int, count: int) -> tuple[list[InterviewDto.Response.interviewSummary], int]:
+    def get_interviews(user_id: int, page: int, count: int) -> tuple[list[InterviewDto.Response.InterviewSummary], int]:
         session = get_session()
 
         # 면접 데이터를 가져오는 쿼리 정의
@@ -615,7 +620,7 @@ class InterviewService:
                 ResumeLike.resume_id == interview.interview_id
             ).scalar() or 0
 
-            summary = InterviewDto.Response.interviewSummary(
+            summary = InterviewDto.Response.InterviewSummary(
                 interview_id=interview.interview_id,
                 title=interview.title,
                 created_time=interview.created_time,

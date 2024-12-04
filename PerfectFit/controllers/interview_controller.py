@@ -23,8 +23,7 @@ def get_questions(interview_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    questions: InterviewDto.Response.questions = InterviewService.get_questions(interview_id)
-
+    questions: InterviewDto.Response.Questions = InterviewService.get_questions(interview_id)
 
     response: InterviewDto.Response.QuestionList = InterviewDto.Response.QuestionList(
         questions= [question for question in questions.questions],
@@ -35,10 +34,6 @@ def get_questions(interview_id: int):
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
-
-
-    # return render_template("test/test_interview.html", response=response)
-
 @interview_bp.route('/ispublic/<interview_id>', methods=['GET']) # Modal 창에 띄울 것이라 Json으로 리턴
 def get_is_public(interview_id: int):
     jwt_factory = JWTFactory()
@@ -46,7 +41,7 @@ def get_is_public(interview_id: int):
 
     interviewList = InterviewService.get_is_public(interview_id)
 
-    response: InterviewDto.Response.isPublicList = InterviewDto.Response.isPublicList(
+    response: InterviewDto.Response.isPublicList = InterviewDto.Response.IsPublicList(
         interviews= [interview for interview in interviewList]
     )
 
@@ -61,8 +56,11 @@ def get_improvement(task_id: int):
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     improvementList = InterviewService.get_improvement(task_id, user_id)
-    print(improvementList[0].improvement)
+
+
+
     title, interview_id = InterviewService.get_interview_title(improvementList[0].questionId, None)
+
     response = {
         "improvements": [{
 			"improvementId": improvement.improvementId,
@@ -74,15 +72,14 @@ def get_improvement(task_id: int):
             "isShared": InterviewService.get_question_is_shared(improvement.questionId)
 		} for improvement in improvementList],
         "title" : title,
-        "interviewId" : interview_id,
-
+        "interviewId": interview_id,
     }
 
     return render_template("result.html",response=response)
 
 @interview_bp.route('/improvement/<interview_id>', methods=['GET'])
 def get_improvement_with_id(interview_id: int):
-    print("in1")
+
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
@@ -94,8 +91,9 @@ def get_improvement_with_id(interview_id: int):
 			"questionId": improvement.questionId,
             "question": improvement.question,
 			"answer": improvement.answer,
-			"improvement": improvement.improvement,
-			"translatedAnswer": improvement.translatedAnswer,
+            "improvement": improvement.improvement.replace("'", '').replace('"', ""),
+            "translatedAnswer": improvement.translatedAnswer.replace("'", '').replace('"', ""),
+            "isShared": InterviewService.get_question_is_shared(improvement.questionId)
 		}
             for improvement in improvementList],
         "title" : title,
@@ -139,7 +137,7 @@ def post_question_answer():
 
     answers = request.form.get('answers').split("|")
 
-    post_answer_request = InterviewDto.Request.postInterviewAnswer(
+    post_answer_request = InterviewDto.Request.PostInterviewAnswer(
         questionIds=question_ids,
         answers=answers
     )
@@ -177,7 +175,7 @@ def make_interview_resume():
     level = request.form.get('level', None, type=str)
     title = request.form.get('title', None, type=str)
 
-    request_dto = InterviewDto.Request.postMakeInterviewResume(
+    request_dto = InterviewDto.Request.PostMakeInterviewResume(
         resumeId=resume_id,
         level=level,
         title=title
@@ -199,7 +197,7 @@ def make_interview_job():
     level = request.form.get('level', None, type=str)
     title = request.form.get('title', None, type=str)
 
-    request_dto = InterviewDto.Request.postMakeInterviewJob(
+    request_dto = InterviewDto.Request.PostMakeInterviewJob(
         jobId=job_id,
         userId=user_id,
         level=level,
@@ -250,7 +248,7 @@ def patch_title(interview_id: int):
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴. 마찬가지로 Patch 방식이라 Form 불가능
-    patch_interview_title = InterviewDto.Request.patchInterviewTitle(**data, interviewId=interview_id)
+    patch_interview_title = InterviewDto.Request.PatchInterviewTitle(**data, interviewId=interview_id)
 
     InterviewService.patch_interview_title(patch_interview_title)
 
@@ -271,7 +269,7 @@ def spell_check():
                 translatedContent="문장을 입력해주세요."
             )
 
-        spellCheckDto = InterviewDto.Request.spellCheck(content=content)
+        spellCheckDto = InterviewDto.Request.SpellCheck(content=content)
         translatedContent = InterviewService.spell_check(spellCheckDto)
 
         response = {
@@ -305,104 +303,178 @@ def loading_analyze(task_id: int):
 def interview():
     return render_template("interview.html")
 
+# @interview_bp.route('/list') # 모의면접 목록 페이지.
+# def interviewlist():
+#     """
+#     기업별 리스트 가져올 모의면접.
+#
+# 1. is_public : true
+# 2. company : not null
+# 3. 사용자 이름 넣고 제목 설정
+#     1. 윤**님 AI 모의면접
+# 4. 회사가 있으니까 인재상 있으므로 넣어줌
+# 5. 학교이름은 그냥 명시해서 넣기.
+# 6. 경력도 그냥 넣기
+#
+# 지원분야별
+#
+# 1. is_public : true
+# 2. occupation_id 별로 넣기
+# 3. 일단 인재상 . 다빼기
+# 4. 최상단 회사명은 있는 경우에만 넣기
+#     1. 없으면 그냥 비어두기
+# 5. 기타 사항은 기업별과 동일
+#     :return:
+#     """
+#     #jwt_factory = JWTFactory()
+#     #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+#
+#     job_interviews, company_interviews = InterviewService.get_interview_list()
+#
+#     keyword = request.form.get('keyword', None, type=str)
+#     if keyword is None :
+#         response = {
+#             "companyInterviews" : [{
+#                     "interviewId" : company_interview.interviewId,
+#                     "companyName" : company_interview.companyName,
+#                     "level" : company_interview.level,
+#                     "title" : company_interview.title,
+#                     "jobName" : company_interview.jobName, # 지원 분야
+#                     "university": company_interview.university, # 출신 학교
+#                     "companyBest": [company_best.content for company_best in company_interview.companyBest],
+#                     "companyWorst": company_interview.companyWorst
+#                 } for company_interview in company_interviews],
+#             "jobInterviews": [{
+#                 "occupationId": job_interview['occupationId'],
+#                 "interviews": [{
+#                     "interviewId": interview.interviewId,
+#                     "companyName": ( interview.companyName if interview.companyName else None ),
+#                     "level": interview.level,
+#                     "title": interview.title,
+#                     "jobName": interview.jobName,  # 지원 분야
+#                     "university": interview.university  # 출신 학교
+#                  } for interview in job_interview['jobInterviews']],
+#                 "total": job_interview['total']
+#             } for job_interview in job_interviews],
+#             "searchInterviews": [],
+#             "total" : len(job_interviews) # job_interviews는 무조건 들어가니까 이거로
+#         }
+#     else :
+#         search_interviews = InterviewService.get_interview_list_search(keyword)
+#         response = {
+#             "companyInterviews": [{
+#                 "interviewId": company_interview.interviewId,
+#                 "questionId": company_interview.questionId,
+#                 "companyName": company_interview.companyName,
+#                 "level": company_interview.level,
+#                 "title": company_interview.title,
+#                 "jobName": company_interview.jobName,  # 지원 분야
+#                 "university": company_interview.university,  # 출신 학교
+#                 "companyBest": [company_best.content for company_best in company_interview.companyBest],
+#                 "companyWorst": company_interview.companyWorst
+#             } for company_interview in company_interviews],
+#             "jobInterviews": [{
+#                 "occupationId": job_interview['occupationId'],
+#                 "interviews": [{
+#                     "interviewId": interview.interviewId,
+#                     "questionId": interview.questionId,
+#                     "companyName": (interview.companyName if interview.companyName else None),
+#                     "level": interview.level,
+#                     "title": interview.title,
+#                     "jobName": interview.jobName,  # 지원 분야
+#                     "university": interview.university  # 출신 학교
+#                 } for interview in job_interview['jobInterviews']],
+#                 "total": job_interview['total']
+#             } for job_interview in job_interviews],
+#             "searchInterviews": [{
+#                 "interviewId": search_interview.interviewId,
+#                 "questionId": search_interview.questionId,
+#                 "companyName": search_interview.companyName,
+#                 "level": search_interview.level,
+#                 "title": search_interview.title,
+#                 "jobName": search_interview.jobName,  # 지원 분야
+#                 "university": search_interview.university,  # 출신 학교
+#                 "companyBest": [company_best.content for company_best in search_interview.companyBest] if search_interview.companyName else None,
+#                 "companyWorst": search_interview.companyWorst if search_interview.companyName else None
+#             } for search_interview in search_interviews],
+#             "total": len(job_interviews)
+#         }
+#
+#     return render_template("interviewlist.html", response = response)
+
 @interview_bp.route('/list') # 모의면접 목록 페이지.
-def interviewlist():
-    """
-    기업별 리스트 가져올 모의면접.
-
-1. is_public : true
-2. company : not null
-3. 사용자 이름 넣고 제목 설정
-    1. 윤**님 AI 모의면접
-4. 회사가 있으니까 인재상 있으므로 넣어줌
-5. 학교이름은 그냥 명시해서 넣기.
-6. 경력도 그냥 넣기
-
-지원분야별
-
-1. is_public : true
-2. occupation_id 별로 넣기
-3. 일단 인재상 . 다빼기
-4. 최상단 회사명은 있는 경우에만 넣기
-    1. 없으면 그냥 비어두기
-5. 기타 사항은 기업별과 동일
-    :return:
-    """
+def interviewlist_company():
     #jwt_factory = JWTFactory()
     #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-
-    job_interviews, company_interviews = InterviewService.get_interview_list()
-
-    keyword = request.form.get('keyword', None, type=str)
-    if keyword is None :
-        response = {
-            "companyInterviews" : [{
-                    "interviewId" : company_interview.interviewId,
-                    "companyName" : company_interview.companyName,
-                    "level" : company_interview.level,
-                    "title" : company_interview.title,
-                    "jobName" : company_interview.jobName, # 지원 분야
-                    "university": company_interview.university, # 출신 학교
-                    "companyBest": [company_best.content for company_best in company_interview.companyBest],
-                    "companyWorst": company_interview.companyWorst
-                } for company_interview in company_interviews],
-            "jobInterviews": [{
-                "occupationId": job_interview['occupationId'],
-                "interviews": [{
-                    "interviewId": interview.interviewId,
-                    "companyName": ( interview.companyName if interview.companyName else None ),
-                    "level": interview.level,
-                    "title": interview.title,
-                    "jobName": interview.jobName,  # 지원 분야
-                    "university": interview.university  # 출신 학교
-                 } for interview in job_interview['jobInterviews']],
-                "total": job_interview['total']
-            } for job_interview in job_interviews],
-            "searchInterviews": [],
-            "total" : len(job_interviews) # job_interviews는 무조건 들어가니까 이거로
-        }
-    else :
-        search_interviews = InterviewService.get_interview_list_search(keyword)
-        response = {
-            "companyInterviews": [{
-                "interviewId": company_interview.interviewId,
-                "questionId": company_interview.questionId,
-                "companyName": company_interview.companyName,
-                "level": company_interview.level,
-                "title": company_interview.title,
-                "jobName": company_interview.jobName,  # 지원 분야
-                "university": company_interview.university,  # 출신 학교
+    job_interviews, company_interviews, job_total, company_total = InterviewService.get_interview_list()
+    response = {
+        "interviews" : [{
+                "interviewId" : company_interview.interviewId,
+                "companyName" : company_interview.companyName,
+                "level" : company_interview.level,
+                "title" : company_interview.title,
+                "jobName" : company_interview.jobName, # 지원 분야
+                "university": company_interview.university, # 출신 학교
                 "companyBest": [company_best.content for company_best in company_interview.companyBest],
                 "companyWorst": company_interview.companyWorst
             } for company_interview in company_interviews],
-            "jobInterviews": [{
-                "occupationId": job_interview['occupationId'],
-                "interviews": [{
-                    "interviewId": interview.interviewId,
-                    "questionId": interview.questionId,
-                    "companyName": (interview.companyName if interview.companyName else None),
-                    "level": interview.level,
-                    "title": interview.title,
-                    "jobName": interview.jobName,  # 지원 분야
-                    "university": interview.university  # 출신 학교
-                } for interview in job_interview['jobInterviews']],
-                "total": job_interview['total']
-            } for job_interview in job_interviews],
-            "searchInterviews": [{
-                "interviewId": search_interview.interviewId,
-                "questionId": search_interview.questionId,
-                "companyName": search_interview.companyName,
-                "level": search_interview.level,
-                "title": search_interview.title,
-                "jobName": search_interview.jobName,  # 지원 분야
-                "university": search_interview.university,  # 출신 학교
-                "companyBest": [company_best.content for company_best in search_interview.companyBest] if search_interview.companyName else None,
-                "companyWorst": search_interview.companyWorst if search_interview.companyName else None
-            } for search_interview in search_interviews],
-            "total": len(job_interviews)
-        }
-
+        "total" :company_total
+    }
+    print(response)
     return render_template("interviewlist.html", response = response)
+
+@interview_bp.route('/list/job') # 모의면접 목록 페이지.
+def interviewlist_job():
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    job_interviews, company_interviews, job_total,company_total = InterviewService.get_interview_list()
+
+    response = {
+        "interviews": [{
+            "occupationId": job_interview['occupationId'],
+            "occupationName": job_interview['occupationName'],
+            "competencies": job_interview['competencies'],
+            "interviews": [{
+                "interviewId": interview.interviewId,
+                "level": interview.level,
+                "title": interview.title,
+                "jobName": interview.jobName,  # 지원 분야
+                "university": interview.university  # 출신 학교
+             } for interview in job_interview['jobInterviews']],
+            "total": job_interview['total']
+        } for job_interview in job_interviews],
+        "total" : job_total
+    }
+    print(response)
+    return render_template("interviewlist.html", response = response)
+
+@interview_bp.route('/list/search') # 모의면접 목록 페이지.
+def interviewlist_search():
+    #jwt_factory = JWTFactory()
+    #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    keyword = request.form.get('keyword', None, type=str)
+
+    if keyword is None :
+        raise CustomException()
+
+    search_interviews, total = InterviewService.get_interview_list_search(keyword)
+    response = {
+        "interviews": [{
+            "interviewId": search_interview.interviewId,
+            "companyName": search_interview.companyName,
+            "level": search_interview.level,
+            "title": search_interview.title,
+            "jobName": search_interview.jobName,  # 지원 분야
+            "university": search_interview.university,  # 출신 학교
+            "companyBest": [company_best.content for company_best in search_interview.companyBest] if search_interview.companyName else None,
+            "companyWorst": search_interview.companyWorst if search_interview.companyName else None
+        } for search_interview in search_interviews],
+        "total": total
+    }
+    return render_template("interviewlist.html", response = response)
+
 
 @interview_bp.route('/result') # 모의면접 결과 페이지. Improvement
 def result():
