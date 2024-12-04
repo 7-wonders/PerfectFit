@@ -1,0 +1,19 @@
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_list_nav.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/interview_list_nav.js') }}"></script>
+{% endblock %}
+
+<nav class="nav-container">
+    <a href="/interview/list">
+        <button class="nav-item">기업별 (업종 / 그룹)</button>
+    </a>
+    <a href="/interview/job">
+        <button class="nav-item">지원 분야별</button>
+    </a>
+    <a href="/interview/search">
+        <button class="nav-item">내용 검색</button>
+    </a>
+</nav>
