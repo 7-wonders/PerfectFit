@@ -49,7 +49,7 @@ class UserDto:
             pages: int
 
         @dataclass
-        class DetailedUser:
+        class UserDetail:
             user_id: int
             username: str
             age: int
@@ -62,6 +62,10 @@ class UserDto:
             email: str
             phone_number: str
             profile_path: str
+
+        @dataclass
+        class DetailUser:
+            user: 'UserDto.Response.UserDetail'
             work_experiences: List['WorkExperienceDTO.Response.WorkExperience']
             project_experiences: List['PexDTO.Response.ProjectExperience']
             resumes: List['ResumeDto.Response.MyResume'] = field(default=None)

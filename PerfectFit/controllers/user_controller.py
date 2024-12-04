@@ -40,8 +40,7 @@ def get_users():
         pages=paginate_user.pages,
     )
 
-    return render_template("testusers.html", users=asdict(response))
-
+    return render_template("testusers.html", response = asdict(response))
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
@@ -67,18 +66,21 @@ def get_info():
 
     response = (
         UserDto.Response.DetailedUser(
-        user_id=user.user_id,
-        username=user.username,
-        age=user.age,
-        major=user.major,
-        university=user.university,
-        university_status=user.university_status,
-        grade=user.grade,
-        address=user.address,
-        detail_address=user.detail_address,
-        email=user.email,
-        phone_number=user.phone_number,
-        profile_path=user.profile_path,
+        user=[
+            UserDto.Response.UserDetail(
+                user_id=user.user_id,
+                username=user.username,
+                age=user.age,
+                major=user.major,
+                university=user.university,
+                university_status=user.university_status,
+                grade=user.grade,
+                address=user.address,
+                detail_address=user.detail_address,
+                email=user.email,
+                phone_number=user.phone_number,
+                profile_path=user.profile_path)
+        ],
         work_experiences=[
             WorkExperienceDTO.Response.WorkExperience(
                 work_experience_id=exp.work_experience_id,
@@ -108,7 +110,7 @@ def get_info():
         ]
     ))
 
-    return render_template("mypage_information.html", user=asdict(response))  # JSON 데이터 전달
+    return render_template("mypage_information.html", response = asdict(response))
 
 
 @user_bp.route('/user/profile')
@@ -224,7 +226,7 @@ def create_requirements():
 
     # Redis에 데이터 저장
     from config.config_redis import Redis
-    redis_instance = Redis()  # Redis 인스턴스 생성
+    redis_instance = Redis()
     redis_key = f"user:{user_id}:requirements"
     redis_value = json.dumps(data, ensure_ascii=False)
 
