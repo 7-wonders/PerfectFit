@@ -49,7 +49,7 @@ def get_user(user_id: int):
     return render_template("testusers.html", response = response)
 
 
-@user_bp.route('/user/mypage/info')
+@user_bp.route('/user/mypage/infomation')
 def get_info():
     # try:
     #     # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
