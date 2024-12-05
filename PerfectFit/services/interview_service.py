@@ -208,7 +208,6 @@ class InterviewService:
                 ))
                 .all()
             )
-
             total = 0
 
             for interview in interviews:

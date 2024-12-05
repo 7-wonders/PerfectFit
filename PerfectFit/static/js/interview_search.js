@@ -9,7 +9,7 @@ window.addEventListener('load', () => {
 
         const searchValue = searchEle.value;
         if (searchValue) {
-            location.replace(`/interview/search?keyword=${searchValue}`);
+            location.replace(`/interview/list/search?keyword=${searchValue}`);
         } else {
             alert('검색어를 입력해주세요.');
             searchEle.focus();

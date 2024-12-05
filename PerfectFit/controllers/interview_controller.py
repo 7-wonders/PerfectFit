@@ -447,19 +447,19 @@ def interviewlist_job():
         "total" : job_total
     }
     print(response)
-    return render_template("interviewlist.html", response = response)
+    return render_template("interview_job.html", response = response)
 
 @interview_bp.route('/list/search') # 모의면접 목록 페이지.
 def interviewlist_search():
     #jwt_factory = JWTFactory()
     #user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    keyword = request.form.get('keyword', None, type=str)
+    keyword = request.args.get('keyword', None, type=str)
 
     if keyword is None :
-        raise CustomException()
-
-    search_interviews, total = InterviewService.get_interview_list_search(keyword)
+        search_interviews, total = [], 0
+    else :
+        search_interviews, total = InterviewService.get_interview_list_search(keyword)
     response = {
         "interviews": [{
             "interviewId": search_interview.interviewId,
@@ -473,7 +473,7 @@ def interviewlist_search():
         } for search_interview in search_interviews],
         "total": total
     }
-    return render_template("interviewlist.html", response = response)
+    return render_template("interview_search.html", response = response)
 
 
 @interview_bp.route('/result') # 모의면접 결과 페이지. Improvement

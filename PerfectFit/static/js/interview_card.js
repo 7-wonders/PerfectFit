@@ -10,7 +10,7 @@ window.addEventListener('load', () => {
                 return;
             }
 
-            window.location.href = `/interview/${interviewId}`;
+            window.location.href = `/interview/improvement/${interviewId}`;
         });
     });
 });
