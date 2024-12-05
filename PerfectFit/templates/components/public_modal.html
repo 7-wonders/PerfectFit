@@ -1,0 +1,39 @@
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/public_modal.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/public_modal.js') }}"></script>
+{% endblock %}
+
+<div id="modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body">
+        <h4 class="title">공개 여부 확인</h4>
+        <p class="mb30">자신의 질문과 개선사항을 공개해, 다른 사용자에게 도움을 줄 수 있습니다.</p>
+        <div class="public-container">
+            {% for improvement in improvements %}
+                <div class="item">
+                    <div class="top-box">
+                        <input  type="checkbox"
+                                name="is-public"
+                                data-question-id="{{ improvement.questionId }}"
+                                class="check-box"
+                                {% if improvement.isShared %}checked{% endif %}  />
+                        <div class="question-container" data-expand="false">
+                            <div class="question-box">
+                                <span>{{ loop.index }}.</span>
+                                <span class="question">{{ improvement.question }}</span>
+                            </div>
+                            <img src="{{ url_for('static', filename='img/down_arrow.svg') }}" alt="확장" class="down-arrow" />
+                        </div>
+                    </div>
+                    <div class="content">{{ improvement.answer }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="btn-box">
+            <button class="modal-public-btn un-public" id="modal-un-public-btn">공개 안함</button>
+            <button class="modal-public-btn public" id="modal-public-btn">공개</button>
+        </div>
+    </div>
+</div>

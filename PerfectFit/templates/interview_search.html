@@ -26,7 +26,7 @@
     </div>
 
     <div class="card-container">
-        {% if response %}
+        {% if response and response.interviews and response.interviews | length > 0 %}
             {% for interview in response.interviews %}
                 {% with interview=interview %}
                     {% include 'interview_card.html' %}
