@@ -40,17 +40,16 @@ def get_users():
         pages=paginate_user.pages,
     )
 
-    return render_template("testusers.html", users=asdict(response))
-
+    return render_template("testusers.html", response = asdict(response))
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.user_id, user.username)
-    return render_template("testusers.html", user=response)
+    return render_template("testusers.html", response = response)
 
 
-@user_bp.route('/user/mypage/info')
+@user_bp.route('/user/mypage/information')
 def get_info():
     # try:
     #     # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
@@ -65,19 +64,23 @@ def get_info():
     #     )
     user = UserService.get_user()
 
-    response = UserDto.Response.DetailedUser(
-        user_id=user.user_id,
-        username=user.username,
-        age=user.age,
-        major=user.major,
-        university=user.university,
-        university_status=user.university_status,
-        grade=user.grade,
-        address=user.address,
-        detail_address=user.detail_address,
-        email=user.email,
-        phone_number=user.phone_number,
-        profile_path=user.profile_path,
+    response = (
+        UserDto.Response.DetailedUser(
+        user=[
+            UserDto.Response.UserDetail(
+                user_id=user.user_id,
+                username=user.username,
+                age=user.age,
+                major=user.major,
+                university=user.university,
+                university_status=user.university_status,
+                grade=user.grade,
+                address=user.address,
+                detail_address=user.detail_address,
+                email=user.email,
+                phone_number=user.phone_number,
+                profile_path=user.profile_path)
+        ],
         work_experiences=[
             WorkExperienceDTO.Response.WorkExperience(
                 work_experience_id=exp.work_experience_id,
@@ -105,9 +108,9 @@ def get_info():
             )
             for proj in user.project_experiences
         ]
-    )
+    ))
 
-    return render_template("testusers.html", user=asdict(response))  # JSON 데이터 전달
+    return render_template("mypage_information.html", response = asdict(response))
 
 
 @user_bp.route('/user/profile')
@@ -118,8 +121,11 @@ def get_profile():
         "profilePath": user.profile_path
     }
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return render_template("testusers.html", user=response)
+    return Response(
+        json.dumps(response, ensure_ascii=False, indent=2),  ##  한글이 깨지지 않도록 처리하였습니다!
+        status=200,
+        content_type='application/json; charset=utf-8'
+    )
 
 
 @user_bp.route('/user/mypage/resume')
@@ -162,7 +168,7 @@ def get_resumes():
         total=total
     )
 
-    return render_template("testusers.html", user=response)
+    return render_template("mypage_resume.html", response = response)
 
 
 @user_bp.route('/user/mypage/interview')
@@ -187,7 +193,7 @@ def get_interviews():
         ]
     )
 
-    return render_template("testusers.html", user=response)
+    return render_template("mypage_interview.html", response = response)
 
 
 @user_bp.route('/user/requirements', methods=['POST'])
@@ -220,7 +226,7 @@ def create_requirements():
 
     # Redis에 데이터 저장
     from config.config_redis import Redis
-    redis_instance = Redis()  # Redis 인스턴스 생성
+    redis_instance = Redis()
     redis_key = f"user:{user_id}:requirements"
     redis_value = json.dumps(data, ensure_ascii=False)
 
