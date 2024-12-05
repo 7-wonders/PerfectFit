@@ -494,11 +494,11 @@ class InterviewService:
                 session.add(new_view)
                 session.commit()
             is_mine = improvement.question.interview.user_id == user_id
-            like = InterviewLike(interview_id=interview_id, user_id=user_id)
+            like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
             is_like = False if like is None else True
 
-            view_count = InterviewView.query.filter_by(interview_id=interview_id).count()
-            like_count = InterviewLike.query.filter_by(interview_id=interview_id).count()
+            view_count = session.query(InterviewView).filter_by(interview_id=interview_id).count()
+            like_count = session.query(InterviewLike).filter_by(interview_id=interview_id).count()
 
             return improvementList, is_mine, is_like, view_count, like_count
     @staticmethod
@@ -534,11 +534,11 @@ class InterviewService:
                 session.add(new_view)
                 session.commit()
             is_mine = improvement.question.interview.user_id == user_id
-            like = InterviewLike(interview_id=interview_id, user_id=user_id)
+            like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
             is_like = False if like is None else True
 
-            view_count = InterviewView.query.filter_by(interview_id=interview_id).count()
-            like_count = InterviewLike.query.filter_by(interview_id=interview_id).count()
+            view_count = session.query(InterviewView).filter_by(interview_id=interview_id).count()
+            like_count = session.query(InterviewLike).filter_by(interview_id=interview_id).count()
 
 
             return improvementList, is_mine, is_like, view_count, like_count
