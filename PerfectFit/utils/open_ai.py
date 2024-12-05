@@ -15,7 +15,6 @@ from domain.models import Resume, ResumeSection, WorkExperience, ProjectExperien
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from dto.interview.interview import InterviewDto
-from tasks import start_async_ai_task
 
 # load_dotenv()
 # OpenAI API 키 가져오기
