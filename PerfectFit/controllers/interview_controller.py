@@ -239,9 +239,9 @@ def patch_is_public():
 
 
     if isinstance(is_share_ids, list):
-        InterviewService.patch_ispublic(is_share_ids)
+        InterviewService.patch_ispublic(is_share_ids, user_id)
     if isinstance(is_close_ids, list):
-        InterviewService.patch_ispublic_cancel(is_close_ids)
+        InterviewService.patch_ispublic_cancel(is_close_ids, user_id)
 
     return Response('', status=204, content_type='application/json; charset=utf-8') # 완료 후 어디로 보내야 하나
 @interview_bp.route('/ispublic/cancel', methods=['PATCH']) # deprecated
@@ -267,7 +267,7 @@ def patch_title(interview_id: int):
     data = request.get_json()  # POST 요청의 JSON 데이터를 가져옴. 마찬가지로 Patch 방식이라 Form 불가능
     patch_interview_title = InterviewDto.Request.PatchInterviewTitle(**data, interviewId=interview_id)
 
-    InterviewService.patch_interview_title(patch_interview_title)
+    InterviewService.patch_interview_title(patch_interview_title, user_id)
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8')
 
@@ -276,9 +276,10 @@ def spell_check():
     if request.method == 'POST':
         # POST 요청에서 폼 데이터를 가져옵니다.
         content = request.form.get('content', None, type=str)
+
         if content is None :
             content = request.get_json().get('content', None)
-        print(content)
+
         if not content:
             return render_template(
                 'spelling_check.html',
@@ -289,16 +290,6 @@ def spell_check():
         spellCheckDto = InterviewDto.Request.SpellCheck(content=content)
         translatedContent = InterviewService.spell_check(spellCheckDto)
 
-        response = {
-            "translatedContent": translatedContent
-        }
-        # 데이터를 HTML에 전달하며 렌더링
-        # return render_template(
-        #     'spelling_check.html',
-        #     content=content,
-        #     translatedContent=translatedContent
-        # )
-        print(jsonify(translatedContent))
         return jsonify(translatedContent), 200
     # GET 요청 처리 (기본 빈 페이지 렌더링)
     return render_template(

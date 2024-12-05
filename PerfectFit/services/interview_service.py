@@ -371,7 +371,7 @@ class InterviewService:
 
 
     @staticmethod
-    def patch_interview_title(interview_title: InterviewDto.Request.PatchInterviewTitle) -> None:
+    def patch_interview_title(interview_title: InterviewDto.Request.PatchInterviewTitle, user_id : int) -> None:
 
         try:
             session = get_session()
@@ -379,6 +379,9 @@ class InterviewService:
 
             if interview is None:
                 raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
+
+            if interview.user_id != user_id :
+                raise CustomException(ExceptionType.FORBIDDEN_INTERVIEW)
 
             interview.title = interview_title.title
 
@@ -390,7 +393,7 @@ class InterviewService:
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
-    def patch_ispublic(questionIds: list[int]) -> None:
+    def patch_ispublic(questionIds: list[int], user_id: int) -> None:
 
         try:
             session = get_session()
@@ -399,7 +402,8 @@ class InterviewService:
                 interview_question = session.query(InterviewQuestion).filter_by(question_id=questionId).first()
                 if interview_question is None:
                     raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
-
+                if interview_question.interview.user_id != user_id :
+                    raise CustomException(ExceptionType.FORBIDDEN_INTERVIEW)
                 interview_question.is_shared = True
 
             session.commit()
@@ -410,7 +414,7 @@ class InterviewService:
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
-    def patch_ispublic_cancel(questionIds: list[int]) -> None:
+    def patch_ispublic_cancel(questionIds: list[int], user_id: int) -> None:
 
         try:
             session = get_session()
@@ -419,7 +423,8 @@ class InterviewService:
                 interview_question = session.query(InterviewQuestion).filter_by(question_id=questionId).first()
                 if interview_question is None:
                     raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
-
+                if interview_question.interview.user_id != user_id :
+                    raise CustomException(ExceptionType.FORBIDDEN_INTERVIEW)
                 interview_question.is_shared = False
 
             session.commit()
