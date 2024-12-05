@@ -578,6 +578,20 @@ class InterviewService:
             session.commit()
 
     @staticmethod
+    def delete_interview(interview_id: int, user_id: int) -> None:
+        with get_session() as session :
+            interview = session.query(Interview).filter_by(interview_id=interview_id).first()
+
+            if interview is None:
+                raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
+
+            if interview.user_id != user_id:
+                raise CustomException(ExceptionType.FORBIDDEN_INTERVIEW)
+
+            session.delete(interview)
+            session.commit()
+
+    @staticmethod
     def spell_check(spellCheckDto: InterviewDto.Request.SpellCheck) -> str:
         text = spellCheckDto.content
 

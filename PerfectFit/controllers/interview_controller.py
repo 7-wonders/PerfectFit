@@ -119,7 +119,6 @@ def post_like(interview_id: int):
 
 
     data = request.get_json()
-    is_like = data.get("is_like")
 
     InterviewService.post_like(interview_id,user_id)
 
@@ -131,10 +130,19 @@ def delete_like(interview_id: int):
 
 
     data = request.get_json()
-    is_like = data.get("is_like")
-    
+
     InterviewService.delete_like(interview_id,user_id)
     return Response("", status=204)
+
+
+@interview_bp.route('/<interview_id>', methods=['DELETE'])
+def delete_interview(interview_id: int):
+    jwt_factory = JWTFactory()
+    user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
+
+    InterviewService.delete_like(interview_id, user_id)
+    return redirect(f"/interview/list")
+
 
 @interview_bp.route('/', methods=['POST'])
 def post_question_answer():
@@ -162,10 +170,10 @@ def get_task(task_id):
     state = task.state.lower()
 
     if state == 'success':
-        
+
         #여기서 DB 작업
         InterviewService.post_question_answer_after(task_id)
-        
+
         return jsonify({"task_id": task.id}), HTTPStatus.OK
     elif state == 'failure':
         raise CustomException(ExceptionType.CELERY_ERROR)
