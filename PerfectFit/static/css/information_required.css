@@ -1,0 +1,39 @@
+.uk-center {
+    display: grid;
+    justify-content: center;
+}
+
+.container {
+    min-width: 36.25rem;
+}
+
+.uk-article {
+    padding-top: 20px;
+}
+
+.uk-article-title {
+    font-size: 24px;
+}
+
+.uk-article-meta {
+    font-size: 16px;
+}
+
+.uk-form-label {
+    font-size: 18px;
+}
+
+.uk-input {
+    font-size: 16px;
+    border: 1px solid #96C0FF;
+}
+
+.uk-select {
+    width: 250px;
+    border: 1px solid #96C0FF;
+}
+
+.uk-button-small {
+    border: 1px solid transparent;
+    color: #666;
+}

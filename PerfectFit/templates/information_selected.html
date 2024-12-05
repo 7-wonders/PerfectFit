@@ -1,0 +1,148 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/information_selected.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/information_selected.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <form class="uk-form-stacked uk-center">
+        <div class="container">
+
+            <div class="uk-margin">
+                <article class="uk-article">
+                    <h1 class="uk-article-title"><a class="uk-link-reset" href="">선택 정보</a></h1>
+                    <p class="uk-article-meta">원하는 서비스를 위해 정보를 입력해주세요.</p>
+                </article>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="form-stacked-text">학력</label>
+                <div class="uk-form-controls">
+                    <div class="uk-flex uk-flex-between">
+                        <input class="uk-input" id="form-stacked-text" type="text" placeholder="최종 학력을 입력해주세요.">
+                        <select class="uk-select" aria-label="Select">
+                            <option>재학</option>
+                            <option>휴학</option>
+                            <option>졸업</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="form-stacked-text">전공</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="form-stacked-text" type="text" placeholder="전공을 입력해주세요.">
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="form-stacked-text">학점</label>
+                <div class="uk-form-controls">
+                    <div class="uk-flex uk-flex-between">
+                        <input class="uk-input" id="form-stacked-text" type="text" placeholder="학점을 입력해주세요.">
+                        <select class="uk-select" aria-label="Select">
+                            <option>/4.5</option>
+                            <option>/4.3</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="form-stacked-text">전화번호</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="form-stacked-text" type="text" placeholder="전화번호를 입력해주세요.">
+                </div>
+            </div>
+
+            <div class="project" id="projectExp">
+                <div class="uk-margin">
+                    <div class="uk-flex uk-flex-between">
+                        <label class="uk-form-label" for="form-stacked-email">프로젝트 경험</label>
+                        <button type="button" class="uk-button uk-button-default uk-button-small" onclick="addProject()">+ 프로젝트 추가하기</button>
+                    </div>
+
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="form-stacked-text" type="text" placeholder="프로젝트 이름">
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-stacked-text">프로젝트 기간</label>
+                    <div class="uk-flex">
+                        <div class="uk-width-1-4@s uk-flex-first">
+                            <input class="uk-input" type="text" aria-label="25">
+                        </div>
+                        <div class="uk-card uk-margin-left">
+                            ~
+                        </div>
+                        <div class="uk-width-1-4@s uk-flex-last uk-margin-left">
+                            <input class="uk-input" type="text" aria-label="25">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-stacked-text">프로젝트 내용</label>
+                    <textarea class="uk-textarea" rows="5" placeholder="프로젝트 내용" aria-label="Textarea"></textarea>
+                </div>
+            </div>
+
+            <div class="career" id="careerExp">
+                <div class="uk-margin">
+                    <div class="uk-flex uk-flex-between">
+                        <label class="uk-form-label" for="form-stacked-email">경력</label>
+                        <button class="uk-button uk-button-default uk-button-small" id="addCareerButton">+ 경력 추가하기</button>
+                    </div>
+
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="form-stacked-text" type="text" placeholder="회사 이름">
+                    </div>
+
+                    <div class="uk-margin">
+                        <label class="uk-form-label" for="form-stacked-text">경력 기간</label>
+                        <div class="uk-flex">
+                            <div class="uk-width-1-4@s uk-flex-first">
+                                <input class="uk-input" type="text" aria-label="25">
+                            </div>
+                            <div class="uk-card uk-margin-left">
+                                ~
+                            </div>
+                            <div class="uk-width-1-4@s uk-flex-last uk-margin-left">
+                                <input class="uk-input" type="text" aria-label="25">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <div class="uk-form-controls">
+                            <input class="uk-input" id="form-stacked-text" type="text" placeholder="직책">
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-form-controls">
+                            <input class="uk-input" id="form-stacked-text" type="text" placeholder="맡은 일">
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-form-controls">
+                            <input class="uk-input" id="form-stacked-text" type="text" placeholder="퇴사 사유">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-flex uk-flex-between">
+            <button id="infoButton" class="uk-button uk-button-default">이전</button>
+            <button id="completeButton" class="uk-button uk-button-primary" type="submit" >완료</button>
+        </div>
+    </form>
+{% endblock %}
