@@ -140,7 +140,7 @@ def delete_interview(interview_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    InterviewService.delete_like(interview_id, user_id)
+    InterviewService.delete_interview(interview_id, user_id)
     return redirect(f"/interview/list")
 
 
