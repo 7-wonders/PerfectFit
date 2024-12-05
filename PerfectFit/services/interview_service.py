@@ -313,20 +313,8 @@ class InterviewService:
                     "questions":questions,
                     "best_answers":best_answers})
 
-                print("3a2")
-                # improvements = async_result.get(timeout=30)
-                #
-                # for improvement in improvements['InterviewImprovement']:
-                #     new_improvement = InterviewImprovement(
-                #         question_id=int(question_answer.questionId),
-                #         answer=improvement['UserAnswer'],
-                #         improvement=improvement['Improvement'],
-                #         translated_answer=improvement['TranslatedAnswer']
-                #     )
-                #     session.add(new_improvement)
                 session.commit()
 
-                print("석세스")
 
                 # 작업 ID 반환
                 return async_result

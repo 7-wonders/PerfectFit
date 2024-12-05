@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from domain.models.interview import Interview
     from domain.models.interview_like import InterviewLike
     from domain.models.interview_view import InterviewView
+    from domain.models.represent import Represent
 
 
 class Company(db.Model):
@@ -26,3 +27,4 @@ class Company(db.Model):
     interview_likes: Mapped[list["InterviewLike"]] = db.relationship("InterviewLike", back_populates="company")
     company_bests: Mapped[list["CompanyBest"]] = db.relationship("CompanyBest", back_populates="company")
     company_worsts: Mapped[list["CompanyWorst"]] = db.relationship("CompanyWorst", back_populates="company")
+    represent: Mapped["Represent"] = db.relationship("Represent", back_populates="company")

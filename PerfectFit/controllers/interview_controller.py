@@ -14,6 +14,7 @@ from services.interview_service import InterviewService
 from utils.jwt_factory import JWTFactory
 
 from tasks import start_async_ai_task
+from utils.open_ai import make_company_interview, make_company_improvement
 interview_bp = Blueprint('interview', __name__)
 
 
@@ -512,4 +513,9 @@ def job_select():
 @interview_bp.route('/run/<interview_id>')
 def interview_run(interview_id: int):
     return render_template("interview.html", interviewId = interview_id)
+
+@interview_bp.route('/make/company')
+def make_company():
+    make_company_improvement()
+    return render_template("resume_loading.html.html")
 
