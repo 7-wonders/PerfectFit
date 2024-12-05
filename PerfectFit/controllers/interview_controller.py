@@ -56,8 +56,7 @@ def get_improvement(task_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    improvementList = InterviewService.get_improvement(task_id, user_id)
-
+    improvementList, is_mine, is_like, view_count, like_count = InterviewService.get_improvement(task_id, user_id)
 
 
     title, interview_id = InterviewService.get_interview_title(improvementList[0].questionId, None)
@@ -73,6 +72,10 @@ def get_improvement(task_id: int):
             "isShared": InterviewService.get_question_is_shared(improvement.questionId)
 		} for improvement in improvementList],
         "title" : title,
+        "isMine" : is_mine,
+        "isLike" : is_like,
+        "viewCount" : view_count,
+        "likeCount" : like_count,
         "interviewId": interview_id,
     }
 
@@ -84,7 +87,8 @@ def get_improvement_with_id(interview_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-    improvementList = InterviewService.get_improvement_based_id(interview_id, user_id)
+    improvementList, is_mine, is_like, view_count, like_count = InterviewService.get_improvement_based_id(interview_id, user_id)
+
     title, interview_id = InterviewService.get_interview_title(None, interview_id)
     response = {
         "improvements": [{
@@ -98,6 +102,10 @@ def get_improvement_with_id(interview_id: int):
 		}
             for improvement in improvementList],
         "title" : title,
+        "isMine" : is_mine,
+        "isLike" : is_like,
+        "viewCount" : view_count,
+        "likeCount" : like_count,
         "interviewId" : interview_id
     }
 

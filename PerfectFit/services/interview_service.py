@@ -444,7 +444,7 @@ class InterviewService:
         return isPublicInterviews
 
     @staticmethod
-    def get_improvement(task_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] :
+    def get_improvement(task_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any :
 
         with get_session() as session :
 
@@ -488,10 +488,16 @@ class InterviewService:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
                 session.add(new_view)
                 session.commit()
+            is_mine = improvement.question.interview.user_id == user_id
+            like = InterviewLike(interview_id=interview_id, user_id=user_id)
+            is_like = False if like is None else True
 
-            return improvementList
+            view_count = InterviewView.query.filter_by(interview_id=interview_id).count()
+            like_count = InterviewLike.query.filter_by(interview_id=interview_id).count()
+
+            return improvementList, is_mine, is_like, view_count, like_count
     @staticmethod
-    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] :
+    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any :
         with (get_session() as session) :
             interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
             questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
@@ -522,8 +528,15 @@ class InterviewService:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
                 session.add(new_view)
                 session.commit()
+            is_mine = improvement.question.interview.user_id == user_id
+            like = InterviewLike(interview_id=interview_id, user_id=user_id)
+            is_like = False if like is None else True
 
-            return improvementList
+            view_count = InterviewView.query.filter_by(interview_id=interview_id).count()
+            like_count = InterviewLike.query.filter_by(interview_id=interview_id).count()
+
+
+            return improvementList, is_mine, is_like, view_count, like_count
     @staticmethod
     def get_interview_title(question_id: int, interview_id: int):
         with get_session() as session :
