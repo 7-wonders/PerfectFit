@@ -1,7 +1,7 @@
 const urlList = [
     '/interview/list',
-    '/interview/job',
-    '/interview/search'
+    '/interview/list/job',
+    '/interview/list/search'
 ];
 
 window.addEventListener('load', () => {

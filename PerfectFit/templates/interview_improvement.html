@@ -1,0 +1,84 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_improvement.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const interviewId = {{ response.interviewId }};
+        const improvements = {{ response.improvements | tojson }};
+
+        if (improvements.length <= 0) {
+            alert('공개되지 않은 개선 사항입니다.');
+            history.back();
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/interview_improvement.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="top-box">
+            <div class="title-box">
+                <h3 class="title">{{ response.title }}</h3>
+                <img src="{{ url_for('static', filename='img/pencil.svg') }}" alt="수정" id="edit-title" />
+                <input class="uk-input change-input none" type="text" id="change-input" />
+                <button class="title-btn none" id="change-btn">변경</button>
+            </div>
+            <div class="func-box">
+                <div class="func-item">
+                    <img src="{{ url_for('static', filename='img/view.svg') }}" alt="조회수" />
+                    <span>{{ response.viewCount | default(0) }}</span>
+                </div>
+                <div class="func-item" id="like-btn">
+                    <img src="{{ url_for('static', filename='img/like.svg') }}" alt="좋아요" />
+                    <span>{{ response.viewCount | default(0) }}</span>
+                </div>
+                <div class="func-item" id="public-btn" uk-toggle="target: #modal">
+                    <img src="{{ url_for('static', filename='img/public.svg') }}" alt="공개" />
+                    <span>공개</span>
+                </div>
+                <div class="func-item delete" id="delete-btn">
+                    <img src="{{ url_for('static', filename='img/delete.svg') }}" alt="삭제" />
+                    <span>삭제</span>
+                </div>
+            </div>
+        </div>
+        <div class="result-box">
+            <div class="interview-box">
+                {% for improvement in response.improvements %}
+                    <div class="interview-item">
+                        <div class="question-box">
+                            <div class="question">
+                                <span>Q.</span>
+                                <span>{{ improvement.question }}</span>
+                            </div>
+                            <button class="btn" data-improvement-id="{{ improvement.improvementId }}">개선 사항 확인</button>
+                        </div>
+                        <div class="answer-box">
+                            <span>A.</span>
+                            <span>{{ improvement.answer }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <img src="{{ url_for('static', filename='img/arrow_right.svg') }}" alt="화살표" class="arrow" />
+            <div class="improvement-box">
+                <div class="improvement">
+                    <b>개선 사항</b>
+                    <div class="improvement-content"></div>
+                </div>
+                <div class="translate">
+                    <b>변경된 답변</b>
+                    <div class="improvement-answer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% with improvements=response.improvements %}
+        {% include 'components/public_modal.html' %}
+    {% endwith %}
+{% endblock %}

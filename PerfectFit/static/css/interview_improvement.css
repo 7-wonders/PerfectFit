@@ -1,0 +1,176 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.container {
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 1440px;
+    width: 100%;
+    margin: 30px auto;
+    box-sizing: border-box;
+
+    .top-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+
+        .title-box {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .title {
+                font-size: 22px;
+                font-weight: bold;
+                margin: 0;
+                color: #333;
+            }
+
+            img {
+                position: relative;
+                top: 2px;
+                cursor: pointer;
+            }
+
+            .change-input {
+                width: 600px;
+                padding: 10px 15px;
+                border: 1px solid #96C0FF;
+                border-radius: 5px;
+                background-color: #FCFCFD;
+            }
+
+            .title-btn {
+                height: 40px;
+                padding: 8px 16px;
+                border: none;
+                outline: none;
+                border-radius: 8px;
+                color: white;
+                background-color: #2B7FFF;
+                cursor: pointer;
+            }
+
+            .none { display: none; }
+        }
+    }
+
+    .func-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .func-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                position: relative;
+                top: -2px;
+            }
+
+            &:not(:first-child) {
+                cursor: pointer;
+            }
+        }
+    }
+
+    .delete { color: #FFA4A4; }
+
+    .result-box {
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        height: 100%;
+        margin: -15px -15px -15px 0;
+        padding: 20px 20px 20px 0;
+
+        .interview-box {
+            overflow-y: auto;
+            flex: 1;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar { display: none; }
+
+            .interview-item {
+                padding: 0 15px 20px 0;
+                border-right: 2px solid #22222226;
+
+                &:not(:last-child) {
+                    margin-bottom: 30px;
+                }
+
+                .question-box {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 10px;
+                    margin-bottom: 15px;
+
+                    .question {
+                        flex: 1;
+                        display: flex;
+                        gap: 5px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #222222;
+
+                        span:nth-child(2) {
+                            flex: 1;
+                        }
+                    }
+
+                    .btn {
+                        box-sizing: border-box;
+                        padding: 8px 16px;
+                        border: none;
+                        border-radius: 6px;
+                        outline: none;
+                        color: white;
+                        background-color: #2B7FFF;
+                        cursor: pointer;
+                    }
+                }
+
+                .answer-box {
+                    margin-left: 3px;
+                }
+            }
+
+            .active {
+                border-right: 2px solid #2B7FFF;
+            }
+        }
+
+        .arrow {
+            width: 40px;
+        }
+
+        .improvement-box {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding: 20px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px 0 rgba(0, 62, 156, 0.25);
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar { display: none; }
+
+            b {
+                color: #222222;
+            }
+        }
+    }
+}

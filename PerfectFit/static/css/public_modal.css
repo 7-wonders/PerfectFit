@@ -1,0 +1,125 @@
+.title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #222222;
+}
+
+.mb30 {
+    margin-bottom: 30px;
+}
+
+.uk-modal-body {
+    position: relative;
+    padding: 30px 30px 0 30px !important;
+
+    .public-container {
+        overflow-y: auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+        width: 100%;
+        max-width: 800px;
+        max-height: 565px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar { display: none; }
+
+        .top-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
+            cursor: pointer;
+
+            .check-box {
+                position: relative;
+                top: 1px;
+                min-width: 18px;
+                min-height: 18px;
+                border: 1px solid #E6F0FF;
+                border-radius: 6px;
+                background-color: #96C0FF;
+            }
+
+            .question-container {
+                flex: 1;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                font-size: 16px;
+                color: #222222;
+
+                .question-box {
+                    flex: 1;
+                    display: flex;
+                    gap: 5px;
+
+                    .question {
+                        flex: 1;
+                    }
+                }
+
+                .down-arrow {
+                    position: relative;
+                    top: 7px;
+                    width: 16px;
+                    height: 16px;
+                    transition: transform 0.5s ease;
+                }
+            }
+        }
+
+        .content {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            padding-left: 48px;
+            color: #858585;
+            transition: all 0.5s ease;
+        }
+
+        .animation {
+            overflow: initial;
+            max-height: 280px;
+            opacity: 1;
+        }
+
+        .rotate {
+        transform: rotate(180deg);
+    }
+    }
+
+    .btn-box {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 0 10px 0;
+        background-color: white;
+        z-index: 99;
+
+        .modal-public-btn {
+            padding: 12px 38px;
+            border: none;
+            outline: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .un-public {
+            border: 1px solid #F2F2F4;
+            background-color: #FCFCFD;
+        }
+
+        .public {
+            background-color: #2B7FFF;
+            color: white;
+        }
+    }
+}
