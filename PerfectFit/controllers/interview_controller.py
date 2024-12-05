@@ -35,6 +35,7 @@ def get_questions(interview_id: int):
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
 
+
 @interview_bp.route('/ispublic/<interview_id>', methods=['GET']) # Modal 창에 띄울 것이라 Json으로 리턴
 def get_is_public(interview_id: int):
     jwt_factory = JWTFactory()
@@ -49,6 +50,7 @@ def get_is_public(interview_id: int):
     json_response = json.dumps(asdict(response), ensure_ascii=False, indent=2)
 
     return Response(json_response, status=200, content_type='application/json; charset=utf-8')
+
 
 @interview_bp.route('/improvement/task/<task_id>', methods=['GET'])
 def get_improvement(task_id: int):
@@ -79,7 +81,8 @@ def get_improvement(task_id: int):
         "interviewId": interview_id,
     }
 
-    return render_template("result.html",response=response)
+    return render_template("interview_improvement.html",response=response)
+
 
 @interview_bp.route('/improvement/<interview_id>', methods=['GET'])
 def get_improvement_with_id(interview_id: int):
@@ -109,7 +112,7 @@ def get_improvement_with_id(interview_id: int):
         "interviewId" : interview_id
     }
 
-    return render_template("result.html",response=response)
+    return render_template("interview_improvement.html",response=response)
 
 
 @interview_bp.route('/<interview_id>/like', methods=['POST'])
@@ -123,6 +126,8 @@ def post_like(interview_id: int):
     InterviewService.post_like(interview_id,user_id)
 
     return Response("", status=204)
+
+
 @interview_bp.route('/<interview_id>/like', methods=['DELETE'])
 def delete_like(interview_id: int):
     jwt_factory = JWTFactory()
@@ -164,6 +169,7 @@ def post_question_answer():
 
     return jsonify(task.id)
 
+
 @interview_bp.route('/task/<task_id>', methods=['POST'])
 def get_task(task_id):
     task = start_async_ai_task.AsyncResult(task_id)
@@ -204,6 +210,7 @@ def make_interview_resume():
     return redirect(f"/interview/run/{interview_id}")
     # 아마 리턴으로 로딩창 혹은 결과페이지로 보내야 할듯.
 
+
 @interview_bp.route('/job/select', methods=['POST'])
 def make_interview_job():
 
@@ -226,6 +233,7 @@ def make_interview_job():
     return redirect(f"/interview/run/{interview_id}")
     # return render_template("interview.html",interview_id=interview_id)
 
+
 @interview_bp.route('/ispublic', methods=['PATCH'])
 def patch_is_public():
 
@@ -244,6 +252,8 @@ def patch_is_public():
         InterviewService.patch_ispublic_cancel(is_close_ids, user_id)
 
     return Response('', status=204, content_type='application/json; charset=utf-8') # 완료 후 어디로 보내야 하나
+
+
 @interview_bp.route('/ispublic/cancel', methods=['PATCH']) # deprecated
 def patch_is_public_cancel():
 
@@ -258,6 +268,7 @@ def patch_is_public_cancel():
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8') #
 
+
 @interview_bp.route('/<interview_id>/title', methods=['PATCH'])
 def patch_title(interview_id: int):
 
@@ -270,6 +281,7 @@ def patch_title(interview_id: int):
     InterviewService.patch_interview_title(patch_interview_title, user_id)
 
     return Response(' ', status=204, content_type='application/json; charset=utf-8')
+
 
 @interview_bp.route('/spellcheck', methods=['GET','POST']) # 프론트가 나와야 테스트 가능
 def spell_check():
@@ -303,9 +315,11 @@ def spell_check():
 def loading_create():
     return render_template("Loading-create.html")
 
+
 @interview_bp.route('/loading-analyze/<task_id>')
 def loading_analyze(task_id: int):
     return render_template("Loading-analyze.html", task_id=task_id)
+
 
 @interview_bp.route('/')
 def interview():
@@ -410,6 +424,7 @@ def interview():
 #
 #     return render_template("interviewlist.html", response = response)
 
+
 @interview_bp.route('/list') # 모의면접 목록 페이지.
 def interviewlist_company():
     #jwt_factory = JWTFactory()
@@ -430,6 +445,7 @@ def interviewlist_company():
     }
     print(response)
     return render_template("interviewlist.html", response = response)
+
 
 @interview_bp.route('/list/job') # 모의면접 목록 페이지.
 def interviewlist_job():
@@ -457,6 +473,7 @@ def interviewlist_job():
     print(response)
     return render_template("interview_job.html", response = response)
 
+
 @interview_bp.route('/list/search') # 모의면접 목록 페이지.
 def interviewlist_search():
     #jwt_factory = JWTFactory()
@@ -483,10 +500,6 @@ def interviewlist_search():
     }
     return render_template("interview_search.html", response = response)
 
-
-@interview_bp.route('/result') # 모의면접 결과 페이지. Improvement
-def result():
-    return render_template("result.html")
 
 @interview_bp.route('/resume-select') # api 추가하였음.
 def resume_select():

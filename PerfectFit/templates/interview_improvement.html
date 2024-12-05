@@ -35,7 +35,7 @@
                 </div>
                 <div class="func-item" id="like-btn">
                     <img src="{{ url_for('static', filename='img/like.svg') }}" alt="좋아요" />
-                    <span>{{ response.viewCount | default(0) }}</span>
+                    <span>{{ response.likeCount | default(0) }}</span>
                 </div>
                 <div class="func-item" id="public-btn" uk-toggle="target: #modal">
                     <img src="{{ url_for('static', filename='img/public.svg') }}" alt="공개" />
