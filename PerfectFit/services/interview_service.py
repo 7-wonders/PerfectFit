@@ -487,7 +487,7 @@ class InterviewService:
                             translatedAnswer = improvement.translated_answer)
                         improvementList.append(improvementDto)
 
-            view = session.query(InterviewView).filter_by(user_id=user_id).first()
+            view = session.query(InterviewView).filter_by(interview_id=interview_id, user_id=user_id).first()
 
             if view is None:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
