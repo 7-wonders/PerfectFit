@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/not_found.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="not-found">
+        <img src="{{ url_for('static', filename='img/not_found.svg') }}" alt="not found" />
+        <h4>페이지를 찾을 수 없습니다.</h4>
+    </div>
+{% endblock %}

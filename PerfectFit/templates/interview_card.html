@@ -1,0 +1,50 @@
+<div class="card" data-interview-id="{{ interview.interviewId }}">
+    {% if interview.level == '신입' %}
+        <div class="level newbie">신입</div>
+    {% else %}
+        <div class="level junior">경력</div>
+    {% endif %}
+
+    <b class="title">{{ interview.title }}</b>
+
+    <div class="info">
+        {% if interview.companyName %}
+            <div class="info-content company">
+                <p class="field">기업명</p>
+                <p class="name">{{ interview.companyName }}</p>
+            </div>
+            <div class="line"></div>
+        {% endif %}
+        <div class="info-content">
+            <p class="field">지원 분야</p>
+            <p class="name">{{ interview.jobName }}</p>
+        </div>
+    </div>
+
+    <div class="pros-cons-container">
+        {% if interview.companyBest %}
+            {% for best in interview.companyBest %}
+                <div class="item pros">
+                    <img src="{{ url_for('static', filename='img/thumb.svg') }}" alt="인재상" />
+                    <p>{{ best }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if competencies %}
+            {% for competency in competencies %}
+                <div class="item pros">
+                    <img src="{{ url_for('static', filename='img/thumb.svg') }}" alt="요구 역량" />
+                    <p>{{ competency }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if interview.companyWorst %}
+            <div class="item cons">
+                <img src="{{ url_for('static', filename='img/un_thumb.svg') }}" alt="비추천" />
+                <p>{{ interview.companyWorst }}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
