@@ -130,7 +130,7 @@ async function showCompletionModal() {
 async function loadModalQuestions() {
     const questionListElement = document.getElementById("question-list");
     questionListElement.innerHTML = ""; // 초기화
-    for(let i = 0 ; i < 10 ; ++i) {
+    for(let i = 0 ; i < questions.length ; ++i) {
 
         const questionAnswerItem = document.createElement("div");
         questionAnswerItem.classList.add("uk-margin");
@@ -159,12 +159,12 @@ async function handleConfirmPublic() {
         document.querySelectorAll("#question-list input[type='checkbox']:not(:checked)")
     ).map((checkbox) => parseInt(checkbox.value, 10));
 
-    if (selectedQuestions.length === 0) {
-        alert("선택된 항목이 없습니다.");
-        return;
-    }
-    console.log("s :: " + selectedQuestions[0]);
-    console.log("us :: " + unSelectedQuestions);
+    // if (selectedQuestions.length === 0) {
+    //     alert("선택된 항목이 없습니다.");
+    //     return;
+    // }
+    // console.log("s :: " + selectedQuestions[0]);
+    // console.log("us :: " + unSelectedQuestions);
     try {
         const requestBody = {
         isShareIds: selectedQuestions,

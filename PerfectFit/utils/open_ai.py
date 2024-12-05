@@ -142,7 +142,7 @@ def make_interview_based_on_resume(resume_id: int, level: str,title: str):
         # 5. 트랜잭션 커밋
         get_session().commit()
 
-        return result
+        return interview_id
     except (KeyError, ValidationError) as e:
         get_session().rollback()
         print(f"Error: {e}")
@@ -198,7 +198,7 @@ def make_interview_based_on_job(job_id: int, user_id: int, level: str, title: st
         get_session().commit()
         print("Data successfully inserted into the database!")
 
-        return result
+        return interview_id
     except KeyError as e:
         get_session().rollback()
         print(f"Error: {e}")

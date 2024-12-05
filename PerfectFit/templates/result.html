@@ -63,6 +63,7 @@
 </div>
 
 <script>
+let responseData = {{ response | tojson }}
 document.addEventListener("DOMContentLoaded", () => {
     // {{ response }} 안에 있는 데이터를 JavaScript 객체로 변환
     const response = {{ response|tojson }};
@@ -169,22 +170,24 @@ async function showCompletionModal() {
 async function loadModalQuestions() {
     const questionListElement = document.getElementById("question-list");
     questionListElement.innerHTML = ""; // 초기화
-    for(let i = 0 ; i < 10 ; ++i) {
+    for(let i = 0 ; i < responseData['improvements'].length ; ++i) {
         const questionAnswerItem = document.createElement("div");
-        const responseData = {{ response | tojson }}
         questionAnswerItem.classList.add("uk-margin");
-        console.log( responseData)
 
         questionAnswerItem.innerHTML = `
         <p class="uk-text-bold">Q${i + 1}. ${responseData['improvements'][i]['question']}</p>
         <p class="uk-text-muted">A: ${responseData['improvements'][i]['answer'] || "답변 없음"}</p>
         <label class="uk-checkbox-wrapper" style="display: flex; align-items: center;">
-            <input type="checkbox" name="publish_question" value="${responseData['improvements'][i]['questionId']}" class="uk-checkbox">
+            <input
+                type="checkbox"
+                name="publish_question"
+                value="${responseData['improvements'][i]['questionId']}"
+                class="uk-checkbox"
+                ${responseData['improvements'][i]['isShared'] ? 'checked' : ''} >
             <span style="margin-left: 8px;">공개 여부</span>
         </label>
     `;
 
-        console.log("gogo3")
         questionListElement.appendChild(questionAnswerItem);
     }
 }
@@ -198,10 +201,7 @@ async function handleConfirmPublic() {
         document.querySelectorAll("#question-list input[type='checkbox']:not(:checked)")
     ).map((checkbox) => parseInt(checkbox.value, 10));
 
-    if (selectedQuestions.length === 0) {
-        alert("선택된 항목이 없습니다.");
-        return;
-    }
+
     try {
         const requestBody = {
         isShareIds: selectedQuestions,
@@ -222,6 +222,20 @@ async function handleConfirmPublic() {
         }
 
         alert("공개 여부 수정 성공 ! ");
+
+        for (let i = 0; i < responseData['improvements'].length; i++) {
+            const questionId = responseData['improvements'][i]['questionId'];
+
+            // `isShared` 값을 업데이트
+            if (selectedQuestions.includes(questionId.toString())) {
+                responseData['improvements'][i]['isShared'] = true;
+            } else if (unSelectedQuestions.includes(questionId)) {
+                responseData['improvements'][i]['isShared'] = false;
+            }
+        }
+
+        // UI 업데이트
+        loadModalQuestions();
 
         const modal = document.getElementById("confirmation-modal");
         UIkit.modal(modal).hide();
