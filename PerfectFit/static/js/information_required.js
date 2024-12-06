@@ -52,12 +52,6 @@ function checkInputs() {
     }
 }
 
-async function compare_verification_code() {
-    const verifyCode = document.getElementById('verificationCode').value;
-    const emailTmp = document.getElementById('email').value;
-    const emailDomain = document.getElementById('emailDomain').value;
-    const email = emailTmp + emailDomain;
-
 function disabledDomain() {
     console.log("disabled 실행");
     const emailInput = document.getElementById('email');

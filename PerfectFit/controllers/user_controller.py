@@ -244,7 +244,8 @@ def register_necessary_info():
     # 요청 바디에서 필수 정보 데이터를 추출합니다.
     name = request.form.get("name")
     age = int(request.form.get("age"))
-    email = request.form.get("email") + request.form.get("emailDomain")
+    emaiL_domain = request.form.get("emailDomain") if request.form.get("emailDomain") is not None else ""
+    email = request.form.get("email") + emaiL_domain
     address = request.form.get("address")
     detail_address = request.form.get("detailAddress")
 
