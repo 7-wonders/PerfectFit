@@ -25,4 +25,65 @@ document.addEventListener('DOMContentLoaded', function() {
     formInputs.forEach(input => {
         input.addEventListener('input', checkInputs);
     });
+
+    // 이메일 인증 버튼
+    const emailButton = document.getElementById('emailButton');
+
+    // 이메일 인증 버튼 클릭 시 처리
+    // emailButton.addEventListener('click', async function(event) {
+    //     const emailInput = document.getElementById('email');
+    //     const emailDomainSelect = document.getElementById('emailDomain');
+    //
+    //     const email = emailInput.value + emailDomainSelect.value;
+    //     const verifyCode = generateVerificationCode();
+    //
+    //     // 이메일과 인증 코드를 서버로 전송하는 함수 호출
+    //     await send_verification_code(email, verifyCode);
+    // });
 });
+
+// function generateVerificationCode() {
+//     return Math.floor(1000 + Math.random() * 9000); // 1000에서 9999 사이의 숫자
+// }
+
+async function send_verification_code() {
+    const emailTmp = document.getElementById(`email`).value;
+    const emailDomain = document.getElementById(`emailDomain`).value;
+    const email = emailTmp + emailDomain;
+
+    try {
+        const response = await instance.post('/user/verify/send', JSON.stringify({
+            email: email
+        }));
+        // 응답 성공 시 알림
+        if(response.status === 204) {
+            alert('이메일 인증 코드를 발송했습니다.');
+        }
+    } catch (error) {
+        console.error('Error sending verification code:', error);
+        alert('이메일 전송 중 오류가 발생했습니다.');
+    }
+}
+
+async function compare_verification_code(email) {
+    const verifyCode = document.getElementById(`verificationCode`).value;
+
+    try {
+        const response = await instance.post('/user/verify/compare', JSON.stringify({
+            email: email,
+            verifyCode: verifyCode
+        }));
+        // 응답 성공 시 알림
+        if(response.status === 204) {
+            alert('이메일 인증 성공하였습니다');
+        }
+    } catch (error) {
+        console.error('Error sending verification code:', error);
+        alert('이메일 인증 코드 확인 실패');
+    }
+}
+
+function backButton() {
+    history.back();
+}
+

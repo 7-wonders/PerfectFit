@@ -23,13 +23,20 @@
 }
 
 .uk-input {
+    color: rgba(0, 0, 0, 0.50);
+    font-family: "Noto Sans KR";
     font-size: 16px;
-    border: 1px solid #96C0FF;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border : 1px solid #96C0FF;
+    border-radius: 8px;
 }
 
 .uk-select {
     width: 250px;
     border: 1px solid #96C0FF;
+    border-radius: 8px;
 }
 
 .uk-card {
@@ -42,9 +49,43 @@
 .uk-textarea {
     font-size: 16px;
     border: 1px solid #96C0FF;
+    border-radius: 8px;
 }
 
 .uk-button-small {
     border: 1px solid transparent;
     color: #666;
+}
+
+.add-right-btn-box {
+    display : flex;
+    justify-content: flex-end;
+}
+
+.add-btn {
+    border : none;
+    background: none;
+    cursor : pointer;
+    color: rgba(0, 0, 0, 0.50);
+    font-family: "Noto Sans KR";
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.project {
+    margin : 30px 0;
+}
+
+.uk-margin {
+    margin-bottom : 0 !important;
+}
+
+.uk-button {
+    border-radius: 8px !important;
+}
+
+.date-input {
+    width : 300px;
 }

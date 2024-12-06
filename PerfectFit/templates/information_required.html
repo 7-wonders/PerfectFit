@@ -25,27 +25,27 @@
             <div class="uk-margin">
                 <label class="uk-form-label" for="name">이름</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="name" type="text" placeholder="이름을 입력해주세요.">
+                    <input class="uk-input" name="name" id="name" type="text" placeholder="이름을 입력해주세요.">
                 </div>
             </div>
 
             <div class="uk-margin">
                 <label class="uk-form-label" for="age">나이</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="age" type="text">
+                    <input class="uk-input" name="age" id="age" type="text">
                 </div>
             </div>
 
             <div class="uk-margin">
                 <div class="uk-flex uk-flex-between">
                     <label class="uk-form-label" for="email">이메일</label>
-                    <button class="uk-button uk-button-default uk-button-small">이메일 인증하기</button>
+                    <button class="add-btn" type="button" onclick="send_verification_code()">이메일 인증하기</button>
                 </div>
 
                 <div class="uk-form-controls">
                     <div class="uk-flex uk-flex-between">
-                        <input class="uk-input" id="email" type="text">
-                        <select class="uk-select" aria-label="Select" id="emailDomain">
+                        <input class="uk-input" name="email" id="email" type="text" style="margin-right: 10px">
+                        <select class="uk-select" name="emailDomain" aria-label="Select" id="emailDomain">
                             <option>@naver.com</option>
                             <option>@gmail.com</option>
                             <option>@daum.net</option>
@@ -56,31 +56,35 @@
                         </select>
                     </div>
                 </div>
+
             </div>
 
             <div class="uk-margin">
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="verificationCode" type="text" placeholder="이메일 인증코드 입력">
+                    <input class="uk-input" id="verificationCode" type="text" placeholder="이메일 인증 코드 입력">
+                </div>
+                <div class = "check-right-btn-box">
+                    <button class="add-btn" id="check-btn" type="button" onclick="compare_verification_code()" >인증 코드 확인</button>
                 </div>
             </div>
 
             <div class="uk-margin">
                 <label class="uk-form-label" for="address">주소</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="address" type="text" placeholder="주소 입력">
+                    <input class="uk-input" name="address" id="address" type="text" placeholder="주소 입력">
                 </div>
             </div>
 
             <div class="uk-margin">
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="detailedAddress" type="text" placeholder="상세 주소">
+                    <input class="uk-input" name="detailAddress" id="detailAddress" type="text" placeholder="상세 주소">
                 </div>
             </div>
         </div>
 
         <div class="uk-flex uk-flex-between">
-            <button class="uk-button uk-button-default">이전</button>
-            <button class="uk-button uk-button-default" id="nextButton" type="button" disabled>다음</button>
+            <button class="uk-button uk-button-default" type="button" onclick="backButton()">이전</button>
+            <button class="uk-button uk-button-primary" id="nextButton" type="submit" disabled>다음</button>
         </div>
     </form>
 {% endblock %}
