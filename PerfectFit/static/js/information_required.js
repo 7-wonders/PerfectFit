@@ -7,31 +7,13 @@ document.addEventListener('DOMContentLoaded', function() {
     formInputs.forEach(input => {
         input.addEventListener('input', checkInputs);
     });
-
-    // 이메일 인증 버튼
-    const emailButton = document.getElementById('emailButton');
-
-    // 이메일 인증 버튼 클릭 시 처리
-    // emailButton.addEventListener('click', async function(event) {
-    //     const emailInput = document.getElementById('email');
-    //     const emailDomainSelect = document.getElementById('emailDomain');
-    //
-    //     const email = emailInput.value + emailDomainSelect.value;
-    //     const verifyCode = generateVerificationCode();
-    //
-    //     // 이메일과 인증 코드를 서버로 전송하는 함수 호출
-    //     await send_verification_code(email, verifyCode);
-    // });
 });
-
-// function generateVerificationCode() {
-//     return Math.floor(1000 + Math.random() * 9000); // 1000에서 9999 사이의 숫자
-// }
 
 async function send_verification_code() {
     const emailTmp = document.getElementById(`email`).value;
     const emailDomain = document.getElementById(`emailDomain`).value;
     const email = emailTmp + emailDomain;
+    console.log(email);
 
     try {
         const response = await instance.post('/user/verify/send', JSON.stringify({
@@ -46,6 +28,7 @@ async function send_verification_code() {
         alert('이메일 전송 중 오류가 발생했습니다.');
     }
 }
+
 
 // 입력 필드에서 변화가 있을 때마다 실행되는 함수
 function checkInputs() {
@@ -75,6 +58,29 @@ async function compare_verification_code() {
     const emailDomain = document.getElementById('emailDomain').value;
     const email = emailTmp + emailDomain;
 
+function disabledDomain() {
+    console.log("disabled 실행");
+    const emailInput = document.getElementById('email');
+    const emailDomainSelect = document.getElementById('emailDomain');
+
+    // 이메일 입력 필드의 값이 변경될 때 이벤트 처리
+    emailInput.addEventListener('input', () => {
+        if (emailInput.value.includes('@')) {
+            emailDomainSelect.disabled = true; // 비활성화
+            emailDomainSelect.value = "";
+            document.getElementById(`none-domain`).textContent = "- - -"
+        } else {
+            emailDomainSelect.disabled = false; // 활성화
+            document.getElementById(`none-domain`).textContent = "이메일 주소 선택"
+        }
+    });
+}
+
+async function compare_verification_code() {
+    const verifyCode = document.getElementById(`verificationCode`).value;
+    const emailTmp = document.getElementById(`email`).value;
+    const emailDomain = document.getElementById(`emailDomain`).value;
+    const email = emailTmp + emailDomain;
     try {
         const response = await instance.post('/user/verify/compare', JSON.stringify({
             email: email,
