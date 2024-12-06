@@ -44,15 +44,16 @@
 
                 <div class="uk-form-controls">
                     <div class="uk-flex uk-flex-between">
-                        <input class="uk-input" name="email" id="email" type="text" style="margin-right: 10px">
+                        <input class="uk-input" name="email" id="email" type="text" style="margin-right: 10px" onInput="disabledDomain()">
                         <select class="uk-select" name="emailDomain" aria-label="Select" id="emailDomain">
-                            <option>@naver.com</option>
-                            <option>@gmail.com</option>
-                            <option>@daum.net</option>
-                            <option>@nate.com</option>
-                            <option>@kakao.com</option>
-                            <option>@me.com</option>
-                            <option>@yahoo.com</option>
+                            <option value="" id = "none-domain">이메일 주소 선택</option>
+                            <option value="@naver.com">@naver.com</option>
+                            <option value="@gmail.com">@gmail.com</option>
+                            <option value="@daum.net">@daum.net</option>
+                            <option value="@nate.com">@nate.com</option>
+                            <option value="@kakao.com">@kakao.com</option>
+                            <option value="@me.com">@me.com</option>
+                            <option value="@yahoo.com">@yahoo.com</option>
                         </select>
                     </div>
                 </div>
