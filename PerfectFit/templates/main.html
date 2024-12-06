@@ -46,7 +46,7 @@
                     </div>
                 </a>
 
-                <a href = "#" class = "link-deco">
+                <a href = "/interview/job-select" class = "link-deco">
                     <div>
                         <div class="uk-card uk-card-default uk-card-body function-card">
                             <img src="{{ url_for('static', filename='img/interview.svg') }}" width = "350" height = "250" alt="interview"/>
@@ -56,7 +56,7 @@
                     </div>
                 </a>
 
-                <a href = "#" class = "link-deco">
+                <a href = "/interview/spellcheck" class = "link-deco">
                     <div>
                         <div class="uk-card uk-card-default uk-card-body function-card">
                             <img src="{{ url_for('static', filename='img/spellchecker.svg') }}"  width = "350" height = "250" alt="spell-checker"/>
@@ -78,26 +78,26 @@
             </div>
                 <div class = "resume-tab">
                         <div class="uk-child-width-1-2@s" uk-grid>
-                            {% for i in range(2) %}
+                            {% for resume in response.resumes %}
                             {# 자기소개서 카드 #}
-                                <a href = "http://127.0.0.1:5000/resume/detail/1">
+                                <a href = "/resume/{{ resume.resumeId }}">
                                     <div class="uk-card uk-card-default uk-card-large uk-card-body resume-card">
                                         <div class = "card-title">
-                                            <span class = "card-category">{{ resumeOccupation }}</span>
-                                            <span class = "card-category">{{ resumeJob }}</span>
-                                            <span class = "card-category">{{ resumePersonalHistory }}</span>
-                                            <span class = Medium-22>{{ resumeTitle }}</span>
+                                            <span class = "card-category">{{ resume.occupationName }}</span>
+                                            <span class = "card-category">{{ resume.jobName }}</span>
+                                            <span class = "card-category">{{ resume.level }}</span>
+                                            <span class = Medium-22>{{ resume.title }}</span>
                                         </div>
-                                        <p class = "Medium-18">{{ resumeItem01 }}</p>
-                                        <p class = "resume-card-content">{{ resumeContent01 }}</p>
+                                        <p class = "Medium-18">{{ resume.section.title }}</p>
+                                        <p class = "resume-card-content">{{ resume.section.content }}</p>
                                         <div class = "Engagement">
                                             <div class = "Views">
                                                 <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                                                <span class = "Regular-16-light">{{ resumeViews }}</span>
+                                                <span class = "Regular-16-light">{{ resume.viewCount }}</span>
                                             </div>
                                             <div class = "Likes">
                                                 <span uk-icon="icon: heart; ratio: 1.0;"></span>
-                                                <span class = "Regular-16-light">{{ resumeLikes }}</span>
+                                                <span class = "Regular-16-light">{{ resume.likeCount }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -117,26 +117,26 @@
             {# 모의 면접 카드 탭 #}
             <div class = "interview-tab">
                 <div class="uk-child-width-1-2@s" uk-grid>
-                    {% for i in range(4) %}
+                    {% for interview in response.interviews %}
                     {# 모의 면접 카드 #}
                     <a href = "#">
                         <div class="uk-card uk-card-default uk-card-large uk-card-body interview-card">
                             <div class = "card-title">
-                                <span class = "card-category">{{ interviewOccupation }}</span>
-                                <span class = "card-category">{{ interviewJob }}</span>
-                                <span class = "card-category">{{ interviewPersonalHistory }}</span>
-                                <span class = Medium-22>{{ interviewTitle }}</span>
+                                <span class = "card-category">{{ interview.OccupationName }}</span>
+                                <span class = "card-category">{{ interview.jobName }}</span>
+                                <span class = "card-category">{{ interview.level }}</span>
+                                <span class = Medium-22>{{ interview.title }}</span>
                             </div>
-                            <p class = "Medium-18">{{ interviewQuestion01 }}</p>
-                            <p class = "interview-card-content">{{ interviewAnswer01 }}</p>
+                            <p class = "Medium-18">{{ interview.section.title }}</p>
+                            <p class = "interview-card-content">{{ interview.section.answer }}</p>
                             <div class = "Engagement">
                                 <div>
                                     <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                                    <span class = "Regular-16-light">{{ interviewViews }}</span>
+                                    <span class = "Regular-16-light">{{ interview.viewCount }}</span>
                                 </div>
                                 <div>
                                     <span uk-icon="icon: heart; ratio: 1.0;"></span>
-                                    <span class = "Regular-16-light">{{ interviewLikes }}</span>
+                                    <span class = "Regular-16-light">{{ interview.likeCount }}</span>
                                 </div>
                             </div>
                         </div>
