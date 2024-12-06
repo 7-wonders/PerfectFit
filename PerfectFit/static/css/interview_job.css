@@ -1,0 +1,33 @@
+.container {
+    max-width: 1440px;
+    margin: 0 auto;
+
+    .accordion {
+        .occupation {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .total {
+            font-size: 0.825rem;
+        }
+
+        .uk-accordion-title {
+            padding: 20px 30px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            background-color: #E6F0FF;
+        }
+
+        .accordion-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 80px;
+            margin: 0 !important;
+            padding: 20px 30px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            background-color: #E6F0FF;
+        }
+    }
+}
