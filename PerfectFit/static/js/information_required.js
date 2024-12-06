@@ -1,25 +1,7 @@
+let emailSuccess = false;
+
 document.addEventListener('DOMContentLoaded', function() {
-    const nextButton = document.getElementById('nextButton');
     const formInputs = document.querySelectorAll('#informationForm input');
-
-    // 입력 필드에서 변화가 있을 때마다 실행되는 함수
-    function checkInputs() {
-        let allFilled = true;
-
-        // 각 입력 필드에서 값이 비어있는지 확인
-        formInputs.forEach(input => {
-            if (input.value.trim() === '') {
-                allFilled = false;
-            }
-        });
-
-        // 모든 입력이 채워지면 "다음" 버튼 활성화
-        if (allFilled) {
-            nextButton.disabled = false;
-        } else {
-            nextButton.disabled = true;
-        }
-    }
 
     // 각 입력 필드에 이벤트 리스너 추가 (입력값 변화 시마다 checkInputs 함수 실행)
     formInputs.forEach(input => {
@@ -57,7 +39,7 @@ async function send_verification_code() {
         }));
         // 응답 성공 시 알림
         if(response.status === 204) {
-            alert('이메일 인증 코드를 발송했습니다.');
+            alert('이메일 인증 성공하였습니다');
         }
     } catch (error) {
         console.error('Error sending verification code:', error);
@@ -65,8 +47,33 @@ async function send_verification_code() {
     }
 }
 
-async function compare_verification_code(email) {
-    const verifyCode = document.getElementById(`verificationCode`).value;
+// 입력 필드에서 변화가 있을 때마다 실행되는 함수
+function checkInputs() {
+    let allFilled = true;
+    const nextButton = document.getElementById('nextButton');
+    const formInputs = document.querySelectorAll('#informationForm input');
+
+
+    // 각 입력 필드에서 값이 비어있는지 확인
+    formInputs.forEach(input => {
+        if (input.value.trim() === '') {
+            allFilled = false;
+        }
+    });
+
+    // 모든 입력이 채워지면 "다음" 버튼 활성화
+    if (allFilled && emailSuccess) {
+        nextButton.disabled = false;
+    } else {
+        nextButton.disabled = true;
+    }
+}
+
+async function compare_verification_code() {
+    const verifyCode = document.getElementById('verificationCode').value;
+    const emailTmp = document.getElementById('email').value;
+    const emailDomain = document.getElementById('emailDomain').value;
+    const email = emailTmp + emailDomain;
 
     try {
         const response = await instance.post('/user/verify/compare', JSON.stringify({
@@ -76,6 +83,8 @@ async function compare_verification_code(email) {
         // 응답 성공 시 알림
         if(response.status === 204) {
             alert('이메일 인증 성공하였습니다');
+            emailSuccess = true;
+            checkInputs()
         }
     } catch (error) {
         console.error('Error sending verification code:', error);
