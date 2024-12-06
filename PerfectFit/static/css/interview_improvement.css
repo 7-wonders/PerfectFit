@@ -76,6 +76,11 @@ body {
                 top: -2px;
             }
 
+            & > img {
+                width: 23px;
+                height: 23px;
+            }
+
             &:not(:first-child) {
                 cursor: pointer;
             }

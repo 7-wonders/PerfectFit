@@ -43,6 +43,10 @@ const titleClickHandler = () => {
     const titleInputEle = document.querySelector('#change-input');
     const titleSaveBtnEle = document.querySelector('#change-btn');
 
+    if (!titleEle || !titleBtnEle || !titleInputEle || !titleSaveBtnEle) {
+        return;
+    }
+
     const showHandler = () => {
         titleInputEle.value = titleEle.innerHTML;
 
@@ -95,7 +99,82 @@ const titleClickHandler = () => {
     titleSaveBtnEle.addEventListener('click', saveHandler);
 };
 
+const fetchAddLike = async () => {
+    const response = await instance.post(`/interview/${interviewId}/like`);
+
+    if (response.status !== 204) {
+        alert('좋아요 추가에 실패했습니다.');
+    }
+};
+
+const fetchRemoveLike = async () => {
+    const response = await instance.delete(`/interview/${interviewId}/like`);
+
+    if (response.status !== 204) {
+        alert('좋아요 삭제에 실패했습니다.');
+    }
+};
+
+const likeHandler = () => {
+    const likeBtnEle = document.querySelector('#like-btn');
+    const likeIconELe = document.querySelector('#like-icon');
+    const likeCountEle = document.querySelector('#like-count');
+
+    if (!likeBtnEle) {
+        return;
+    }
+
+    const clickHandler = async () => {
+        try {
+            if (!isLike) {
+                likeBtnEle.classList.add('active');
+                await fetchAddLike();
+                likeCountEle.innerHTML = parseInt(likeCountEle.innerHTML) + 1;
+                likeIconELe.setAttribute('src', '/static/img/like_active.svg');
+            } else {
+                likeBtnEle.classList.remove('active');
+                await fetchRemoveLike();
+                likeCountEle.innerHTML = parseInt(likeCountEle.innerHTML) - 1;
+                likeIconELe.setAttribute('src', '/static/img/like.svg');
+            }
+
+            isLike = !isLike;
+        } catch (error) {
+            console.error(error);
+            alert('좋아요 처리에 실패했습니다.');
+        }
+    };
+
+    likeBtnEle.addEventListener('click', clickHandler);
+};
+
+const deleteHandler = async () => {
+    const deleteBtnEle = document.querySelector('#delete-btn');
+    if (!deleteBtnEle) {
+        return;
+    }
+
+    const fetchDelete = async () => {
+        const response = await instance.delete(`/interview/${interviewId}`);
+
+        if (response.status !== 204) {
+            alert('삭제에 실패했습니다.');
+            return;
+        }
+
+        location.replace('/interview/list');
+    };
+
+    deleteBtnEle.addEventListener('click', async () => {
+        if (confirm('정말 삭제하시겠습니까?')) {
+            await fetchDelete();
+        }
+    });
+};
+
 window.addEventListener('load', () => {
     improvementClickHandler();
     titleClickHandler();
+    likeHandler();
+    deleteHandler();
 });
