@@ -238,15 +238,15 @@ def create_requirements():
 @user_bp.route('/user/necessary', methods=['POST'])
 def register_necessary_info():
     # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
-    user_id = request.headers.get("user_id")
+    # user_id = request.headers.get("user_id")
+    user_id = 5
 
     # 요청 바디에서 필수 정보 데이터를 추출합니다.
-    data = request.get_json()
-    name = data.get("name")
-    age = data.get("age")
-    email = data.get("email")
-    address = data.get("address")
-    detail_address = data.get("detailAddress")
+    name = request.form.get("name")
+    age = int(request.form.get("age"))
+    email = request.form.get("email") + request.form.get("emailDomain")
+    address = request.form.get("address")
+    detail_address = request.form.get("detailAddress")
 
     # 필수 필드 유효성 검사를 수행합니다.
     if not all([name, age, email, address]):
@@ -257,7 +257,7 @@ def register_necessary_info():
     NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
 
     # 응답: 성공 시 204 No Content를 반환
-    return Response(status=204)
+    return redirect(f"/user/test/selected")
 
 
 @user_bp.route('/user/optional', methods=['POST'])
@@ -317,7 +317,7 @@ def send_verification_code():
     # 요청 바디에서 이메일 주소를 추출합니다.
     data = request.get_json()
     email = data.get("email")
-
+    print(email)
     # 필수 값 확인
     if not email:
         return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
@@ -431,3 +431,9 @@ def logout():
 # def get_mypage_information():
 #     return render_template("mypage_information.html", active_page = 'information')
 
+@user_bp.route('/user/test/required')
+def get_mypage_information():
+    return render_template("information_required.html")
+@user_bp.route('/user/test/selected')
+def get_mypage_selected():
+    return render_template("information_selected.html")
