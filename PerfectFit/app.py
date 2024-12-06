@@ -12,6 +12,7 @@ from controllers.resume_controller import resume_bp
 from controllers.user_controller import user_bp
 from controllers.auth_controller import auth_bp
 from exception.exception_handler import eh_bp
+from controllers.main_controller import main_bp
 from middlewares.auth_middleware import authenticate_request
 from utils.jwt_factory import JWTFactory
 
@@ -24,6 +25,7 @@ app.config.from_object(Config)  # config.py의 Config 클래스를 사용
 app.register_blueprint(eh_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(job_bp)
+app.register_blueprint(main_bp)
 app.register_blueprint(interview_bp, url_prefix='/interview')
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(resume_bp, url_prefix="/resume")
@@ -41,10 +43,10 @@ JWTFactory().initialize_pool()
 def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-@app.route('/')
-def index():
-
-    return render_template("main.html")
+# @app.route('/')
+# def index():
+#
+#     return render_template("main.html")
 
 
 if __name__ == '__main__':
