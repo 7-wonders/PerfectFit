@@ -120,9 +120,6 @@ def post_like(interview_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
-
-    data = request.get_json()
-
     InterviewService.post_like(interview_id,user_id)
 
     return Response("", status=204)
@@ -132,9 +129,6 @@ def post_like(interview_id: int):
 def delete_like(interview_id: int):
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-
-
-    data = request.get_json()
 
     InterviewService.delete_like(interview_id,user_id)
     return Response("", status=204)
@@ -146,7 +140,7 @@ def delete_interview(interview_id: int):
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
 
     InterviewService.delete_interview(interview_id, user_id)
-    return redirect(f"/interview/list")
+    return Response("", status=204)
 
 
 @interview_bp.route('/', methods=['POST'])

@@ -10,6 +10,7 @@
     <script>
         const interviewId = {{ response.interviewId }};
         const improvements = {{ response.improvements | tojson }};
+        let isLike = {{ response.isLike | tojson | default(false) }};
 
         if (improvements.length <= 0) {
             alert('공개되지 않은 개선 사항입니다.');
@@ -24,9 +25,11 @@
         <div class="top-box">
             <div class="title-box">
                 <h3 class="title">{{ response.title }}</h3>
-                <img src="{{ url_for('static', filename='img/pencil.svg') }}" alt="수정" id="edit-title" />
-                <input class="uk-input change-input none" type="text" id="change-input" />
-                <button class="title-btn none" id="change-btn">변경</button>
+                {% if response.isMine %}
+                    <img src="{{ url_for('static', filename='img/pencil.svg') }}" alt="수정" id="edit-title" />
+                    <input class="uk-input change-input none" type="text" id="change-input" />
+                    <button class="title-btn none" id="change-btn">변경</button>
+                {% endif %}
             </div>
             <div class="func-box">
                 <div class="func-item">
@@ -34,17 +37,25 @@
                     <span>{{ response.viewCount | default(0) }}</span>
                 </div>
                 <div class="func-item" id="like-btn">
-                    <img src="{{ url_for('static', filename='img/like.svg') }}" alt="좋아요" />
-                    <span>{{ response.likeCount | default(0) }}</span>
+                    <img
+                        {% if response.isLike %}src="{{ url_for('static', filename='img/like_active.svg') }}"
+                        {% else %}src="{{ url_for('static', filename='img/like.svg') }}"
+                        {% endif %}
+                        alt="좋아요"
+                        id="like-icon"
+                    />
+                    <span id="like-count" class="likeCountEle">{{ response.likeCount | default(0) }}</span>
                 </div>
-                <div class="func-item" id="public-btn" uk-toggle="target: #modal">
-                    <img src="{{ url_for('static', filename='img/public.svg') }}" alt="공개" />
-                    <span>공개</span>
-                </div>
-                <div class="func-item delete" id="delete-btn">
-                    <img src="{{ url_for('static', filename='img/delete.svg') }}" alt="삭제" />
-                    <span>삭제</span>
-                </div>
+                {% if response.isMine %}
+                    <div class="func-item" id="public-btn" uk-toggle="target: #modal">
+                        <img src="{{ url_for('static', filename='img/public.svg') }}" alt="공개" />
+                        <span>공개</span>
+                    </div>
+                    <div class="func-item delete" id="delete-btn">
+                        <img src="{{ url_for('static', filename='img/delete.svg') }}" alt="삭제" />
+                        <span>삭제</span>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <div class="result-box">
