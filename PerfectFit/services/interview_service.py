@@ -501,20 +501,21 @@ class InterviewService:
             like_count = session.query(InterviewLike).filter_by(interview_id=interview_id).count()
 
             return improvementList, is_mine, is_like, view_count, like_count
+
     @staticmethod
     def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any :
-        with (get_session() as session) :
+        with get_session() as session:
             interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
             questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
             improvementList = []
 
-            if not questions :
+            if not questions:
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
             for question in questions:
                 improvement = session.query(InterviewImprovement).filter(InterviewImprovement.question_id == question.question_id).order_by(desc(InterviewImprovement.created_time)).first()
 
-                if improvement :
+                if improvement:
                     if (improvement.question.interview.user_id == user_id) or \
                         (improvement.question.interview.user_id != user_id and \
                          improvement.question.is_shared == True) :
@@ -533,6 +534,7 @@ class InterviewService:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
                 session.add(new_view)
                 session.commit()
+
             is_mine = improvement.question.interview.user_id == user_id
             like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
             is_like = False if like is None else True
@@ -540,18 +542,19 @@ class InterviewService:
             view_count = session.query(InterviewView).filter_by(interview_id=interview_id).count()
             like_count = session.query(InterviewLike).filter_by(interview_id=interview_id).count()
 
-
             return improvementList, is_mine, is_like, view_count, like_count
+
     @staticmethod
     def get_interview_title(question_id: int, interview_id: int):
-        with get_session() as session :
-            if interview_id is None :
+        with get_session() as session:
+            if interview_id is None:
                 question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
                 interview = session.query(Interview).filter_by(interview_id=question.interview_id).first()
                 return interview.title, question.interview_id
-            else :
+            else:
                 interview = session.query(Interview).filter_by(interview_id=interview_id).first()
                 return interview.title, interview.interview_id
+
     @staticmethod
     def get_question_is_shared(question_id: int):
         with get_session() as session :
@@ -584,7 +587,7 @@ class InterviewService:
 
     @staticmethod
     def delete_interview(interview_id: int, user_id: int) -> None:
-        with get_session() as session :
+        with get_session() as session:
             interview = session.query(Interview).filter_by(interview_id=interview_id).first()
 
             if interview is None:
@@ -593,7 +596,22 @@ class InterviewService:
             if interview.user_id != user_id:
                 raise CustomException(ExceptionType.FORBIDDEN_INTERVIEW)
 
+            session.query(InterviewImprovement).filter(
+                InterviewImprovement.question_id.in_(
+                    session.query(InterviewQuestion.question_id).filter_by(interview_id=interview_id)
+                )
+            ).delete(synchronize_session=False)
+            session.query(InterviewAnswer).filter(
+                InterviewAnswer.question_id.in_(
+                    session.query(InterviewQuestion.question_id).filter_by(interview_id=interview_id)
+                )
+            ).delete(synchronize_session=False)
+            session.query(InterviewQuestion).filter_by(interview_id=interview_id).delete(synchronize_session=False)
+            session.query(InterviewView).filter_by(interview_id=interview_id).delete()
+            session.query(InterviewLike).filter_by(interview_id=interview_id).delete()
+
             session.delete(interview)
+
             session.commit()
 
     @staticmethod
