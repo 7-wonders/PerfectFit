@@ -1,57 +1,61 @@
+{#{% set response = {#}
+{#    "user": {#}
+{#        "userId": 1,#}
+{#        "username": "홍길동",#}
+{#        "profilePath": url_for('static', filename='img/logo.svg')#}
+{#    },#}
+{#    "resumes": [#}
+{#        {#}
+{#            "resumeId": 1,#}
+{#            "title": "웹 개발자 자기소개서",#}
+{#            "viewCount": 15,#}
+{#            "likeCount": 3,#}
+{#            "isPublic": True,#}
+{#            "occupation": {#}
+{#                "occupationId": 101,#}
+{#                "occupationName": "웹 개발"#}
+{#            },#}
+{#            "job": "프론트엔드 개발자",#}
+{#            "level": "경력",#}
+{#            "createdTime": "2024-10-10"#}
+{#        },#}
+{#        {#}
+{#            "resumeId": 2,#}
+{#            "title": "백엔드 개발자 자기소개서",#}
+{#            "viewCount": 20,#}
+{#            "likeCount": 5,#}
+{#            "isPublic": false,#}
+{#            "occupation": {#}
+{#                "occupationId": 102,#}
+{#                "occupationName": "백엔드 개발"#}
+{#            },#}
+{#            "job": "백엔드 개발자",#}
+{#            "level": "신입",#}
+{#            "createdTime": "2024-11-01"#}
+{#        },#}
+{#        {#}
+{#            "resumeId": 3,#}
+{#            "title": "풀스택 개발자 자기소개서",#}
+{#            "viewCount": 30,#}
+{#            "likeCount": 8,#}
+{#            "isPublic": True,#}
+{#            "occupation": {#}
+{#                "occupationId": 103,#}
+{#                "occupationName": "풀스택 개발"#}
+{#            },#}
+{#            "job": "풀스택 개발자",#}
+{#            "level": "경력",#}
+{#            "createdTime": "2024-09-15"#}
+{#        }#}
+{#    ],#}
+{#    "total": 3#}
+{#} %}#}
 
-{% set response = {
-    "user": {
-        "userId": 1,
-        "username": "홍길동",
-        "profilePath": url_for('static', filename='img/logo.svg')
-    },
-    "resumes": [
-        {
-            "resumeId": 1,
-            "title": "웹 개발자 자기소개서",
-            "viewCount": 15,
-            "likeCount": 3,
-            "isPublic": True,
-            "occupation": {
-                "occupationId": 101,
-                "occupationName": "웹 개발"
-            },
-            "job": "프론트엔드 개발자",
-            "level": "경력",
-            "createdTime": "2024-10-10"
-        },
-        {
-            "resumeId": 2,
-            "title": "백엔드 개발자 자기소개서",
-            "viewCount": 20,
-            "likeCount": 5,
-            "isPublic": false,
-            "occupation": {
-                "occupationId": 102,
-                "occupationName": "백엔드 개발"
-            },
-            "job": "백엔드 개발자",
-            "level": "신입",
-            "createdTime": "2024-11-01"
-        },
-        {
-            "resumeId": 3,
-            "title": "풀스택 개발자 자기소개서",
-            "viewCount": 30,
-            "likeCount": 8,
-            "isPublic": True,
-            "occupation": {
-                "occupationId": 103,
-                "occupationName": "풀스택 개발"
-            },
-            "job": "풀스택 개발자",
-            "level": "경력",
-            "createdTime": "2024-09-15"
-        }
-    ],
-    "total": 3
-} %}
-
+{% set page = request.args.get('page', 1) | default(1) | int %}
+{% set pageRange = 5 %}
+{% set totalPages = ( response.total + pageRange - 1) // pageRange %}
+{% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
+{% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
 {% block Content %}
 {% include 'components/mypage.html' %}
     <div class = "container">
@@ -63,7 +67,7 @@
                         <span class = "title-category">{{ resume.occupation.occupationName }} |</span>
                         <span class = "title-category">{{ resume.job }} |</span>
                         <span class = "title-category">{{ resume.level }}</span>
-                        <a href = "#" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
+                        <a href = "/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
                     </div>
                     <p class="Regular-16">공개 여부 : {{ '공개' if resume.isPublic else '비공개' }}</p>
                 </div>
@@ -86,6 +90,42 @@
                <hr>
            {% endif %}
         {% endfor %}
+        {# 페이지네이션 #}
+        <nav aria-label="Pagination">
+            <ul class="uk-pagination uk-flex-center" uk-margin>
+                {# Previous 버튼 렌더링 조건 #}
+                {% if startPage > 1 %}
+                    <li>
+                        <a href="/resume?page={{ startPage - 1 }}&count=5"
+                                class="Regular-20-light">
+                            <span class="Regular-20-light" uk-pagination-previous></span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {# 페이지 번호 생성 #}
+                {% for pageNum in range(startPage, endPage + 1) %}
+                    <li class="{% if pageNum == page %}uk-active{% endif %}">
+                        {% if pageNum == page %}
+                            <span class="Regular-20-light" aria-current="page" style = "color : #175FE6">{{ pageNum }}</span>
+                        {% else %}
+                           <a href="/user/mypage/resume?page={{ pageNum }}&count=5"
+                                class="Regular-20-light">{{ pageNum }}
+                           </a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+
+                {# Next 버튼 렌더링 조건 #}
+                {% if endPage < totalPages %}
+                    <li>
+                        <a href="/resume?page={{ endPage + 1 }}&count=5"
+                                class="Regular-20-light">
+                            <span class="Regular-20-light" uk-pagination-next></span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+       </nav>
     </div>
 {% endblock %}
-

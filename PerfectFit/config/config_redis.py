@@ -88,6 +88,10 @@ class Redis:
         """Redis에 데이터를 저장하며 TTL 설정"""
         self._redis_instance.setex(key, 60, value)
 
+    def save_verify(self, key: str, value: str):
+        """Redis에 데이터를 저장하며 TTL 설정"""
+        self._redis_instance.setex(key, 300, value)
+
     def get(self, key: str):
         """Redis에서 데이터를 가져오기"""
         return self._redis_instance.get(key)

@@ -1,0 +1,91 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+{% include 'components/footer.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/information_required.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/information_required.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <form class="uk-form-stacked uk-center" id="informationForm" action="/user/necessary" method="post">
+        <div class="container">
+
+            <div class="uk-margin">
+                <article class="uk-article">
+                    <h1 class="uk-article-title"><a class="uk-link-reset" href="">필수 정보</a></h1>
+                    <p class="uk-article-meta">원하는 서비스를 위해 정보를 입력해주세요.</p>
+                </article>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="name">이름</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" name="name" id="name" type="text" placeholder="이름을 입력해주세요.">
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="age">나이</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" name="age" id="age" type="text">
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <div class="uk-flex uk-flex-between">
+                    <label class="uk-form-label" for="email">이메일</label>
+                    <button class="add-btn" type="button" onclick="send_verification_code()">이메일 인증하기</button>
+                </div>
+
+                <div class="uk-form-controls">
+                    <div class="uk-flex uk-flex-between">
+                        <input class="uk-input" name="email" id="email" type="text" style="margin-right: 10px" onInput="disabledDomain()">
+                        <select class="uk-select" name="emailDomain" aria-label="Select" id="emailDomain">
+                            <option value="" id = "none-domain">이메일 주소 선택</option>
+                            <option value="@naver.com">@naver.com</option>
+                            <option value="@gmail.com">@gmail.com</option>
+                            <option value="@daum.net">@daum.net</option>
+                            <option value="@nate.com">@nate.com</option>
+                            <option value="@kakao.com">@kakao.com</option>
+                            <option value="@me.com">@me.com</option>
+                            <option value="@yahoo.com">@yahoo.com</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="uk-margin">
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="verificationCode" type="text" placeholder="이메일 인증 코드 입력">
+                </div>
+                <div class = "check-right-btn-box">
+                    <button class="add-btn" id="check-btn" type="button" onclick="compare_verification_code()" >인증 코드 확인</button>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="address">주소</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" name="address" id="address" type="text" placeholder="주소 입력">
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <div class="uk-form-controls">
+                    <input class="uk-input" name="detailAddress" id="detailAddress" type="text" placeholder="상세 주소">
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-flex uk-flex-between">
+            <button class="uk-button uk-button-default" type="button" onclick="backButton()">이전</button>
+            <button class="uk-button uk-button-primary" id="nextButton" type="submit" disabled>다음</button>
+        </div>
+    </form>
+{% endblock %}
