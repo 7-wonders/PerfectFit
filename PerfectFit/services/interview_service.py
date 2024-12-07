@@ -503,38 +503,40 @@ class InterviewService:
             return improvementList, is_mine, is_like, view_count, like_count
 
     @staticmethod
-    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any :
-        with get_session() as session:
-            interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
-            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
+    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any:
+        with (get_session() as session):
+            interview: Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
+            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(
+                InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(
+                10).all()
             improvementList = []
 
             if not questions:
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
             for question in questions:
-                improvement = session.query(InterviewImprovement).filter(InterviewImprovement.question_id == question.question_id).order_by(desc(InterviewImprovement.created_time)).first()
+                improvement = session.query(InterviewImprovement).filter(
+                    InterviewImprovement.question_id == question.question_id).order_by(
+                    desc(InterviewImprovement.created_time)).first()
 
                 if improvement:
                     if (improvement.question.interview.user_id == user_id) or \
-                        (improvement.question.interview.user_id != user_id and \
-                         improvement.question.is_shared == True) :
+                            (improvement.question.interview.user_id != user_id and improvement.question.is_shared == True):
                         improvementDto = InterviewDto.Response.Improvement(
-                            improvementId = improvement.improvement_id,
-                            questionId = question.question_id,
-                            question = question.question,
-                            answer = improvement.answer,
-                            improvement = improvement.improvement,
-                            translatedAnswer = improvement.translated_answer)
+                            improvementId=improvement.improvement_id,
+                            questionId=question.question_id,
+                            question=question.question,
+                            answer=improvement.answer,
+                            improvement=improvement.improvement,
+                            translatedAnswer=improvement.translated_answer)
                         improvementList.append(improvementDto)
 
             view = session.query(InterviewView).filter_by(interview_id=interview_id, user_id=user_id).first()
-            
+
             if view is None:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
                 session.add(new_view)
                 session.commit()
-
             is_mine = improvement.question.interview.user_id == user_id
             like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
             is_like = False if like is None else True
@@ -630,40 +632,3 @@ class InterviewService:
             return result.checked
         except Exception as e:
             print("Error occurred:", e)
-
-    @staticmethod
-    def get_interviews(user_id: int, page: int, count: int) -> tuple[list[InterviewDto.Response.InterviewSummary], int]:
-        session = get_session()
-
-        # 면접 데이터를 가져오는 쿼리 정의
-        interviews_query = session.query(Interview).filter(Interview.user_id == user_id)
-        total = interviews_query.count()
-
-        interviews = (
-            interviews_query.order_by(Interview.created_time.desc())
-            .offset((page - 1) * count)
-            .limit(count)
-            .all()
-        )
-
-        # 조회수 및 좋아요 수 계산
-        interview_summaries = []
-        for interview in interviews:
-            view_count = session.query(func.sum(ResumeView.view_count)).filter(
-                ResumeView.resume_id == interview.interview_id
-            ).scalar() or 0
-
-            like_count = session.query(func.sum(ResumeLike.like_count)).filter(
-                ResumeLike.resume_id == interview.interview_id
-            ).scalar() or 0
-
-            summary = InterviewDto.Response.InterviewSummary(
-                interview_id=interview.interview_id,
-                title=interview.title,
-                created_time=interview.created_time,
-                view_count=view_count,
-                like_count=like_count,
-            )
-            interview_summaries.append(summary)
-
-        return interview_summaries, total

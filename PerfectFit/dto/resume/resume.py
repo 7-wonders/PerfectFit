@@ -161,14 +161,16 @@ class ResumeDto:
 
         @dataclass
         class MyResumeInfo:
-            resume_id: int
+            resumeId: int
             title: str
-            view_count: int
-            like_count: int
-            occupation: 'OccupationDto.Response.Occupation'
-            job: str
+            viewCount: int
+            likeCount: int
+            isLike: bool
+            occupationName: str
+            jobName: str
             level: str
-            created_time: datetime
+            isPublic: bool
+            createdTime: datetime
 
         @dataclass
         class MyResume:

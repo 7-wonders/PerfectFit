@@ -51,66 +51,8 @@ def get_user(user_id: int):
 
 @user_bp.route('/user/mypage/information')
 def get_info():
-    # try:
-    #     # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
-    #     access_token = request.cookies.get('access_token')
-    #     jwt_factory = JWTFactory()
-    #     user_id = jwt_factory.verify_access_token(access_token)
-    # except ValueError as e:
-    #     return Response(
-    #         json.dumps({"error": str(e)}),
-    #         status=401,
-    #         content_type='application/json; charset=utf-8'
-    #     )
-    user = UserService.get_user()
-
-    response = (
-        UserDto.Response.DetailedUser(
-        user=[
-            UserDto.Response.UserDetail(
-                user_id=user.user_id,
-                username=user.username,
-                age=user.age,
-                major=user.major,
-                university=user.university,
-                university_status=user.university_status,
-                grade=user.grade,
-                address=user.address,
-                detail_address=user.detail_address,
-                email=user.email,
-                phone_number=user.phone_number,
-                profile_path=user.profile_path)
-        ],
-        work_experiences=[
-            WorkExperienceDTO.Response.WorkExperience(
-                work_experience_id=exp.work_experience_id,
-                from_date=exp.from_date,
-                to_date=exp.to_date,
-                company_name=exp.company_name,
-                position=exp.position,
-                responsibility=exp.responsibility
-            )
-            for exp in user.work_experiences
-        ],
-        project_experiences=[
-            PexDTO.Response.ProjectExperience(
-                project_experience_id=proj.project_experience_id,
-                project_name=proj.project_name,
-                from_date=proj.from_date,
-                to_date=proj.to_date,
-                contents=[
-                    PexDTO.Response.ProjectExperienceContent(
-                        project_experience_task_id=task.project_experience_task_id,
-                        content=task.content
-                    )
-                    for task in proj.contents
-                ]
-            )
-            for proj in user.project_experiences
-        ]
-    ))
-
-    return render_template("mypage_information.html", response = asdict(response))
+    response = UserService.get_information()
+    return render_template("mypage_information.html", response=response)
 
 
 @user_bp.route('/user/profile')
@@ -132,68 +74,16 @@ def get_profile():
 def get_resumes():
     page, count = get_pagination_params()
 
-    # get_user 하지말고 get_user with resumes 메소드를 만들어서 컨트롤러에 대응하는 서비스 만들고. user랑 resumes를 join시켰습니다
-    user, resumes, total = UserService.get_user_with_resumes(page, count)
-
-    # DTO를 사용하여 응답 생성
-    response = ResumeDto.Response.MyResume(
-        user=UserDto.Response.IntroUserWithProfile(
-            userId=user.user_id,
-            username=user.username,
-            profilePath=user.profile_path
-        ),
-        resumes=[
-            ResumeDto.Response.MyResumeInfo(
-                resume_id=resume.resume_id,
-                title=resume.title,
-                # 컬럼에 view_count, like_count가 없어서 주석처리했습니다.
-                # 직접 DB COUNT 해서 가져와야 합니다.
-                # view_count=resume.view_count,
-                # like_count=resume.like_count,
-                view_count=1,
-                like_count=1,
-                occupation=OccupationDto.Response.Occupation(
-                    # occupation 테이블을 통해서 가져와야 합니다.
-                    # occupationId=resume.occupation_id,
-                    # occupationName=resume.occupation_name
-                    occupationId=1,
-                    occupationName="Software Engineer"
-                ),
-                job=resume.job,
-                level=resume.level,
-                created_time=resume.created_time
-            )
-            for resume in resumes
-        ],
-        total=total
-    )
-
-    return render_template("mypage_resume.html", response = response)
+    response = UserService.get_user_with_resumes(page, count)
+    return render_template("mypage_resume.html", response=response)
 
 
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
-    user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
+    response = UserService.get_my_interviews(page, count)
 
-    # 사용자 및 인터뷰 데이터 조회
-    user = UserService.get_user(user_id)
-    interviews, total = InterviewService.get_interviews(user_id, page, count)
-
-    # DTO를 사용하여 응답 생성
-    response = InterviewDto.Response.IsPublicList(
-        interviews=[
-            InterviewDto.Response.IsPublicInterview(
-                questionId=interview.question_id,
-                title=interview.title,
-                answer=interview.answer,
-                isPublic=interview.is_public
-            )
-            for interview in interviews
-        ]
-    )
-
-    return render_template("mypage_interview.html", response = response)
+    return render_template("mypage_interview.html", response=response)
 
 
 @user_bp.route('/user/requirements', methods=['POST'])
@@ -237,9 +127,7 @@ def create_requirements():
 
 @user_bp.route('/user/necessary', methods=['POST'])
 def register_necessary_info():
-    # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
-    # user_id = request.headers.get("user_id")
-    user_id = 5
+    user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
 
     # 요청 바디에서 필수 정보 데이터를 추출합니다.
     name = request.form.get("name")
