@@ -175,9 +175,9 @@ def get_interviews():
     interviews, total = InterviewService.get_interviews(user_id, page, count)
 
     # DTO를 사용하여 응답 생성
-    response = InterviewDto.Response.isPublicList(
+    response = InterviewDto.Response.IsPublicList(
         interviews=[
-            InterviewDto.Response.isPublicInterview(
+            InterviewDto.Response.IsPublicInterview(
                 questionId=interview.question_id,
                 title=interview.title,
                 answer=interview.answer,

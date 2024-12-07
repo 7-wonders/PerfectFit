@@ -8,5 +8,6 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
-    response: list[MainDto.Response.Population] = MainService.get_population_by_data()
+    resume_response, interview_response = MainService.get_population_by_data()
+    response = MainDto.Response.MainPopulation(resume_response, interview_response)
     return render_template('main.html', response=response)

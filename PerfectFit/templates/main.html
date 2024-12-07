@@ -7,24 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
 {% endblock %}
 
-{% set resumeViews = 32 %}
-{% set resumeLikes = 126 %}
-{% set resumeTitle = "자기소개서 제목" %}
-{% set resumeContent01 = "항목1 내용" %}
-{% set resumeItem01 = "항목1 제목" %}
-{% set resumeOccupation = "직군 |" %}
-{% set resumeJob = "직업 |" %}
-{% set resumePersonalHistory = "경력" %}
-{% set interviewTitle = "모의면접 제목" %}
-{% set interviewOccupation = "직군 |" %}
-{% set interviewJob = "직업 |" %}
-{% set interviewPersonalHistory = "경력" %}
-{% set interviewQuestion01 = "Q1. 질문 내용" %}
-{% set interviewAnswer01 = "A1. 답변 내용" %}
-{% set interviewViews = 110 %}
-{% set interviewLikes = 134 %}
-
-
 {% block content %}
     <div class = "container">
         <img src="{{ url_for('static', filename='img/banner.svg') }}" alt="banner"/>
@@ -83,8 +65,9 @@
                                 <a href = "/resume/{{ resume.resumeId }}">
                                     <div class="uk-card uk-card-default uk-card-large uk-card-body resume-card">
                                         <div class = "card-title">
-                                            <span class = "card-category">{{ resume.occupationName }}</span>
-                                            <span class = "card-category">{{ resume.jobName }}</span>
+                                            <span class = "card-category">{{ resume.occupationName }} |</span>
+                                            <span class = "card-category">{{ resume.jobName }} |</span>
+
                                             <span class = "card-category">{{ resume.level }}</span>
                                             <span class = Medium-22>{{ resume.title }}</span>
                                         </div>
@@ -119,16 +102,17 @@
                 <div class="uk-child-width-1-2@s" uk-grid>
                     {% for interview in response.interviews %}
                     {# 모의 면접 카드 #}
-                    <a href = "#">
+                    <a href = "/interview/improvement/{{ interview.interviewId }}">
                         <div class="uk-card uk-card-default uk-card-large uk-card-body interview-card">
                             <div class = "card-title">
-                                <span class = "card-category">{{ interview.OccupationName }}</span>
-                                <span class = "card-category">{{ interview.jobName }}</span>
+                                <span class = "card-category">{{ interview.occupationName }} |</span>
+                                <span class = "card-category">{{ interview.jobName }} |</span>
                                 <span class = "card-category">{{ interview.level }}</span>
                                 <span class = Medium-22>{{ interview.title }}</span>
                             </div>
-                            <p class = "Medium-18">{{ interview.section.title }}</p>
-                            <p class = "interview-card-content">{{ interview.section.answer }}</p>
+                            <p class = "Medium-18">{{ interview.question }}</p>
+                            <p class = "interview-card-content">{{ interview.answer }}</p>
+
                             <div class = "Engagement">
                                 <div>
                                     <span uk-icon="icon: eye; ratio: 1.0;"></span>

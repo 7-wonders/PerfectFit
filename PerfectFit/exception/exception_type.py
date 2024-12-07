@@ -21,6 +21,7 @@ class ExceptionType(Enum):
     INVALID_TOKEN = ("401", "U40111", "토큰이 유효하지 않습니다.")
 
     FORBIDDEN_RESUME = ("403", "F40310", "작성자만 자기소개서를 편집할 수 있습니다.")
+    FORBIDDEN_INTERVIEW = ("403", "F40320", "작성자만 모의 면접을 편집할 수 있습니다.")
 
     NOT_FOUND_USER = ("404", "N40410", "사용자를 찾을 수 없습니다.")
     NOT_FOUND_JOB = ("404", "N40420", "직업을 찾을 수 없습니다.")
@@ -28,6 +29,7 @@ class ExceptionType(Enum):
     NOT_FOUND_INTERVIEW = ("404", "N40430", "모의 면접을 찾을 수 없습니다.")
     NOT_FOUND_QUESTION = ("404", "N40431", "질문을 찾을 수 없습니다.")
     NOT_FOUND_RESUME = ("404", "N40432", "자기소개서를 찾을 수 없습니다.")
+    NOT_FOUND_LIKE = ("404", "N40433", "좋아요를 찾을 수 없습니다.")
 
     INTERNAL_SERVER_ERROR = ("500", "I500", "서버 내부에서 오류가 발생하였습니다.")
     GOOGLE_LOGIN_ERROR = ("500", "I50010", "구글 로그인에 문제가 발생하였습니다.")
