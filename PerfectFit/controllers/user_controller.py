@@ -125,28 +125,33 @@ def create_requirements():
     # 리다이렉션으로 응답 반환
     return redirect("/requirements/success")
 
-@user_bp.route('/user/necessary', methods=['POST'])
+
+@user_bp.route('/user/necessary', methods=['GET', 'POST'])
 def register_necessary_info():
     user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
 
-    # 요청 바디에서 필수 정보 데이터를 추출합니다.
-    name = request.form.get("name")
-    age = int(request.form.get("age"))
-    emaiL_domain = request.form.get("emailDomain") if request.form.get("emailDomain") is not None else ""
-    email = request.form.get("email") + emaiL_domain
-    address = request.form.get("address")
-    detail_address = request.form.get("detailAddress")
+    if request.method == 'GET':
+        response = NecessaryInfoService.get_info()
+        return render_template("information_required.html", response=response)
+    else:
+        # 요청 바디에서 필수 정보 데이터를 추출합니다.
+        name = request.form.get("name")
+        age = int(request.form.get("age"))
+        emaiL_domain = request.form.get("emailDomain") if request.form.get("emailDomain") is not None else ""
+        email = request.form.get("email") + emaiL_domain
+        address = request.form.get("address")
+        detail_address = request.form.get("detailAddress")
 
-    # 필수 필드 유효성 검사를 수행합니다.
-    if not all([name, age, email, address]):
-        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400,
-                        content_type='application/json; charset=utf-8')
+        # 필수 필드 유효성 검사를 수행합니다.
+        if not all([name, age, email, address]):
+            return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400,
+                            content_type='application/json; charset=utf-8')
 
-    # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
-    NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
+        # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
+        NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
 
-    # 응답: 성공 시 204 No Content를 반환
-    return redirect(f"/user/test/selected")
+        # 응답: 성공 시 204 No Content를 반환
+        return redirect(f"/user/test/selected")
 
 
 @user_bp.route('/user/optional', methods=['POST'])
@@ -320,9 +325,6 @@ def logout():
 # def get_mypage_information():
 #     return render_template("mypage_information.html", active_page = 'information')
 
-@user_bp.route('/user/test/required')
-def get_mypage_information():
-    return render_template("information_required.html")
 @user_bp.route('/user/test/selected')
 def get_mypage_selected():
     return render_template("information_selected.html")

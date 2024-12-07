@@ -68,3 +68,11 @@ class UserDto:
             user: 'UserDto.Response.UserDetail'
             work_experiences: List['WorkExperienceDTO.Response.WorkExperience']
             project_experiences: List['PexDTO.Response.ProjectExperience']
+
+        @dataclass
+        class NecessaryInfo:
+            username: str
+            age: int
+            email: str
+            address: str
+            detailAddress: str
