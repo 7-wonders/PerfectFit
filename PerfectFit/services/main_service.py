@@ -28,7 +28,7 @@ class MainService:
             )
             .where(ResumeSection.resume_id == Resume.resume_id)
             .limit(1)
-            .subquery()
+            .lateral()
         )
 
         resume_query = (
@@ -38,15 +38,16 @@ class MainService:
                 Resume.level,
                 view_scalar_query.label("viewCount"),
                 like_scalar_query.label("likeCount"),
-                one_section_scalar_query,
+                one_section_scalar_query.c.sectionTitle,
+                one_section_scalar_query.c.sectionContent,
                 Occupation.occupation_name.label("occupationName"),
                 Job.job_name.label("jobName"),
                 AppUser.username.label("username"),
             )
-            .join(ResumeSection, ResumeSection.resume_id == Resume.resume_id)
             .join(Job, Job.job_id == Resume.job_id)
             .join(Occupation, Occupation.occupation_id == Job.occupation_id)
             .join(AppUser, AppUser.user_id == Resume.user_id)
+            .where(Resume.is_shared.is_(True))
             .order_by(view_scalar_query.desc(), like_scalar_query.desc(), Resume.created_time.desc())
             .limit(2)
         )
