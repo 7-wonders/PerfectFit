@@ -204,7 +204,7 @@ async function handleConfirmPublic() {
                 const data = await response.json();  // JSON으로 파싱
                 const task_id = data;  // task_id를 받아옴
 
-                window.location.href = `/interview/loading-analyze/${task_id}`;
+                window.location.href = `/interview/loading-analyze/${task_id}/${questionIds[0]}`;
            } else {
                 alert("답변 저장 실패");
            }

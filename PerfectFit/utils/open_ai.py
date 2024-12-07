@@ -358,7 +358,7 @@ def make_company_interview():
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
 
     with get_session() as session:
-        represents: list[Represent] = session.query(Represent).all()
+        represents: list[Represent] = session.query(Represent).filter(Represent.company_id>21).all()
         for represent in represents:
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -378,7 +378,7 @@ def make_company_interview():
                 result = response.choices[0].message.content.strip()
                 print(result)
 
-                new_interview = Interview(user_id=1, resume_id=None, job_id=represent.job.job_id, company=None, title=f"{represent.company.company_name}의 면접" , level = "신입")
+                new_interview = Interview(user_id=1, resume_id=None, job_id=represent.job.job_id, company_id=represent.company.company_id, title=f"{represent.company.company_name}의 면접" , level = "신입")
 
                 session.add(new_interview)
                 session.flush()
@@ -484,7 +484,7 @@ def make_company_improvement():
     with get_session() as session:
         represents: list[Represent] = session.query(Represent).filter(Represent.company_id > 15).all()
         try:
-            interviews = session.query(Interview).filter(Interview.interview_id > 157).all()
+            interviews = session.query(Interview).filter(Interview.interview_id > 338).all()
 
             for interview in interviews:
                 questionIds = []
@@ -500,7 +500,6 @@ def make_company_improvement():
 
                 try:
 
-                    print("3")
                     results = []
                     for question, question_id, user_answer, best_answer in zip(questions, questionIds, answers,
                                                                                best_answers):
@@ -529,16 +528,34 @@ def make_company_improvement():
 
                         result = response.choices[0].message.content.strip()
                         result_dict = json.loads(result)
-                        result_dict['InterviewImprovement']['UserAnswer'] = user_answer
+
+                        interview_improvements = result_dict['InterviewImprovement']
+                        if isinstance(interview_improvements, list):  # 리스트일 경우
+                            for improvement in interview_improvements:
+                                if improvement['UserAnswer'] is not None:
+                                    improvement['UserAnswer'] = user_answer
+                        else:  # 딕셔너리일 경우
+                            if interview_improvements['UserAnswer'] is not None:
+                                interview_improvements['UserAnswer'] = user_answer
                         results.append(result_dict)
+
                     for interview_improvement in results:
                         improvement = interview_improvement['InterviewImprovement']
-                        new_improvement = InterviewImprovement(
-                            question_id=improvement['questionId'],
-                            answer=improvement['UserAnswer'],
-                            improvement=improvement['Improvement'],
-                            translated_answer=improvement['TranslatedAnswer']
-                        )
+                        print(improvement)
+                        if not isinstance(improvement, list):  # 리스트일 경우
+                            new_improvement = InterviewImprovement(
+                                question_id=improvement['questionId'],
+                                answer=improvement['UserAnswer'],
+                                improvement=improvement['Improvement'],
+                                translated_answer=improvement['TranslatedAnswer']
+                            )
+                        else:  # 딕셔너리일 경우
+                            new_improvement = InterviewImprovement(
+                                question_id=improvement[0]['questionId'],
+                                answer=improvement[0]['UserAnswer'],
+                                improvement=improvement[0]['Improvement'],
+                                translated_answer=improvement[0]['TranslatedAnswer']
+                            )
                         session.add(new_improvement)
                     session.commit()
 

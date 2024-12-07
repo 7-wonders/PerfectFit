@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             profilePath = response.data;
             // console.log(profilePath);
             const userProfileImage = document.getElementById('userProfileImage');
-            userProfileImage.src = profilePath;
+            userProfileImage.src = profilePath.profilePath;
         }
         catch(error) {
              alert("프로필 이미지 호출에 실패했습니다. 다시 시도해주세요.");
