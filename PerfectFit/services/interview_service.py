@@ -562,7 +562,7 @@ class InterviewService:
     @staticmethod
     def post_like(interview_id: int, user_id: int) -> None:
         with get_session() as session :
-            like = session.query(InterviewLike).filter_by(user_id=user_id).first()
+            like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
 
             if like is not None:
                 raise CustomException(ExceptionType.ALREADY_LIKED)
@@ -574,7 +574,7 @@ class InterviewService:
     @staticmethod
     def delete_like(interview_id: int, user_id: int) -> None:
         with get_session() as session :
-            like = session.query(InterviewLike).filter_by(user_id=user_id).first()
+            like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
 
             if like is None:
                 raise CustomException(ExceptionType.NOT_FOUND_LIKE)

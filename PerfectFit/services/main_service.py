@@ -103,9 +103,9 @@ class MainService:
                 for resume in resumes
             ]
 
-            valid_interviews = []  # 조건을 만족하는 인터뷰를 담을 리스트
-            offset = 0  # 가져온 인터뷰의 시작 위치
-            limit = 4  # 가져올 인터뷰 개수
+            valid_interviews = []
+            offset = 0
+            limit = 100
             question_alias = aliased(InterviewQuestion)
             improvement_alias = aliased(InterviewImprovement)
 
@@ -125,7 +125,6 @@ class MainService:
                     .join(Job, Job.job_id == Interview.job_id)
                     .join(Occupation, Occupation.occupation_id == Job.occupation_id)
                     .order_by(view_scalar_query_interview.desc())
-                    .offset(offset)
                     .limit(limit)
                 )
 
