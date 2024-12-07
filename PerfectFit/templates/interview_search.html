@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+
+{% include 'components/header.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_search.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_card.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/interview_search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/interview_card.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% with total = response.total if response else 0 %}
+        {% include 'components/interview_title.html' %}
+    {% endwith %}
+    {% include 'components/interview_list_nav.html' %}
+    <div class="search-container">
+        <div class="uk-inline search-box">
+            <a class="uk-form-icon uk-form-icon-flip" href="#" uk-icon="icon: search;" id="icon"></a>
+            <input class="uk-input search-input" type="text" id="search" />
+        </div>
+    </div>
+
+    <div class="card-container">
+        {% if response and response.interviews and response.interviews | length > 0 %}
+            {% for interview in response.interviews %}
+                {% with interview=interview %}
+                    {% include 'interview_card.html' %}
+                {% endwith %}
+            {% endfor %}
+        {% else %}
+            <div class="not-found">
+                <img src="{{ url_for('static', filename='img/not_found.svg') }}" alt="not found" />
+                <h4>면접을 찾을 수 없습니다.</h4>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

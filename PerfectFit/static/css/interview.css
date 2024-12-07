@@ -150,3 +150,9 @@
     width: 70%;
     max-width: 900px;
 }
+.uk-textarea {
+    text-align: left; /* 텍스트를 왼쪽 정렬 */
+    direction: ltr; /* 텍스트 방향을 왼쪽에서 오른쪽으로 설정 */
+    padding-left: 5px; /* 적절한 왼쪽 여백 추가 (선택 사항) */
+}
+

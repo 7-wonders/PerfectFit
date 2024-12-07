@@ -23,9 +23,21 @@
     width : 400px;
     border-radius: 16px;
     align-items: center;
-
 }
-
+.search-btn-box {
+    display : flex;
+    justify-content: flex-end;
+    margin-bottom : 30px;
+    align-items: center;
+}
+/* 검색 버튼 */
+.search-btn {
+    border : none;
+    background : #2B7FFF !important;
+    color : white !important;
+    width : 150px;
+    height : 55px;
+}
 
 /*테이블 내용 텍스트 css*/
 .uk-subnav-pill>.uk-active>a {

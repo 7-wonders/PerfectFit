@@ -1,0 +1,22 @@
+body {
+    background-color: rgba(23, 95, 230, 0.1);
+}
+
+.login-container-box {
+    display: flex;                     /* Flexbox 사용 */
+    flex-direction: column;            /* 세로 방향으로 정렬 */
+    align-items: center;               /* 수평 중앙 정렬 */
+    width: 380px;                  /* 최소 너비 설정 (필요 시 조정) */
+    height: 500px;                 /* 최소 높이 설정 (필요 시 조정) */
+    box-sizing: border-box;            /* 패딩 포함하여 크기 계산 */
+    padding: 50px 0;
+    margin : 0;
+    border-radius: 8px;
+    background-color: white;
+    position : absolute;
+    /*=========== 중앙으로 보내기 ==========*/
+    top : 45%;
+    left : 50%;
+    transform : translate(-50%, -50%);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.5);
+}

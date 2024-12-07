@@ -8,15 +8,21 @@
 {% endblock %}
 
 {% block scripts %}
-   <script>
-    const dots = document.getElementById("dots");
-    let dotCount = 0;
-
-    setInterval(() => {
-      dotCount = (dotCount + 1) % 4; // 0, 1, 2, 3 반복
-      dots.textContent = ".".repeat(dotCount); // 점의 개수에 따라 텍스트 변경
-    }, 500); // 0.5초마다 업데이트
-  </script>
+     <script>
+        task_id = "{{ task_id }}";
+        setInterval(() => {
+            fetch(`/interview/task/${ task_id }`, { method: "POSt" })
+                .then(response => {
+                    if (response.status === 200) {
+                        window.location.href = `/interview/improvement/task/${ task_id }`;
+                    } else if (response.status === 202) {
+                        console.log("Running...")
+                    } else {
+                        console.error("Error")
+                    }
+                });
+        }, 1000);
+    </script>
 {% endblock %}
 
 {% block content %}

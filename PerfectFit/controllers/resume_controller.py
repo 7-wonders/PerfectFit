@@ -1,4 +1,3 @@
-
 from http import HTTPStatus
 from urllib import request
 
@@ -7,15 +6,16 @@ from flask import Blueprint, request, jsonify, redirect, render_template, flash,
 from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
+from dto.resume_draft.resume_draft import ResumeDraftDto
 from dto.resume_section.resume_section import ResumeSectionDto
 from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
+from services.occupation_service import OccupationService
 from services.resume_service import ResumeService
 from tasks import add_resume_task
 from utils.model_converter import model_to_dict
 from utils.check_api import is_api_call
-import time
 
 resume_bp = Blueprint('resume', __name__)
 
@@ -48,12 +48,15 @@ def render_resume():
 
         return jsonify(response), HTTPStatus.OK
     else:
+        occupations = OccupationService.get_occupations()
+
         response = {
             "resumes": [model_to_dict(resume) for resume in resumes],
+            "occupations": [model_to_dict(occupation) for occupation in occupations],
             "total": total
         }
 
-        return render_template("resume.html", response=response)
+        return render_template("resume_list.html", response=response)
 
 
 @resume_bp.route('/<resume_id>', methods=['GET'])
@@ -61,35 +64,10 @@ def render_resume_detail(resume_id: str):
     if not resume_id.isdecimal():
         redirect(url_for('resume.render_resume'))
 
-    resume, sections, increased_view = ResumeService.get_resume(resume_id)
-    if not resume or not sections:
-        return redirect(url_for('resume.render_resume'))
+    response = ResumeService.get_resume(resume_id)
 
-    response: ResumeDto.Response.Resume = ResumeDto.Response.Resume(
-        resumeId=resume.get('resumeId'),
-        title=resume.get('title'),
-        level=resume.get('level'),
-        jobName=resume.get('jobName'),
-        occupationName=resume.get('occupationName'),
-        viewCount=resume.get('viewCount') + 1 if increased_view else resume.get('viewCount'),
-        likeCount=resume.get('likeCount'),
-        createdTime=resume.get('createdTime').strftime('%Y-%m-%d %H:%M:%S'),
-        isLike=(
-            None if request.cookies.get('access_token') is None
-            else
-            resume.get('isLike') if 'isLike' in resume else False
-        ),
-        section=[ResumeSectionDto.Response.Section(
-            sectionId=section.get('sectionId'),
-            title=section.get('title'),
-            content=section.get('content')
-        ) for section in sections],
-        user=UserDto.Response.IntroUserWithProfile(
-            userId=resume.get('user.userId'),
-            username=resume.get('user.username'),
-            profilePath=resume.get('user.profilePath')
-        )
-    )
+    if not response:
+        return redirect(url_for('resume.render_resume'))
 
     return render_template("resume_detail.html", response=response)
 
@@ -105,7 +83,7 @@ def render_update_resume(resume_id: str):
         level = request.form.get("level")
         pros = request.form.get("pros")
         cons = request.form.get("cons")
-        is_shared = request.form.get("is_shared") or False
+        is_shared = True if request.form.get("is_shared").lower() == 'true' else False
         directional = request.form.get("directional")
         keyword_ids = request.form.getlist("keywords[][keywordId]")
         keyword_contents = request.form.getlist("keywords[][content]")
@@ -122,7 +100,7 @@ def render_update_resume(resume_id: str):
             level=level,
             pros=pros,
             cons=cons,
-            is_shared=bool(is_shared),
+            is_shared=is_shared,
             directional=directional,
             keywords=[KeywordDto.Request.Update(keywordId=keyword_id, content=content)
                       for keyword_id, content in keywords],
@@ -141,7 +119,7 @@ def render_update_resume(resume_id: str):
     if not response:
         return redirect(url_for('resume.render_resume'))
 
-    return render_template("resume_update.html", response=response)
+    return render_template("resume_write_update.html", response=response)
 
 
 @resume_bp.route('/write', methods=['GET'])
@@ -161,31 +139,46 @@ def render_write():
             return redirect(f"/resume/waiting?task_id={task_id}")
 
     if task_response:
-        jobs, occupations = ResumeService.get_resume_write_data(task_response)
+        jobs, occupations, resume_drafts = ResumeService.get_resume_write_data(task_response)
         response = ResumeDto.Response.ResumeForWrite(
             resume=task_response,
+            drafts=[
+                ResumeDraftDto.Response.Intro(
+                    draftId=draft.draft_id,
+                    title=draft.title,
+                    createdTime=draft.created_time,
+                ) for draft in resume_drafts
+            ],
             jobs=jobs,
             occupations=occupations
         )
     else:
-        occupations = ResumeService.get_occupations()
+        occupations, resume_drafts = ResumeService.get_resume_write_without_data()
         response = ResumeDto.Response.ResumeForWrite(
             resume=None,
+            drafts=[
+                ResumeDraftDto.Response.Intro(
+                    draftId=draft.draft_id,
+                    title=draft.title,
+                    createdTime=draft.created_time.strftime('%Y-%m-%d %H:%M:%S'),
+                ) for draft in resume_drafts
+            ],
             jobs=None,
             occupations=occupations
         )
 
-    return render_template("resume_write.html", response=response)
+    return render_template("resume_write_all.html", response=response)
 
 
 @resume_bp.route('/write', methods=['POST'])
 def create_resume():
+    draft_id = request.form.get("draft_id") if request.form.get("draft_id") else None
     title = request.form.get("title")
     job_id = request.form.get("job_id") or -1
     level = request.form.get("level")
     pros = request.form.get("pros")
     cons = request.form.get("cons")
-    is_shared = request.form.get("is_shared") or False
+    is_shared = True if request.form.get("is_shared").lower() == 'true' else False
     directional = request.form.get("directional")
     keywords = request.form.getlist("keywords[]")
     section_titles = request.form.getlist("sections[][title]")
@@ -193,12 +186,13 @@ def create_resume():
     sections = zip(section_titles, section_contents)
 
     data = ResumeDto.Request.Create(
+        draft_id=draft_id,
         title=title,
         job_id=int(job_id),
         level=level,
         pros=pros,
         cons=cons,
-        is_shared=bool(is_shared),
+        is_shared=is_shared,
         directional=directional,
         keywords=keywords,
         sections=[ResumeSectionDto.Request.Create(title=title, content=content)
@@ -221,7 +215,7 @@ def create_section_content():
 
     has_keyword = ('keywords' not in data or not data["keywords"] or len(data["keywords"]) < 1
                    or not any([keyword.strip() for keyword in data["keywords"]]))
-    has_job = 'jobId' not in data or not data["jobId"] or data["jobId"] < 1
+    has_job = 'jobId' not in data or not data["jobId"] or int(data["jobId"]) < 1
     has_level = 'level' not in data or not data["level"] or not data["level"] in ["신입", "경력"]
     has_pros = 'pros' not in data or not data["pros"]
     has_cons = 'cons' not in data or not data["cons"]
@@ -284,13 +278,16 @@ def create_section():
         task = ResumeService.add_section(request_resume)
         return redirect(f"/resume/waiting?task_id={task.id}")
     else:
-        return render_template("resume_information_all.html")
+        occupation = OccupationService.get_occupations()
+        return render_template("resume_information_all.html", response={
+            "occupation": occupation
+        })
 
 
 @resume_bp.route('/waiting', methods=['GET'])
 def render_waiting():
     task_id = request.args.get('task_id')
-    return render_template("resume_waiting.html", task_id=task_id)
+    return render_template("resume_loading.html", task_id=task_id)
 
 
 @resume_bp.route('/task/<task_id>', methods=['POST'])
@@ -327,174 +324,7 @@ def delete_resume(resume_id: str):
     ResumeService.delete_resume(int(resume_id))
     return jsonify({}), HTTPStatus.NO_CONTENT
 
-# @resume_bp.route('/write/part', methods=['POST'])
-# def get_resume_write_part():
-#     # 요청 데이터 받기
-#     data = request.json
 
-#     # 요청 데이터 확인 (로깅용)
-#     print("Received data:", data)
-
-#     #작성하기 애니메이션을 보기 위한 5초 지연
-#     time.sleep(5);
-
-#     # 더미 응답 데이터 생성
-#     response_data = {
-#         "content": (
-#             f"안녕하세요. 저는 {data.get('level', '신입')}이며, "
-#             f"{data.get('pros', '장점')}을 가지고 있습니다. "
-#             f"하지만 {data.get('cons', '단점')}이 있습니다. "
-#             f"저의 목표는 '{data.get('directional', '특정 방향 없음')}' 방향성을 가지고 "
-#             f"최고의 성과를 내는 것입니다."
-#         )
-#     }
-#     # JSON 응답 반환
-#     return jsonify(response_data), 200
-
-# @resume_bp.route('/job/<int:occupation_id>', methods=['GET'])
-# def get_jobs(occupation_id):
-#     # 더미 데이터
-#     job_data = {
-#         1: [
-#             {"jobId": 101, "jobName": "Software Engineer"},
-#             {"jobId": 102, "jobName": "Data Scientist"},
-#         ],
-#         2: [
-#             {"jobId": 201, "jobName": "Mechanical Engineer"},
-#             {"jobId": 202, "jobName": "Civil Engineer"},
-#         ],
-#         3: [
-#             {"jobId": 301, "jobName": "Accountant"},
-#             {"jobId": 302, "jobName": "Auditor"},
-#         ]
-#     }
-
-#     # occupation_id에 해당하는 직업 목록 가져오기
-#     jobs = job_data.get(occupation_id, [])
-
-#     # 응답 데이터 생성
-#     response = {
-#         "jobs": jobs
-#     }
-
-#     # JSON 데이터 반환
-#     return jsonify(response), 200
-
-# @resume_bp.route('/write')
-# def get_resume_write():
-#     return render_template("resume_write_all.html")
-
-# @resume_bp.route('/<int:resumeNum>/update')
-# def get_resume_write_update(resumeNum):
-#     return render_template("resume_write_update.html", resumeNum=resumeNum)
-
-# @resume_bp.route('/select')
-# def get_resume_select():
-#     return render_template("resume_select.html")
-
-# @resume_bp.route('/information')
-# def get_resume_information():
-#     return render_template("resume_information_all.html")
-
-# @resume_bp.route('/loading')
-# def get_resume_load_loading():
-#     return render_template("resume_loading.html")
-
-# @resume_bp.route('/test')
-# def get_test():
-#     return render_template("textAxios.html")
-
-# @resume_bp.route('/list/<int:page>')
-# def get_resume_list(page):
-#     total = 100
-#     return render_template("resume_list.html", total=total, page=page)
-
-# @resume_bp.route('/detail/<int:resume_id>')
-# def get_resume_detail(resume_id):
-#     total = 100
-#     return render_template("resume_detail.html", total=total)
-
-
-# # 자기소개서 상세보기 페이지네이션 버튼 누를 시 동작
-# @resume_bp.route('/test/list/<int:page>', methods=['GET'])
-# def get_resume_list_test(page):
-#     resumes = [
-#         {
-#             "resumeId": 1,
-#             "title": "API 자기소개서1",
-#             "occupationName": "Developer",
-#             "jobName": "Software Engineer",
-#             "level": "경력",
-#             "user": {
-#                 "username": "john_doe",
-#                 "profilePath": url_for('static', filename='img/logo.svg')
-#             },
-#             "viewCount": 100,
-#             "likeCount": 50,
-#             "createdTime": "2024-11-21T12:34:56"
-#         },
-#         {
-#             "resumeId": 2,
-#             "title": "API 자기소개서2",
-#             "occupationName": "Designer",
-#             "jobName": "UI/UX Designer",
-#             "level": "경력",
-#             "user": {
-#                 "username": "jane_doe",
-#                 "profilePath": url_for('static', filename='img/logo.svg')
-#             },
-#             "viewCount": 80,
-#             "likeCount": 30,
-#             "createdTime": "2024-11-20T11:20:45"
-#         },
-#         {
-#             "resumeId": 3,
-#             "title": "API 자기소개서3",
-#             "occupationName": "Designer",
-#             "jobName": "UI/UX Designer",
-#             "level": "신입",
-#             "user": {
-#                 "username": "jane_doe",
-#                 "profilePath": url_for('static', filename='img/logo.svg')
-#             },
-#             "viewCount": 80,
-#             "likeCount": 30,
-#             "createdTime": "2024-11-20T11:20:45"
-#         },
-#         {
-#             "resumeId": 4,
-#             "title": "API 자기소개서4",
-#             "occupationName": "Designer",
-#             "jobName": "UI/UX Designer",
-#             "level": "신입",
-#             "user": {
-#                 "username": "jane_doe",
-#                 "profilePath": url_for('static', filename='img/logo.svg')
-#             },
-#             "viewCount": 80,
-#             "likeCount": 30,
-#             "createdTime": "2024-11-20T11:20:45"
-#         },
-#         {
-#             "resumeId": 5,
-#             "title": "API 자기소개서5",
-#             "occupationName": "Designer",
-#             "jobName": "UI/UX Designer",
-#             "level": "신입",
-#             "user": {
-#                 "username": "jane_doe",
-#                 "profilePath": url_for('static', filename='img/logo.svg')
-#             },
-#             "viewCount": 80,
-#             "likeCount": 30,
-#             "createdTime": "2024-11-20T11:20:45"
-#         }
-#         # 여기에 더 많은 resume 객체를 추가할 수 있습니다.
-#     ]
-
-#     # 응답 데이터
-#     response = {
-#         "resumes": resumes
-#     }
-
-#     return jsonify(response), 200
+@resume_bp.route('/select')
+def get_resume_select():
+    return render_template("resume_select.html")

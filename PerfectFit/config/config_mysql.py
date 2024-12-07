@@ -21,7 +21,16 @@ class Config:
     mariadb_password = os.getenv('MARIADB_PASSWORD') or '1234'
     mariadb = os.getenv('MARIADB') or 'perfectfit'
 
+
+    mariadb_host = os.getenv('MARIADB_HOST') or 'localhost'
+    mariadb_port = os.getenv('MARIADB_PORT') or '11401'
+    mariadb_user = os.getenv('MARIADB_USERNAME') or 'root'
+    mariadb_password = os.getenv('MARIADB_PASSWORD') or '1234'
+    mariadb = os.getenv('MARIADB') or 'perfectfit'
+
+    # SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}'
     SQLALCHEMY_DATABASE_URI = f'mariadb+pymysql://{mariadb_user}:{mariadb_password}@{mariadb_host}:{mariadb_port}/{mariadb}'
+
 
     if os.getenv("FLASK_ENV") == 'production':
         SQLALCHEMY_TRACK_MODIFICATIONS = False

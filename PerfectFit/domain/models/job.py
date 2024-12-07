@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from domain.models.keyword import Keyword
     from domain.models.occupation import Occupation
     from domain.models.resume import Resume
+    from domain.models.represent import Represent
 
 
 class Job(db.Model):
@@ -32,3 +33,4 @@ class Job(db.Model):
     resumeDrafts: Mapped[list["ResumeDraft"]] = db.relationship("ResumeDraft", back_populates="job")
     keywords: Mapped[list["Keyword"]] = db.relationship("Keyword", back_populates="job")
     interviews: Mapped[list["Interview"]] = db.relationship("Interview", back_populates="job")
+    represent: Mapped["Represent"] = db.relationship("Represent", back_populates="job")

@@ -4,67 +4,26 @@
 
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/interviewlist.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_card.css') }}" />
 {% endblock %}
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/interviewlist.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/interview_card.js') }}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <!-- 헤더 -->
-    <header class="header">
-        <div class="header-content">
-            <h1>AI 모의면접 게시물</h1>
-            <p>해당 게시물로 효과적으로 면접을 준비할 수 있습니다</p>
-        </div>
-        <div class="total-count">
-            <span>총 저장건 수</span>
-            <strong id="total-count">0개</strong>
-        </div>
-    </header>
-
-    <!-- 네비게이션 -->
-    <nav class="nav-tabs">
-        <button class="tab active" data-tab="category">기업별 (업종/그룹)</button>
-        <button class="tab" data-tab="position">지원분야별</button>
-        <button class="tab" data-tab="search">내용검색</button>
-    </nav>
-
-    <!-- 기업별 콘텐츠 -->
-    <div id="category-tab" class="tab-content" style="display: block;">
-        <div id="card-container" class="card-grid">
-            <!-- 카드 데이터가 동적으로 추가될 공간 -->
-        </div>
-        <nav class="pagination-container">
-            <ul id="pagination" class="pagination">
-                <!-- 페이지네이션 버튼이 동적으로 추가될 공간 -->
-            </ul>
-        </nav>
-    </div>
-
-    <!-- 지원분야별 콘텐츠 -->
-    <div id="position-tab" class="tab-content" style="display: none;">
-        <p>지원 분야별 탭 내용이 여기에 표시됩니다.</p>
-    </div>
-
-    <!-- 내용 검색 콘텐츠 -->
-    <div id="search-tab" class="tab-content" style="display: none;">
-        <div class="search-container">
-            <input
-                type="text"
-                class="search-input"
-                placeholder="원하는 내용을 검색해보세요."
-            />
-        </div>
-        <div id="card-container" class="card-grid">
-            <!-- 카드 데이터가 동적으로 추가될 공간 -->
-        </div>
-        <nav class="pagination-container">
-            <ul id="pagination" class="pagination">
-                <!-- 페이지네이션 버튼이 동적으로 추가될 공간 -->
-            </ul>
-        </nav>
+    {% with total = response.total %}
+        {% include 'components/interview_title.html' %}
+    {% endwith %}
+    {% include 'components/interview_list_nav.html' %}
+    <div class="card-container">
+        {% for interview in response.interviews %}
+            {% with interview=interview %}
+                {% include 'interview_card.html' %}
+            {% endwith %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
