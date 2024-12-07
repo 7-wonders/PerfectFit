@@ -528,6 +528,10 @@ def job_select():
 def interview_run(interview_id: int):
     return render_template("interview.html", interviewId = interview_id)
 
+@interview_bp.route('/select')
+def get_interview_select():
+    return render_template("interview_select.html")
+
 @interview_bp.route('/make/company')
 def make_company():
     make_company_improvement()
