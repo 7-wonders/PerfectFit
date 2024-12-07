@@ -5,15 +5,11 @@ from celery import Celery
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from domain.models import AppUser, Job, InterviewImprovement
-from dto.job.job import JobDto
+from domain.models import AppUser, Job
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
-from utils.celery_util import update_task_status
-from utils.open_ai import answer_improvement
 from utils.openai.resume.full_resume_strategy import FullResumeStrategy
 from utils.openai.resume.resume_helper import ResumeHelper
-from config.config_mysql import Config, get_session
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -73,7 +69,9 @@ def start_async_ai_task(user_answers: list[str], question_ids: list[int],questio
                 try:
                     # JSON 문자열을 Python 객체로 변환
                     result_dict = json.loads(result)
-                    result_dict['InterviewImprovement']['UserAnswer'] = user_answer
+                    print(result_dict)
+                    if result_dict['InterviewImprovement']['UserAnswer'] is not None:
+                        result_dict['InterviewImprovement']['UserAnswer'] = user_answer
                     results.append(result_dict)
                 except json.JSONDecodeError as e:
                     # JSON 디코딩 실패 시 에러 로그 출력

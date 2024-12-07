@@ -43,6 +43,22 @@ class MainService:
             .limit(1)
             .lateral()
         )
+        one_section_title_query = (
+            select(ResumeSection.title)
+            .where(ResumeSection.resume_id == Resume.resume_id)
+            .order_by(ResumeSection.resume_id)
+            .limit(1)
+            .scalar_subquery()
+        )
+
+        one_section_content_query = (
+            select(ResumeSection.content)
+            .where(ResumeSection.resume_id == Resume.resume_id)
+            .order_by(ResumeSection.resume_id)
+            .limit(1)
+            .scalar_subquery()
+        )
+
         resume_query = (
             select(
                 Resume.resume_id,
@@ -50,8 +66,10 @@ class MainService:
                 Resume.level,
                 view_scalar_query.label("viewCount"),
                 like_scalar_query.label("likeCount"),
-                one_section_scalar_query.c.sectionTitle,
-                one_section_scalar_query.c.sectionContent,
+                one_section_title_query.label("sectionTitle"),
+                one_section_content_query.label("sectionContent"),
+                # one_section_scalar_query.c.sectionTitle,
+                # one_section_scalar_query.c.sectionContent,
                 Occupation.occupation_name.label("occupationName"),
                 Job.job_name.label("jobName"),
                 AppUser.username.label("username"),
@@ -106,9 +124,9 @@ class MainService:
                     )
                     .join(Job, Job.job_id == Interview.job_id)
                     .join(Occupation, Occupation.occupation_id == Job.occupation_id)
-                    .order_by(view_scalar_query_interview.desc())  # viewCount 내림차순으로 정렬
-                    .offset(offset)  # 이전에 가져온 인터뷰를 제외하고 다음 인터뷰 가져오기
-                    .limit(limit)  # 지정한 수만큼 가져옴
+                    .order_by(view_scalar_query_interview.desc())
+                    .offset(offset)
+                    .limit(limit)
                 )
 
                 interviews = session.execute(interview_query).mappings().all()

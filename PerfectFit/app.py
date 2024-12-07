@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 from config.config_mysql import Config, db  # Config와 db를 import
 from config.config_redis import Redis
-from controllers.main_controller import main_bp
 from controllers.resume_controller import resume_bp
 from controllers.resume_draft_controller import resume_draft_bp
 from controllers.user_controller import user_bp
@@ -28,7 +27,6 @@ app.register_blueprint(main_bp)
 app.register_blueprint(eh_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(job_bp)
-app.register_blueprint(main_bp)
 app.register_blueprint(interview_bp, url_prefix='/interview')
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(resume_bp, url_prefix="/resume")

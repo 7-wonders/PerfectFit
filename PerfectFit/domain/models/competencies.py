@@ -19,7 +19,7 @@ class Competencies(db.Model):
         ForeignKey("occupation.occupation_id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False
     )
-    content: Mapped[str] = mapped_column(VARCHAR(40), nullable=False)
+    content: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, server_default=func.now())
 
     # 관계 설정
