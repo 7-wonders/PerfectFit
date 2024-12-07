@@ -16,7 +16,6 @@ class MainDto:
             jobName: str
             username: str
             section: "ResumeSectionDto.Response.Section"
-
         @dataclass
         class Interview:
             interviewId: int
@@ -33,5 +32,3 @@ class MainDto:
         class MainPopulation:
             resumes: list["MainDto.Response.Population"]
             interviews: list["MainDto.Response.Interview"]
-
-

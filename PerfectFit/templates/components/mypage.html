@@ -17,20 +17,12 @@
         <nav class="uk-navbar-container" uk-navbar>
             <div class="uk-navbar-left">
                 <ul class="uk-navbar-nav">
-                    <li class = "{% if active_page == 'resume'%} uk-active {% endif %}"><a href="http://127.0.0.1:5000/user/mypage/resume">자기소개서</a></li>
-                    <li class = "{% if active_page == 'interview'%} uk-active {% endif %}"><a href="http://127.0.0.1:5000/user/mypage/interview">AI 모의면접</a></li>
-                    <li class = "{% if active_page == 'information'%} uk-active {% endif %}"><a href="http://127.0.0.1:5000/user/mypage/information">내 정보</a></li>
+                    <li class = "{% if active_page == 'resume'%} uk-active {% endif %}"><a href="/user/mypage/resume">자기소개서</a></li>
+                    <li class = "{% if active_page == 'interview'%} uk-active {% endif %}"><a href="/user/mypage/interview">AI 모의면접</a></li>
+                    <li class = "{% if active_page == 'information'%} uk-active {% endif %}"><a href="/user/mypage/information">내 정보</a></li>
                 </ul>
             </div>
         </nav>
-
-
-
-{#            <ul class="uk-subnav Regular-20">#}
-{#                <a href="http://127.0.0.1:5000/user/mypage/resume">자기소개서</a>#}
-{#                <a href="http://127.0.0.1:5000/user/mypage/interview">AI 모의면접</a>#}
-{#                <a href="http://127.0.0.1:5000/user/mypage/information">내 정보</a>#}
-{#            </ul>#}
     </div>
 {% endblock %}
 
