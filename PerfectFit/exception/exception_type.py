@@ -13,7 +13,9 @@ class ExceptionType(Enum):
     REQUIRED_CHAPTER_TITLE = ("400", "B40025", "단락의 제목은 필수입니다.")
     INVALID_JOB_ID = ("400", "B40030", "유효하지 않은 직업 ID입니다.")
     INVALID_RESUME_ID = ("400", "B40031", "유효하지 않은 자기소개서 ID입니다.")
+    INVALID_DRAFT_ID = ("400", "B40032", "유효하지 않은 자기소개서 초안 ID입니다.")
     ALREADY_LIKED = ("400", "B40040", "이미 좋아요를 눌렀습니다.")
+    MAX_DRAFT = ("400", "B40050", "자기소개서 초안은 10개까지만 작성할 수 있습니다.")
 
     EXPIRED_TOKEN = ("401", "U40110", "토큰이 만료되었습니다.")
     INVALID_TOKEN = ("401", "U40111", "토큰이 유효하지 않습니다.")

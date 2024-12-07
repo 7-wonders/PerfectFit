@@ -7,10 +7,12 @@ from sqlalchemy.orm import joinedload
 from config.config_mysql import get_session
 from domain.models import Job, AppUser, ProjectExperience, Resume, ProsCons, ResumeSection, Keyword, ResumeView, \
     ResumeLike, Occupation
+from domain.models.resume_draft import ResumeDraft
 from dto.keyword.keyword import KeywordDto
 from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
 from dto.resume_section.resume_section import ResumeSectionDto
+from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
@@ -23,6 +25,23 @@ logger = Logger(__name__)
 
 
 class ResumeService:
+    @staticmethod
+    def get_intro_drafts(user_id: int):
+        with get_session() as session:
+            query = (
+                select(
+                    ResumeDraft.draft_id,
+                    ResumeDraft.title,
+                    ResumeDraft.created_time
+                )
+                .where(ResumeDraft.user_id == user_id)
+                .order_by(ResumeDraft.draft_id.desc())
+            )
+
+            resume_drafts = session.execute(query).mappings().all()
+            return resume_drafts
+
+
     @staticmethod
     def get_resumes(**kwargs):
         with (get_session() as session):
@@ -127,6 +146,8 @@ class ResumeService:
 
     @staticmethod
     def get_resume_write_data(task_data: ResumeGPT.Response.FullResume.Resume = None):
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
         with get_session() as session:
             selected_job_query = (
                 select(
@@ -161,11 +182,14 @@ class ResumeService:
 
             jobs = session.execute(job_query).mappings().all()
             occupations = session.execute(occupation_query).mappings().all()
+            resume_intro_drafts = ResumeService.get_intro_drafts(user_id)
 
-            return jobs, occupations
+            return jobs, occupations, resume_intro_drafts
 
     @staticmethod
-    def get_occupations():
+    def get_resume_write_without_data():
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
         with get_session() as session:
             query = (
                 select(
@@ -175,11 +199,12 @@ class ResumeService:
             )
 
             occupations = session.execute(query).mappings().all()
+            resume_intro_drafts = ResumeService.get_intro_drafts(user_id)
 
-            return occupations
+            return occupations, resume_intro_drafts
 
     @staticmethod
-    def get_resume(resume_id: str) -> tuple[RowMapping | None, RowMapping | None, bool]:
+    def get_resume(resume_id: str) -> Resume | None:
         access_token = request.cookies.get('access_token')
         user_id = None
         increased_view = False
@@ -241,7 +266,7 @@ class ResumeService:
             resume = session.execute(resume_query).mappings().first()
 
             if not resume:
-                return None, None, increased_view
+                return None
 
             sections_query = (
                 select(
@@ -254,7 +279,7 @@ class ResumeService:
 
             sections = session.execute(sections_query).mappings().all()
             if not sections:
-                return None, None, increased_view
+                return None
 
             if user_id and resume.get('user.userId') != user_id and not resume.get('isView'):
                 session.add(ResumeView(
@@ -265,7 +290,36 @@ class ResumeService:
                 session.commit()
                 increased_view = True
 
-            return resume, sections, increased_view
+            response: ResumeDto.Response.Resume = ResumeDto.Response.Resume(
+                resumeId=resume.get('resumeId'),
+                title=resume.get('title'),
+                level=resume.get('level'),
+                jobName=resume.get('jobName'),
+                occupationName=resume.get('occupationName'),
+                viewCount=resume.get('viewCount') + 1 if increased_view else resume.get('viewCount'),
+                likeCount=resume.get('likeCount'),
+                createdTime=resume.get('createdTime').strftime('%Y-%m-%d %H:%M:%S'),
+                isMine=resume.get('user.userId') == user_id,
+                isLike=(
+                    None if request.cookies.get('access_token') is None
+                    else
+                    resume.get('isLike') if 'isLike' in resume else False
+                ),
+                section=[ResumeSectionDto.Response.Section(
+                    sectionId=section.get('sectionId'),
+                    title=section.get('title'),
+                    content=section.get('content')
+                ) for section in sections],
+                user=UserDto.Response.IntroUserWithProfile(
+                    userId=resume.get('user.userId'),
+                    username=resume.get('user.username'),
+                    profilePath=resume.get('user.profilePath')
+                )
+            )
+
+            print(response)
+
+            return response
 
     @staticmethod
     def get_resume_with_update(resume_id: str):
@@ -305,6 +359,10 @@ class ResumeService:
             )
 
             resume = session.execute(resume_query).mappings().first()
+            if not resume:
+                flash('자기소개서 정보를 불러오는 중 오류가 발생했습니다.', 'danger')
+                return None
+
             job_id = resume.get('jobId')
             pros = resume.get('pros')
             cons = resume.get('cons')
@@ -471,6 +529,12 @@ class ResumeService:
 
                 keywords.append(keyword)
 
+            if request_resume.draft_id:
+                session.query(ResumeDraft).filter(ResumeDraft.draft_id == request_resume.draft_id).delete()
+                session.query(ResumeSection).filter(ResumeSection.draft_id == request_resume.draft_id).delete()
+                session.query(Keyword).filter(Keyword.draft_id == request_resume.draft_id).delete()
+                session.query(ProsCons).filter(ProsCons.draft_id == request_resume.draft_id).delete()
+
             session.add_all(keywords)
             session.commit()
 
@@ -572,7 +636,8 @@ class ResumeService:
 
             job = session.query(Job).filter(Job.job_id == data.job_id).first()
             if not job:
-                raise CustomException(ExceptionType.INVALID_JOB_ID)
+                flash('유효하지 않은 직업 ID입니다.', 'danger')
+                return None
 
             resume.title = data.title
             resume.job_id = data.job_id

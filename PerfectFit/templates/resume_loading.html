@@ -6,10 +6,20 @@
 {% endblock %}
 
 {% block scripts %}
-    <script>
-        setTimeout(function() {
-            window.location.href = "http://127.0.0.1:5000/user/resume/write"; // 10초 후 리디렉션
-        }, 10000); // 10000ms = 10초
+     <script>
+        task_id = "{{ task_id }}";
+        setInterval(() => {
+            fetch(`/resume/task/${task_id}`, { method: "POSt" })
+                .then(response => {
+                    if (response.status === 200) {
+                        window.location.href = `/resume/write?task_id=${task_id}`;
+                    } else if (response.status === 202) {
+                        console.log("Running...")
+                    } else {
+                        console.error("Error")
+                    }
+                });
+        }, 1000);
     </script>
 {% endblock %}
 

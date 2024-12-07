@@ -61,7 +61,7 @@ async function updateJobList() {
 
     try {
         // 백엔드 API 호출: 선택한 직군 ID를 경로에 동적으로 전달
-        const response = await instance.get(`/resume/job/${selectedOccupation}`);
+        const response = await instance.get(`/job/${selectedOccupation}`);
 
         // 백엔드로부터 받은 직업 데이터
         const jobList = response.data.jobs;
@@ -315,8 +315,19 @@ function setupEventListeners() {
     const observer = new MutationObserver(checkFormCompletion);
     observer.observe(badgeContainer, { childList: true, subtree: true });
 
-    // 버튼 클릭 이벤트 리스너 추가
-    handleButtonClick();
+    // 버튼 클릭 이벤트 리스너 추가(이거 사용하면 input에서 Enter 이벤트 발생 시 submit 실행됨)
+    // handleButtonClick();
+
+    // Enter 키 방지 추가
+    const titleInputs = document.querySelectorAll('[id^="resume-information-title-"]');
+
+    function preventEnter(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // 기본 Enter 동작 차단
+        }
+    }
+
+    titleInputs.forEach(input => input.addEventListener("keydown", preventEnter));
 }
 
 // 페이지 로드 시 초기 버튼 상태 설정 및 이벤트 리스너 추가
