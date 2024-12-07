@@ -539,7 +539,6 @@ def get_interview_select():
 
 @interview_bp.route('/make/company')
 def make_company():
-    make_company_interview()
-    # make_company_improvement()
-    return render_template("resume_loading.html")
+    # make_company_interview()
+    make_company_improvement()
 
