@@ -122,7 +122,6 @@ def create_requirements():
 
 @user_bp.route('/user/necessary', methods=['GET', 'POST'])
 def register_necessary_info():
-    print(session.get('user_info'))
     user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
 
     if request.method == 'GET':
@@ -135,8 +134,6 @@ def register_necessary_info():
         email_local = request.form.get("email", "")  # 기본값을 ""로 설정
         email_domain = request.form.get("emailDomain", "")  # 기본값을 ""로 설정
         email = email_local + email_domain
-        print(email_local, email_domain, email)
-        print(name,age)
         address = request.form.get("address")
         detail_address = request.form.get("detailAddress")
 
@@ -150,13 +147,9 @@ def register_necessary_info():
 
 @user_bp.route('/user/optional',methods=['GET','POST'])
 def register_optional_info():
-    print("###################################")
     user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
-    print("###################################")
     if request.method == 'GET':
-        print("1")
         response = NecessaryInfoService.get_optional_info()
-        print("2")
         return render_template("information_selected.html", response=response)
     else:
         major = request.form.get("major") # 전공
@@ -208,7 +201,6 @@ def register_optional_info():
             })
             index += 1
 
-        print("슛~~~~~~~~~~~~~~~~~~~", user_id)
         OptionalInfoService.register_info(
             user_id=user_id,
             major=major,
@@ -254,7 +246,6 @@ def send_verification_code():
     # 요청 바디에서 이메일 주소를 추출합니다.
     data = request.get_json()
     email = data.get("email")
-    print(email)
     # 필수 값 확인
     if not email:
         return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
