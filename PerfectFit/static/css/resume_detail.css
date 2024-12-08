@@ -24,10 +24,6 @@ a:hover {
     position: relative;
 }
 
-/*자기소개서 상세보기의 시작을 45px만큼 떨어뜨림*/
-.resume-detail-header-wrapper {
-    margin-top : 45px;
-}
 /* 자기소개서 제목, 수정 버튼에 관한 css */
 .resume-detail-title-and-edit {
     display: flex;

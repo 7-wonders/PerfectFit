@@ -25,6 +25,16 @@
         * {
             font-family: "Noto Sans KR", system-ui !important;
         }
+
+        html, body, .body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        body, .body {
+            flex: 1;
+        }
     </style>
 
     {% block styles %}{% endblock %}
@@ -33,7 +43,11 @@
     <title>PerfectFit</title>
 </head>
 <body>
-    {% block content %}
-    {% endblock %}
+    {% include 'components/header.html' %}
+    <div class="body">
+        {% block content %}
+        {% endblock %}
+    </div>
+    {% include 'components/footer.html' %}
 </body>
 </html>

@@ -307,11 +307,12 @@ class InterviewService:
             add_improvements = []
             for interview_improvement in improvements:
                 improvement = interview_improvement['InterviewImprovement']
-                old_improvement = session.query(InterviewImprovement).filter_by(question_id=improvement['questionId']).first()
-                if old_improvement is not None :
-                    continue
                 if isinstance(improvement, list):
                     improvement = improvement[0]
+
+                old_improvement = session.query(InterviewImprovement).filter_by(question_id=improvement['questionId']).first()
+                if old_improvement is not None:
+                    continue
 
                 new_improvement = InterviewImprovement(
                     question_id=improvement['questionId'],
