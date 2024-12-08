@@ -333,8 +333,8 @@ class UserService:
                     WorkExperienceDTO.Response.WorkExperience(
                         workExperienceId=work_experience.workExperienceId,
                         companyName=work_experience.companyName,
-                        fromDate=variable_to_date_string(work_experience.fromDate),
-                        toDate=variable_to_date_string(work_experience.toDate),
+                        fromDate=work_experience.fromDate.strftime('%Y-%m-%d'),
+                        toDate=work_experience.toDate.strftime('%Y-%m-%d'),
                         position=work_experience.position,
                         reason=work_experience.reason,
                         responsibility=work_experience.responsibility,
@@ -345,8 +345,8 @@ class UserService:
                     PexDTO.Response.ProjectExperience(
                         projectExperienceId=project_experience.projectExperienceId,
                         projectName=project_experience.projectName,
-                        fromDate=variable_to_date_string(project_experience.fromDate),
-                        toDate=variable_to_date_string(project_experience.toDate),
+                        fromDate=project_experience.fromDate.strftime('%Y-%m-%d'),
+                        toDate=project_experience.toDate.strftime('%Y-%m-%d'),
                         contents=[
                             PexDTO.Response.ProjectExperienceContent(
                                 project_experience_task_id=project_task.projectExperienceTaskId,

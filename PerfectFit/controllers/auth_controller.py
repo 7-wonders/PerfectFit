@@ -92,6 +92,9 @@ def auth_naver_callback():
 @auth_bp.route('/login/kakao', methods=['GET'])
 def auth_kakao():
     session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
+    print(session.get('redirect_uri'))
+    print("======================================")
+    print(request.args.get('redirect_uri', type=str))
     return redirect(KakaoOAuthHandler().get_login_url())
 
 
@@ -132,3 +135,7 @@ def renew_token():
     response.status_code = HTTPStatus.NO_CONTENT
 
     return response
+
+@auth_bp.route('/login')
+def get_login():
+    return render_template('login_page.html')

@@ -80,8 +80,8 @@ or response.projectExperiences %}
                             <td class = "Medium-16-Medium">{{ response.user.phoneNumber }}</td>
                         </tr>
                         {% endif %}
-                        {% if response.workExperiences %}
-                            {% for workExperience in response.workExperiences %}
+                        {% if response.work_experiences %}
+                            {% for workExperience in response.work_experiences %}
                                 <tr>
                                     {% if loop.index0 == 0 %}
                                         <td class="Regular-16-Medium">경력</td>
@@ -97,8 +97,8 @@ or response.projectExperiences %}
                                 </tr>
                             {% endfor %}
                         {% endif %}
-                        {% if response.projectExperiences %}
-                            {% for projectExperience in response.projectExperiences %}
+                        {% if response.project_experiences %}
+                            {% for projectExperience in response.project_experiences %}
                                 <tr>
                                     {% if loop.index0 == 0 %}
                                         <td class="Regular-16-Medium">프로젝트 경험</td>
