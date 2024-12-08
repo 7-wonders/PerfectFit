@@ -332,7 +332,7 @@ class UserService:
                 work_experiences=[
                     WorkExperienceDTO.Response.WorkExperience(
                         workExperienceId=work_experience.workExperienceId,
-                        companyName=work_experience.company,
+                        companyName=work_experience.companyName,
                         fromDate=variable_to_date_string(work_experience.fromDate),
                         toDate=variable_to_date_string(work_experience.toDate),
                         position=work_experience.position,

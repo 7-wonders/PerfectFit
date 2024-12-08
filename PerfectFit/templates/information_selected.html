@@ -8,6 +8,17 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/information_selected.js') }}"></script>
+    {% if project_experiences %}
+        <script> let projectCount = {{ project_experiences | length }} </script>
+    {% else %}
+        <script> let projectCount = 1 </script>
+    {% endif %}
+
+    {% if work_experiences %}
+        <script> let careerCount = {{ work_experiences | length }} </script>
+    {% else %}
+        <script> let careerCount = 1 </script>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -19,16 +30,29 @@
                     <p class="uk-article-meta">원하는 서비스를 위해 정보를 입력해주세요.</p>
                 </article>
             </div>
-
             <div class="uk-margin">
                 <label class="uk-form-label" for="form-stacked-text">학력</label>
                 <div class="uk-form-controls">
                     <div class="uk-flex uk-flex-between">
-                        <input class="uk-input" id="form-stacked-text" type="text" name="university" placeholder="최종 학력을 입력해주세요." style="margin-right: 10px">
+                        <input class="uk-input" {% if response %} value = "{{ response.university | default("") }}" {% endif %} id="form-stacked-text" type="text" name="university" placeholder="최종 학력을 입력해주세요." style="margin-right: 10px">
                         <select class="uk-select" name="universityStatus" aria-label="Select">
-                            <option value = "재학">재학</option>
-                            <option value = "휴학">휴학</option>
-                            <option value = "졸업">졸업</option>
+                            {% if response.university_status %}
+                                <option value="{{ response.university_status }}" selected>{{ response.university_status }}</option>
+                                {% if response.university_status == "재학" %}
+                                    <option value="휴학">휴학</option>
+                                    <option value="졸업">졸업</option>
+                                {% elif response.university_status == "휴학" %}
+                                    <option value="재학">재학</option>
+                                    <option value="졸업">졸업</option>
+                                {% elif response.university_status == "졸업" %}
+                                    <option value="재학">재학</option>
+                                    <option value="휴학">휴학</option>
+                                {% endif %}
+                            {% else %}
+                                <option value="재학">재학</option>
+                                <option value="휴학">휴학</option>
+                                <option value="졸업">졸업</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>
@@ -37,104 +61,196 @@
             <div class="uk-margin">
                 <label class="uk-form-label" for="form-stacked-text">전공</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" name="major" id="form-stacked-text" type="text" placeholder="전공을 입력해주세요.">
+                    <input class="uk-input" {% if response.major %} value="{{ response.major | default("") }}" {% endif %} name="major" id="form-stacked-text" type="text" placeholder="전공을 입력해주세요.">
                 </div>
             </div>
 
             <div class="uk-margin">
                 <label class="uk-form-label" for="form-stacked-text">학점</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" name="grade" id="form-stacked-text" type="text" placeholder="학점을 입력해주세요 ex) 3.8">
+                    <input class="uk-input" name="grade" {% if response.grade %} value="{{ response.grade | default("") }}" {% endif %} id="form-stacked-text" type="text" placeholder="학점을 입력해주세요 ex) 3.8">
                 </div>
             </div>
 
             <div class="uk-margin">
                 <label class="uk-form-label" for="form-stacked-text">전화번호</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="form-stacked-text" name="phoneNumber" type="text" placeholder="전화번호를 입력해주세요.">
+                    <input class="uk-input" id="form-stacked-text" {% if response.phone_number %} value = "{{ response.phone_number | default("") }}" {% endif %} name="phoneNumber" type="text" placeholder="전화번호를 입력해주세요.">
                 </div>
             </div>
 
             <div class="project" id="projectExp">
-                <div id = "project-wrapper-0">
-                    <div class="uk-margin">
-                        <div class="uk-flex uk-flex-between">
-                            <label class="uk-form-label" for="form-stacked-email">프로젝트 경험</label>
-                            <button type="button" class="add-btn" id = "add-project-btn" onclick="addProject()">+ 프로젝트 추가하기</button>
-                        </div>
-
-                        <div class="uk-form-controls">
-                            <input class="uk-input" name="projectExperiences[0][projectName]" id="form-stacked-text" type="text" placeholder="프로젝트 이름">
-                        </div>
-                    </div>
-
-                    <div class="uk-margin">
-                        <label class="uk-form-label" for="form-stacked-text">프로젝트 기간</label>
-                        <div class="uk-flex">
-                            <div class="uk-width-1-3@s uk-flex-first">
-                                <input class="uk-input" name="projectExperiences[0][fromDate]" type="date" aria-label="25">
+                {% if response.project_experiences %}
+                    {% for project in response.project_experiences %}
+                    <div id = "project-wrapper-{{ loop.index0 }}">
+                        <div class="uk-margin">
+                            <div class="uk-flex uk-flex-between">
+                                <label class="uk-form-label" for="form-stacked-email">프로젝트 경험{% if loop.index0 != 0 %}{{ loop.index0 + 1 }}{% endif %}</label>
+                                {% if loop.last %}
+                                    <button type="button" class="add-btn" id = "add-project-btn" onclick="addProject()">+ 프로젝트 추가하기</button>
+                                {% endif %}
                             </div>
-                            <div class="uk-card uk-margin-left">
-                                ~
-                            </div>
-                            <div class="uk-width-1-3@s uk-flex-last uk-margin-left">
-                                <input class="uk-input" name="projectExperiences[0][toDate]" type="date" aria-label="25">
-                            </div>
-                        </div>
-                    </div>
-                    <div class = "uk-margin">
-                        <input class="uk-input" name="projectExperiences[0][contents]" type="text" placeholder="프로젝트 내용1">
-                    </div>
-                    <div class = "add-right-btn-box">
-                        <button type="button" class = "add-btn" id = "add-project-content-btn-0" onclick="addProjectContent(0)">+ 내용 추가하기</button>
-                    </div>
-                </div>
-            </div>
 
-            <div class="career" id="careerExp">
-                <div id = "career-wrapper-0">
-                    <div class="uk-margin">
-                        <div class="uk-flex uk-flex-between">
-                            <label class="uk-form-label" for="form-stacked-email">경력</label>
-                            <button type="button" id="add-career-btn" class="add-btn" onclick="addCareer()">+ 경력 추가하기</button>
-                        </div>
-
-                        <div class="uk-form-controls">
-                            <input class="uk-input" id="form-stacked-text" name="workExperiences[0][company_name]" type="text" placeholder="회사 이름">
+                            <div class="uk-form-controls">
+                                <input class="uk-input" value="{{ project.projectName | default("") }}" name="projectExperiences[{{ loop.index0 }}][projectName]" id="form-stacked-text" type="text" placeholder="프로젝트 이름">
+                            </div>
                         </div>
 
                         <div class="uk-margin">
-                            <label class="uk-form-label" for="form-stacked-text">경력 기간</label>
+                            <label class="uk-form-label" for="form-stacked-text">프로젝트 기간</label>
                             <div class="uk-flex">
                                 <div class="uk-width-1-3@s uk-flex-first">
-                                    <input class="uk-input" name="workExperiences[0][fromDate]" type="date" aria-label="25">
+                                    <input class="uk-input" value="{{ project.fromDate }}" name="projectExperiences[{{ loop.index0 }}][fromDate]" type="date" aria-label="25">
                                 </div>
                                 <div class="uk-card uk-margin-left">
                                     ~
                                 </div>
                                 <div class="uk-width-1-3@s uk-flex-last uk-margin-left">
-                                    <input class="uk-input" name="workExperiences[0][toDate]" type="date" aria-label="25">
+                                    <input class="uk-input" value="{{ project.toDate }}" name="projectExperiences[{{ loop.index0 }}][toDate]" type="date" aria-label="25">
                                 </div>
+                            </div>
+                        </div>
+                        {% for content in project.contents %}
+                            <div class = "uk-margin">
+                                <input class="uk-input" value="{{ content | default("") }}" name="projectExperiences[{{ loop.index0 }}][contents]" type="text" placeholder="프로젝트 내용1">
+                            </div>
+                        {% endfor %}
+                        <div class = "add-right-btn-box">
+                            <button type="button" class = "add-btn" id = "add-project-content-btn-{{ loop.index0 }}" onclick="addProjectContent({{ loop.index0 }})">+ 내용 추가하기</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div id = "project-wrapper-0">
+                        <div class="uk-margin">
+                            <div class="uk-flex uk-flex-between">
+                                <label class="uk-form-label" for="form-stacked-email">프로젝트 경험</label>
+                                <button type="button" class="add-btn" id = "add-project-btn" onclick="addProject()">+ 프로젝트 추가하기</button>
+                            </div>
+
+                            <div class="uk-form-controls">
+                                <input class="uk-input" name="projectExperiences[0][projectName]" id="form-stacked-text" type="text" placeholder="프로젝트 이름">
                             </div>
                         </div>
 
                         <div class="uk-margin">
-                            <div class="uk-form-controls">
-                                <input class="uk-input" name="workExperiences[0][position]" id="form-stacked-text" type="text" placeholder="직책">
+                            <label class="uk-form-label" for="form-stacked-text">프로젝트 기간</label>
+                            <div class="uk-flex">
+                                <div class="uk-width-1-3@s uk-flex-first">
+                                    <input class="uk-input" name="projectExperiences[0][fromDate]" type="date" aria-label="25">
+                                </div>
+                                <div class="uk-card uk-margin-left">
+                                    ~
+                                </div>
+                                <div class="uk-width-1-3@s uk-flex-last uk-margin-left">
+                                    <input class="uk-input" name="projectExperiences[0][toDate]" type="date" aria-label="25">
+                                </div>
                             </div>
                         </div>
-                        <div class="uk-margin">
-                            <div class="uk-form-controls">
-                                <input class="uk-input" name="workExperiences[0][responsibility]" id="form-stacked-text" type="text" placeholder="담당 업무">
+                        <div class = "uk-margin">
+                            <input class="uk-input" name="projectExperiences[0][contents]" type="text" placeholder="프로젝트 내용1">
+                        </div>
+                        <div class = "add-right-btn-box">
+                            <button type="button" class = "add-btn" id = "add-project-content-btn-0" onclick="addProjectContent(0)">+ 내용 추가하기</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="career" id="careerExp">
+                {% if response.work_experiences %}
+                    {% for work in response.work_experiences %}
+                        <div id = "career-wrapper-{{ loop.index0 }}">
+                            <div class="uk-margin">
+                                <div class="uk-flex uk-flex-between">
+                                    <label class="uk-form-label" for="form-stacked-email">경력{% if loop.index0 != 0 %}{{ loop.index0 + 1 }}{% endif %}</label>
+                                    {% if loop.last %}
+                                        <button type="button" id="add-career-btn" class="add-btn" onclick="addCareer()">+ 경력 추가하기</button>
+                                    {% endif %}
+                                </div>
+
+                                <div class="uk-form-controls">
+                                    <input class="uk-input" {% if work.companyName %} value="{{ work.companyName }}" {% endif %} id="form-stacked-text" name="workExperiences[{{ loop.index0 }}][company_name]" type="text" placeholder="회사 이름">
+                                </div>
+
+                                <div class="uk-margin">
+                                    <label class="uk-form-label" for="form-stacked-text">경력 기간</label>
+                                    <div class="uk-flex">
+                                        <div class="uk-width-1-3@s uk-flex-first">
+                                            <input class="uk-input" {% if work.fromDate %} value="{{ work.fromDate }}" {% endif %} name="workExperiences[{{ loop.index0 }}][fromDate]" type="date" aria-label="25">
+                                        </div>
+                                        <div class="uk-card uk-margin-left">
+                                            ~
+                                        </div>
+                                        <div class="uk-width-1-3@s uk-flex-last uk-margin-left">
+                                            <input class="uk-input" {% if work.toDate %} value="{{ work.toDate }}" {% endif %} name="workExperiences[{{ loop.index0 }}][toDate]" type="date" aria-label="25">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="uk-margin">
+                                    <div class="uk-form-controls">
+                                        <input class="uk-input" {% if work.position %} value="{{ work.position }}" {% endif %} name="workExperiences[{{ loop.index0 }}][position]" id="form-stacked-text" type="text" placeholder="직책">
+                                    </div>
+                                </div>
+                                <div class="uk-margin">
+                                    <div class="uk-form-controls">
+                                        <input class="uk-input" {% if work.responsibility %} value="{{ work.responsibility }}" {% endif %} name="workExperiences[{{ loop.index0 }}][responsibility]" id="form-stacked-text" type="text" placeholder="담당 업무">
+                                    </div>
+                                </div>
+                                <div class="uk-margin">
+                                    <div class="uk-form-controls">
+                                        <input class="uk-input" {% if work.reason %} value="{{ work.reason }}" {% endif %} name="workExperiences[{{ loop.index0 }}][reason]" id="form-stacked-text" type="text" placeholder="퇴사 사유">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    {% endfor %}
+                {% else %}
+                    <div id = "career-wrapper-0">
                         <div class="uk-margin">
+                            <div class="uk-flex uk-flex-between">
+                                <label class="uk-form-label" for="form-stacked-email">경력</label>
+                                <button type="button" id="add-career-btn" class="add-btn" onclick="addCareer()">+ 경력 추가하기</button>
+                            </div>
+
                             <div class="uk-form-controls">
-                                <input class="uk-input" name="workExperiences[0][reason]" id="form-stacked-text" type="text" placeholder="퇴사 사유">
+                                <input class="uk-input" id="form-stacked-text" name="workExperiences[0][company_name]" type="text" placeholder="회사 이름">
+                            </div>
+
+                            <div class="uk-margin">
+                                <label class="uk-form-label" for="form-stacked-text">경력 기간</label>
+                                <div class="uk-flex">
+                                    <div class="uk-width-1-3@s uk-flex-first">
+                                        <input class="uk-input" name="workExperiences[0][fromDate]" type="date" aria-label="25">
+                                    </div>
+                                    <div class="uk-card uk-margin-left">
+                                        ~
+                                    </div>
+                                    <div class="uk-width-1-3@s uk-flex-last uk-margin-left">
+                                        <input class="uk-input" name="workExperiences[0][toDate]" type="date" aria-label="25">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="uk-margin">
+                                <div class="uk-form-controls">
+                                    <input class="uk-input" name="workExperiences[0][position]" id="form-stacked-text" type="text" placeholder="직책">
+                                </div>
+                            </div>
+                            <div class="uk-margin">
+                                <div class="uk-form-controls">
+                                    <input class="uk-input" name="workExperiences[0][responsibility]" id="form-stacked-text" type="text" placeholder="담당 업무">
+                                </div>
+                            </div>
+                            <div class="uk-margin">
+                                <div class="uk-form-controls">
+                                    <input class="uk-input" name="workExperiences[0][reason]" id="form-stacked-text" type="text" placeholder="퇴사 사유">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
             <div class="uk-flex uk-flex-between" style = "margin-top:30px">
                 <button  type="button" id="infoButton" class="uk-button uk-button-default" onclick="backButton()">이전</button>

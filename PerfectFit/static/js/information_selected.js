@@ -1,6 +1,3 @@
-let projectCount = 1;
-let projectContentCount = 0;
-let careerCount = 1;
 // 프로젝트 추가
 function addProject() {
     const projectExpContainer = document.getElementById(`projectExp`)

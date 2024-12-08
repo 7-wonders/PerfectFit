@@ -15,11 +15,11 @@ class OptionalInfoService:
 
             if user:
                 # 기본 필드 업데이트
-                user.major = major
-                user.university = university
-                user.university_status = university_status
-                user.grade = grade
-                user.phone_number = phone_number
+                user.major = major or None
+                user.university = university or None
+                user.university_status = university_status or None
+                user.grade = grade or None
+                user.phone_number = phone_number or None
                 session.commit()
 
     @staticmethod

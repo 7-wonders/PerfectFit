@@ -18,6 +18,7 @@ from dto.interview.interview import InterviewDto
 
 from domain.models.interview import Interview
 from domain.models.interview_question import InterviewQuestion
+from logs.log import Logger
 from tasks import start_async_ai_task, add_resume_task
 from utils.celery_util import update_task_status, create_task, generate_unique_task_id
 
@@ -26,6 +27,10 @@ from utils.open_ai import answer_improvement, make_interview_based_on_resume, ma
 from hanspell import spell_checker
 
 from celery import Celery
+
+
+logger = Logger(__name__)
+
 class InterviewService:
 
     @staticmethod
@@ -122,7 +127,6 @@ class InterviewService:
 
                 company_name = None
                 if company:
-                    print(interview.company.__dict__)  # 속성들을 딕셔너리 형태로 출력
                     company_bests = [
                         CompanyBestDto.Response.CompanyBest(
                             companyBestId=company_best.company_id,
@@ -183,7 +187,6 @@ class InterviewService:
             total = 0
 
             for interview in interviews:
-                print(interview)
                 user:AppUser= (
                     session
                     .query(AppUser)
@@ -259,13 +262,11 @@ class InterviewService:
         from app import app  # Flask 애플리케이션 가져오기
         with app.app_context():  # Flask 애플리케이션 컨텍스트 활성화
             session = get_session()
-            print("!")
             task_id = None
             questions = []
             best_answers = []
             try:
                 # 상태 저장 (PENDING)
-                print("2")
 
                 for question_id in question_answer.questionIds :
                     question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
@@ -273,11 +274,6 @@ class InterviewService:
                     questions.append(question.question)
                     best_answers.append(best_answer.answer)
 
-                print("3")
-                print("user_answers :: ", question_answer.answers)
-                print("question_ids :: ", question_answer.questionIds)
-                print("questions :: ", questions)
-                print("best_answers :: ", best_answers)
                 # 비동기 AI 작업 시작
                 async_result = start_async_ai_task.apply_async(kwargs={
                     "user_answers":question_answer.answers,
@@ -287,14 +283,13 @@ class InterviewService:
 
                 session.commit()
 
-
                 # 작업 ID 반환
                 return async_result
             except Exception as e:
                 session.rollback()
                 if task_id is not None :
                     update_task_status(task_id, status='FAILED')
-                print("Exception Cause2 ::", e)
+                logger.error(f"Exception Cause2 :: {e}")
                 raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
@@ -303,7 +298,6 @@ class InterviewService:
         task = start_async_ai_task.AsyncResult(task_id)
         improvements = task.get()
         with get_session() as session:
-            print(improvements)
             add_improvements = []
             for interview_improvement in improvements:
                 improvement = interview_improvement['InterviewImprovement']
@@ -335,7 +329,7 @@ class InterviewService:
             return interview_id
         except Exception as e:
             session.rollback()
-            print("Exception Cause2 :: ", e)
+            logger.error(f"Exception Cause2 :: {e}")
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
@@ -347,7 +341,7 @@ class InterviewService:
             return interview_id
         except Exception as e:
             session.rollback()
-            print("Exception Cause2 :: ", e)
+            logger.error(f"Exception Cause2 :: {e}")
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
 
@@ -370,7 +364,7 @@ class InterviewService:
             session.commit()
         except Exception as e:
             get_session().rollback()
-            print("Exception Cause :: ",e)
+            logger.error(f"Exception Cause :: {e}")
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
@@ -391,7 +385,7 @@ class InterviewService:
 
         except Exception as e:
             get_session().rollback()
-            print("Exception Cause :: ",e)
+            logger.error(f"Exception Cause :: {e}")
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
 
     @staticmethod
@@ -412,7 +406,7 @@ class InterviewService:
 
         except Exception as e:
             get_session().rollback()
-            print("Exception Cause :: ",e)
+            logger.error(f"Exception Cause2 :: {e}")
             raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
     @staticmethod
     def get_is_public(interview_id: int) -> list[InterviewDto.Response.IsPublicInterview] :
@@ -490,28 +484,14 @@ class InterviewService:
             questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
             improvementList = []
 
-            print("################")
-            print(questions)
             if questions is None:
-                print("@@@@@@@@@@@@@@@@@@")
-                print(questions)
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
             for question in questions:
                 improvement = session.query(InterviewImprovement).filter(
                     InterviewImprovement.question_id == question.question_id).order_by(
                     desc(InterviewImprovement.created_time)).first()
-                if improvement is None :
-                    if (question.interview.user_id == user_id) or \
-                            (question.interview.user_id != user_id and question.is_shared == True):
-                        improvementDto = InterviewDto.Response.Improvement(
-                            improvementId=question.interview_answers[0].answer_id,
-                            questionId=question.question_id,
-                            question=question.question,
-                            answer=question.interview_answers[0].answer,
-                            improvement="사용자가 답변을 제출하지 않아 모범 답안을 보여드립니다.",
-                            translatedAnswer=question.interview_answers[0].answer)
-                        improvementList.append(improvementDto)
+
                 if improvement:
                     if (improvement.question.interview.user_id == user_id) or \
                             (improvement.question.interview.user_id != user_id and improvement.question.is_shared == True):
@@ -530,7 +510,7 @@ class InterviewService:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
                 session.add(new_view)
                 session.commit()
-            is_mine = interview.user_id == user_id
+            is_mine = improvement.question.interview.user_id == user_id
             like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
             is_like = False if like is None else True
 
@@ -616,15 +596,9 @@ class InterviewService:
         try:
             # 맞춤법 검사 수행
             result = spell_checker.check(text)
-            print("Checked Text:", result.checked)  # 수정된 텍스트
-            print("Original Text:", result.original)  # 원본 텍스트
-            print("Errors Found:", result.errors)  # 발견된 오류 수
-            print("Corrections:", result.words)  # 각 단어의 교정 결과
-            for word in result.words:
-                print(word)
             return result.checked
         except Exception as e:
-            print("Error occurred:", e)
+            logger.error(f"Exception Cause :: {e}")
 
     @staticmethod
     def get_interviews(user_id: int, page: int, count: int) -> tuple[list[InterviewDto.Response.InterviewSummary], int]:

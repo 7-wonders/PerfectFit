@@ -319,8 +319,6 @@ class ResumeService:
                 )
             )
 
-            print(response)
-
             return response
 
     @staticmethod

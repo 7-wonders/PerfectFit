@@ -53,6 +53,7 @@ function checkInputs() {
     }
 
     // 모든 입력이 채워지면 "다음" 버튼 활성화
+    console.log(allFilled, emailSuccess);
     nextButton.disabled = !(allFilled && emailSuccess);
 }
 

@@ -150,8 +150,6 @@ def delete_interview(interview_id: int):
 def post_question_answer():
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-    print(request.form.get('questionIds'))
-    print(request.form.get('answers'))
     question_ids = [int(qid) for qid in request.form.get('questionIds').split('|') if qid]
 
     answers = request.form.get('answers').split("|")
@@ -162,7 +160,6 @@ def post_question_answer():
     )
 
     task = InterviewService.post_question_answer(post_answer_request, user_id)
-    print("controller ========", task.id)
 
     return jsonify(task.id)
 
@@ -433,7 +430,6 @@ def interviewlist_company():
         } for company_interview in company_interviews],
         "total": company_total
     }
-    print(response)
     return render_template("interviewlist.html", response=response)
 
 
@@ -460,7 +456,6 @@ def interviewlist_job():
         } for job_interview in job_interviews],
         "total": job_total
     }
-    print(response)
     return render_template("interview_job.html", response=response)
 
 
@@ -509,7 +504,6 @@ def resume_select():
             for resume in resume_list],  # JSON 형태로 변환
         "total": total
     }
-    print(response)
 
     return render_template("interview_resume_select.html", response=response)
 

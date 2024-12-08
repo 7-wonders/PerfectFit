@@ -6,7 +6,7 @@
 
 {% block scripts %}
     <script>
-        const isLogin = {{ request.cookies.get('access_token') | tojson }} ? true : false;
+        const isLogin = {{ response.isLogin | tojson }};
     </script>
     <script src="{{ url_for('static', filename='js/information_required.js') }}"></script>
 {% endblock %}
@@ -85,13 +85,13 @@
             <div class="uk-margin">
                 <label class="uk-form-label" for="address">주소</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" name="address" id="address" type="text" placeholder="주소 입력" value="{{ response.address | default("0") }}">
+                    <input class="uk-input" name="address" id="address" type="text" placeholder="주소 입력" value="{{ response.address | default("") }}">
                 </div>
             </div>
 
             <div class="uk-margin">
                 <div class="uk-form-controls">
-                    <input class="uk-input" name="detailAddress" id="detailAddress" type="text" placeholder="상세 주소" value="{{ response.detailAddress | default("0") }}">
+                    <input class="uk-input" name="detailAddress" id="detailAddress" type="text" placeholder="상세 주소" value="{{ response.detailAddress | default("") }}">
                 </div>
             </div>
         </div>
