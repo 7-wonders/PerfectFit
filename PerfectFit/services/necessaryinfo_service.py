@@ -91,33 +91,3 @@ class NecessaryInfoService:
                 session.add(new_info)
 
             session.commit()
-
-    @staticmethod
-    def register_optional_info(user_id: int,  major: str, university: str, university_status: str, grade: str, project_experiences: list[str],work_experiences: list[str], phone_number: str):
-        with get_session() as session :
-            # 사용자의 선택 정보를 업데이트 또는 삽입합니다.
-            optional_info = session.query(AppUser).filter(AppUser.user_id == user_id).first()
-
-            if optional_info:
-                # 정보가 이미 존재하는 경우 업데이트
-                optional_info.major = major
-                optional_info.university = university
-                optional_info.university_status = university_status
-                optional_info.grade = grade
-                optional_info.project_experiences = project_experiences
-                optional_info.work_experiences = work_experiences
-                optional_info.phone_number = phone_number
-                session.add(optional_info)
-            else:
-                # 새로운 사용자 정보를 추가
-                new_info = AppUser(
-                    user_id=user_id,
-                    username=name,
-                    age=age,
-                    email=email,
-                    address=address,
-                    detail_address=detail_address
-                )
-                session.add(new_info)
-
-            session.commit()

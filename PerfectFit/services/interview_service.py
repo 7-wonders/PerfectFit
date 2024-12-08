@@ -490,14 +490,28 @@ class InterviewService:
             questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
             improvementList = []
 
+            print("################")
+            print(questions)
             if questions is None:
+                print("@@@@@@@@@@@@@@@@@@")
+                print(questions)
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
             for question in questions:
                 improvement = session.query(InterviewImprovement).filter(
                     InterviewImprovement.question_id == question.question_id).order_by(
                     desc(InterviewImprovement.created_time)).first()
-
+                if improvement is None :
+                    if (question.interview.user_id == user_id) or \
+                            (question.interview.user_id != user_id and question.is_shared == True):
+                        improvementDto = InterviewDto.Response.Improvement(
+                            improvementId=question.interview_answers[0].answer_id,
+                            questionId=question.question_id,
+                            question=question.question,
+                            answer=question.interview_answers[0].answer,
+                            improvement="사용자가 답변을 제출하지 않아 모범 답안을 보여드립니다.",
+                            translatedAnswer=question.interview_answers[0].answer)
+                        improvementList.append(improvementDto)
                 if improvement:
                     if (improvement.question.interview.user_id == user_id) or \
                             (improvement.question.interview.user_id != user_id and improvement.question.is_shared == True):
@@ -516,7 +530,7 @@ class InterviewService:
                 new_view = InterviewView(interview_id=interview_id, company_id=interview.company_id, user_id=user_id)
                 session.add(new_view)
                 session.commit()
-            is_mine = improvement.question.interview.user_id == user_id
+            is_mine = interview.user_id == user_id
             like = session.query(InterviewLike).filter_by(interview_id=interview_id, user_id=user_id).first()
             is_like = False if like is None else True
 
