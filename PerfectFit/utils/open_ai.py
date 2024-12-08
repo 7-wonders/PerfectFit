@@ -358,7 +358,7 @@ def make_company_interview():
     client = OpenAI(api_key=f'{OPENAI_API_KEY}')
 
     with get_session() as session:
-        represents: list[Represent] = session.query(Represent).all()
+        represents: list[Represent] = session.query(Represent).filter(Represent.company_id>21).all()
         for represent in represents:
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -378,7 +378,7 @@ def make_company_interview():
                 result = response.choices[0].message.content.strip()
                 print(result)
 
-                new_interview = Interview(user_id=1, resume_id=None, job_id=represent.job.job_id, company=None, title=f"{represent.company.company_name}의 면접" , level = "신입")
+                new_interview = Interview(user_id=1, resume_id=None, job_id=represent.job.job_id, company_id=represent.company.company_id, title=f"{represent.company.company_name}의 면접" , level = "신입")
 
                 session.add(new_interview)
                 session.flush()
@@ -484,7 +484,7 @@ def make_company_improvement():
     with get_session() as session:
         represents: list[Represent] = session.query(Represent).filter(Represent.company_id > 15).all()
         try:
-            interviews = session.query(Interview).filter(Interview.interview_id > 157).all()
+            interviews = session.query(Interview).filter(Interview.interview_id > 492).all()
 
             for interview in interviews:
                 questionIds = []
@@ -500,7 +500,6 @@ def make_company_improvement():
 
                 try:
 
-                    print("3")
                     results = []
                     for question, question_id, user_answer, best_answer in zip(questions, questionIds, answers,
                                                                                best_answers):
@@ -524,21 +523,41 @@ def make_company_improvement():
                                  "content": f"당신이 판단하기에 지원자의 답변의 부족한 점과 보완할 점을 찾아 개선사항을 도출하고, 지원자의 답변을 개선하여 알려주세요. 개선 사항과 개선된 문장 모두 한국어로 해주세요."},
                                 {"role": "user",
                                  "content": f"결과적으로 당신이 나에게 주어야할 답변은 json 형식이고, 다음의 내용이 포함되어야합니다.\n 1. questionId : {question_id} \n 2, question : {question}, \n3, UserAnswer : {user_answer}, \n4. Improvement : 당신이 생각하는 개선점 ,\n5. TranslatedAnswer : 당신이 생각한 개선점으로 UserAnswer를 고친 한국어 문장 "},
+                                {"role": "user",
+                                 "content": f"당신은 반드시 앞서 제시한 5가지의 Key를 준수해야합니다. questionId, question, UserAnswer, Improvement, TranslatedAnswer를 준수해야합니다. 나는 이것을 json_loads를 통해 처리할 것이기 때문에 해당 Key값이 달라서는 안됩니다. 그리고 이것들을 반드시 InterviewImprovement로 묶어야합니다. "},
                             ]
                         )
 
                         result = response.choices[0].message.content.strip()
                         result_dict = json.loads(result)
-                        result_dict['InterviewImprovement']['UserAnswer'] = user_answer
+
+                        interview_improvements = result_dict['InterviewImprovement']
+                        if isinstance(interview_improvements, list):  # 리스트일 경우
+                            for improvement in interview_improvements:
+                                if improvement['UserAnswer'] is not None:
+                                    improvement['UserAnswer'] = user_answer
+                        else:  # 딕셔너리일 경우
+                            if interview_improvements['UserAnswer'] is not None:
+                                interview_improvements['UserAnswer'] = user_answer
                         results.append(result_dict)
+
                     for interview_improvement in results:
                         improvement = interview_improvement['InterviewImprovement']
-                        new_improvement = InterviewImprovement(
-                            question_id=improvement['questionId'],
-                            answer=improvement['UserAnswer'],
-                            improvement=improvement['Improvement'],
-                            translated_answer=improvement['TranslatedAnswer']
-                        )
+                        print(improvement)
+                        if not isinstance(improvement, list):  # 리스트일 경우
+                            new_improvement = InterviewImprovement(
+                                question_id=improvement['questionId'],
+                                answer=improvement['UserAnswer'],
+                                improvement=improvement['Improvement'],
+                                translated_answer=improvement['TranslatedAnswer']
+                            )
+                        else:  # 딕셔너리일 경우
+                            new_improvement = InterviewImprovement(
+                                question_id=improvement[0]['questionId'],
+                                answer=improvement[0]['UserAnswer'],
+                                improvement=improvement[0]['Improvement'],
+                                translated_answer=improvement[0]['TranslatedAnswer']
+                            )
                         session.add(new_improvement)
                     session.commit()
 

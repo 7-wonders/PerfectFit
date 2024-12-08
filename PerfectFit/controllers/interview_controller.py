@@ -87,9 +87,14 @@ def get_improvement(task_id: int):
 @interview_bp.route('/improvement/<interview_id>', methods=['GET'])
 def get_improvement_with_id(interview_id: int):
 
+    try:
+        interview_id = int(interview_id)
+    except ValueError:
+        raise CustomException(ExceptionType.INTERNAL_SERVER_ERROR)
+
     jwt_factory = JWTFactory()
     user_id = jwt_factory.verify_access_token(request.cookies.get('access_token'))
-
+    print("conroller :: ", interview_id)
     improvementList, is_mine, is_like, view_count, like_count = InterviewService.get_improvement_based_id(interview_id, user_id)
 
     title, interview_id = InterviewService.get_interview_title(None, interview_id)
@@ -173,7 +178,6 @@ def get_task(task_id):
 
         #여기서 DB 작업
         InterviewService.post_question_answer_after(task_id)
-
         return jsonify({"task_id": task.id}), HTTPStatus.OK
     elif state == 'failure':
         raise CustomException(ExceptionType.CELERY_ERROR)
@@ -310,9 +314,10 @@ def loading_create():
     return render_template("Loading-create.html")
 
 
-@interview_bp.route('/loading-analyze/<task_id>')
-def loading_analyze(task_id: int):
-    return render_template("Loading-analyze.html", task_id=task_id)
+@interview_bp.route('/loading-analyze/<task_id>/<question_id>')
+def loading_analyze(task_id: int, question_id: int):
+    interview_id = InterviewService.get_interview_id(question_id)
+    return render_template("Loading-analyze.html", task_id=task_id, interview_id=interview_id)
 
 
 @interview_bp.route('/')
@@ -534,6 +539,6 @@ def get_interview_select():
 
 @interview_bp.route('/make/company')
 def make_company():
+    # make_company_interview()
     make_company_improvement()
-    return render_template("resume_loading.html.html")
 

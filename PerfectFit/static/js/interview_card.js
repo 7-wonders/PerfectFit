@@ -4,11 +4,13 @@ window.addEventListener('load', () => {
 
     cards.forEach(card => {
         card.addEventListener('click', () => {
-            const interviewId = card.dataset.interviewId;
+            let interviewId = card.dataset.interviewId;
             if (!interviewId) {
                 alert('페이지 이동 중 오류가 발생하였습니다.');
                 return;
             }
+            interviewId = parseInt(interviewId, 10); // 또는 Number(interviewId)
+            console.log("Redirecting to interview improvement page with ID:", interviewId);
 
             window.location.href = `/interview/improvement/${interviewId}`;
         });
