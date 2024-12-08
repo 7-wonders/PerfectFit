@@ -76,3 +76,13 @@ class UserDto:
             email: str
             address: str
             detailAddress: str
+
+        @dataclass
+        class OptionalInfo:
+            major: str
+            university: int
+            university_status: str
+            grade: str
+            phone_number: str
+            work_experiences: List['WorkExperienceDTO.Response.WorkExperience']
+            project_experiences: List['PexDTO.Response.ProjectExperience']

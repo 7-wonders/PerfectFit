@@ -57,7 +57,7 @@
                                 style="margin-right: 10px"
                                 onInput="disabledDomain()"
                                 value="{{ response.email | default("") }}"
-                                {% if response.email %} disabled {% endif %}
+                                {% if response.email %} readonly {% endif %}
                         >
                         <select class="uk-select" name="emailDomain" aria-label="Select" id="emailDomain">
                             <option value="" id = "none-domain">이메일 주소 선택</option>

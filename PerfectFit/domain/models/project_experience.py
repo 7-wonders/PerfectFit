@@ -18,7 +18,7 @@ class ProjectExperience(db.Model):
     user_id: Mapped[int] = mapped_column(
         INTEGER(unsigned=True),
         ForeignKey("app_user.user_id", onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False
+        nullable=True
     )
     from_date: Mapped[str] = mapped_column(DATE, nullable=False)
     to_date: Mapped[str] = mapped_column(DATE, nullable=False)

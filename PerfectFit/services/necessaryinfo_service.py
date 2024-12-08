@@ -34,7 +34,36 @@ class NecessaryInfoService:
                 address=user_info['address'],
                 detailAddress=user_info['detailAddress']
             )
+    @staticmethod
+    def get_optional_info() -> UserDto.Response.OptionalInfo:
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
 
+        with get_session() as session:
+            user_query = (
+                select(
+                    AppUser.user_id.label('userId'),
+                    AppUser.major,
+                    AppUser.university,
+                    AppUser.university_status,
+                    AppUser.grade,
+                    AppUser.phone_number,
+                    AppUser.work_experiences,
+                    AppUser.project_experiences
+                )
+                .where(AppUser.user_id == user_id)
+            )
+
+            user_info = session.execute(user_query).mappings().first()
+
+            return UserDto.Response.OptionalInfo(
+                major=user_info['major'],
+                university=user_info['university'],
+                university_status=user_info['university_status'],
+                grade=user_info['grade'],
+                phone_number=user_info['phone_number'],
+                project_experiences=user_info['project_experiences'],
+                work_experiences=user_info['work_experiences'],
+            )
     @staticmethod
     def register_info(user_id: int, name: str, age: int, email: str, address: str, detail_address: str):
         with get_session() as session :
@@ -49,6 +78,36 @@ class NecessaryInfoService:
                 necessary_info.address = address
                 necessary_info.detail_address = detail_address
                 session.add(necessary_info)
+            else:
+                # 새로운 사용자 정보를 추가
+                new_info = AppUser(
+                    user_id=user_id,
+                    username=name,
+                    age=age,
+                    email=email,
+                    address=address,
+                    detail_address=detail_address
+                )
+                session.add(new_info)
+
+            session.commit()
+
+    @staticmethod
+    def register_optional_info(user_id: int,  major: str, university: str, university_status: str, grade: str, project_experiences: list[str],work_experiences: list[str], phone_number: str):
+        with get_session() as session :
+            # 사용자의 선택 정보를 업데이트 또는 삽입합니다.
+            optional_info = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+
+            if optional_info:
+                # 정보가 이미 존재하는 경우 업데이트
+                optional_info.major = major
+                optional_info.university = university
+                optional_info.university_status = university_status
+                optional_info.grade = grade
+                optional_info.project_experiences = project_experiences
+                optional_info.work_experiences = work_experiences
+                optional_info.phone_number = phone_number
+                session.add(optional_info)
             else:
                 # 새로운 사용자 정보를 추가
                 new_info = AppUser(
