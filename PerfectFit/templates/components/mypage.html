@@ -1,39 +1,27 @@
-{% extends "index.html" %}
-
 {% block styles  %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}" />
 {% endblock %}
 
-{% set userName = "한정석"%}
-
-{% block content %}
-    {% include 'components/header.html' %}
-    <div class="container">
-            <div>
-                <img src="{{ response.user.profilePath }}" class = "user-profile-big" />
-                <span class = "Bold-30">{{ response.user.username }}님</span>
-            </div>
-        <nav class="uk-navbar-container" uk-navbar>
-            <div class="uk-navbar-left">
-                <ul class="uk-navbar-nav">
-
-                    <li class="{% if request.path.startswith('/user/mypage/resume') %}uk-active{% endif %}">
-                        <a href="/user/mypage/resume">자기소개서</a>
-                    </li>
-                    <li class="{% if request.path.startswith('/user/mypage/interview') %}uk-active{% endif %}">
-                        <a href="/user/mypage/interview">AI 모의면접</a>
-                    </li>
-                    <li class="{% if request.path.startswith('/user/mypage/information') %}uk-active{% endif %}">
-                        <a href="/user/mypage/information">내 정보</a>
-                    </li>
-
-<!--                     <li class = "{% if active_page == 'resume'%} uk-active {% endif %}"><a href="/user/mypage/resume">자기소개서</a></li>
-                    <li class = "{% if active_page == 'interview'%} uk-active {% endif %}"><a href="/user/mypage/interview">AI 모의면접</a></li>
-                    <li class = "{% if active_page == 'information'%} uk-active {% endif %}"><a href="/user/mypage/information">내 정보</a></li> -->
-
-                </ul>
-            </div>
-        </nav>
+<div class="container">
+    <div>
+        <img src="{{ response.user.profilePath }}" class = "user-profile-big" />
+        <span class = "Bold-30">{{ response.user.username }}님</span>
     </div>
-{% endblock %}
+    <nav class="uk-navbar-container" uk-navbar>
+        <div class="uk-navbar-left">
+            <ul class="uk-navbar-nav">
+
+                <li class="{% if request.path.startswith('/user/mypage/resume') %}uk-active{% endif %}">
+                    <a href="/user/mypage/resume">자기소개서</a>
+                </li>
+                <li class="{% if request.path.startswith('/user/mypage/interview') %}uk-active{% endif %}">
+                    <a href="/user/mypage/interview">AI 모의면접</a>
+                </li>
+                <li class="{% if request.path.startswith('/user/mypage/information') %}uk-active{% endif %}">
+                    <a href="/user/mypage/information">내 정보</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>

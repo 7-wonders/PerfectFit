@@ -1,12 +1,14 @@
+{% extends "index.html" %}
+
 {% set page = request.args.get('page', 1) | default(1) | int %}
 {% set pageRange = 5 %}
 {% set totalPages = ( response.total + pageRange - 1) // pageRange %}
 {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
 {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
 
-{% block Content %}
-    {% include 'components/mypage.html' %}
+{% block content %}
     <div class="container">
+        {% include 'components/mypage.html' %}
         {#모의면접 게시물#}
         <div>
             {% for interview in response.interviews %}
@@ -46,6 +48,7 @@
             {% endfor %}
         </div>
         {# 페이지네이션 #}
+        {% if response.total > 5 %}
         <nav aria-label="Pagination">
             <ul class="uk-pagination uk-flex-center" uk-margin>
                 {# Previous 버튼 렌더링 조건 #}
@@ -82,6 +85,6 @@
                 {% endif %}
             </ul>
        </nav>
+        {% endif %}
     </div>
-
 {% endblock %}

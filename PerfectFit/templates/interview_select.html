@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% include 'components/header.html' %}
+
 
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/text.css') }}" />
@@ -12,7 +12,7 @@
          <div class="uk-grid-small uk-child-width-expand@s uk-text-center resume-select-box" uk-grid>
             <a href = "/interview/resume-select">
                 <div class="uk-card uk-card-default uk-card-body select-card">
-                    <img src="{{ url_for('static', filename='img/resume_select_all.svg') }}" class = "resume-select-img" alt="resume"/>
+                    <img src="{{ url_for('static', filename='img/interview_select_resume.svg') }}" class = "resume-select-img" alt="resume"/>
                     <div class = "resume-select-text">
                         <p class = "Medium-22">자기소개서 기반 모의면접</p>
                         <p class = "Regular-20-light">AI가 당신의 자기소개서를 기반으로 면접을 진행합니다.</p>
@@ -23,7 +23,7 @@
             <a href = "/interview/job-select">
                 <div class="uk-card uk-card-default uk-card-body select-card">
                     <div class = "resume-select-img">
-                        <img src="{{ url_for('static', filename='img/resume_select_part.svg') }}" class = "resume-select-img" alt="interview"/>
+                        <img src="{{ url_for('static', filename='img/interview_select_occupation.svg') }}" class = "resume-select-img" alt="interview"/>
                     </div>
                     <div class = "resume-select-text">
                         <p class = "Medium-22">직무 기반 모의면접</p>

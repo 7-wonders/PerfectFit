@@ -1,7 +1,15 @@
+html, .body {
+    display: block;
+    min-height: 0;
+}
+
+.body {
+    overflow: hidden;
+}
+
 body {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    overflow: hidden;
+    height: 100vh;
 }
 
 .container {
@@ -11,7 +19,8 @@ body {
     flex-direction: column;
     max-width: 1440px;
     width: 100%;
-    margin: 30px auto;
+    height: 100%;
+    margin: 0 auto;
     box-sizing: border-box;
 
     .top-box {

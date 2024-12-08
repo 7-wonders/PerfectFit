@@ -1,11 +1,13 @@
 .container {
+    flex: 1;
     display: flex;
     width: 90rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     font-family: 'Noto Sans KR', sans-serif;
-    margin : 250px auto;
+    margin : 0 auto;
+    height: 100%;
 }
 
 .uk-card-body {

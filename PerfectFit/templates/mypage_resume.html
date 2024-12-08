@@ -1,82 +1,87 @@
+{% extends "index.html" %}
+
 {% set page = request.args.get('page', 1) | default(1) | int %}
 {% set pageRange = 5 %}
 {% set totalPages = ( response.total + pageRange - 1) // pageRange %}
 {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
 {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
-{% block Content %}
-{% include 'components/mypage.html' %}
-    <div class = "container">
-        {% for resume in response.resumes %}
-            <div class = "resume-list">
-                {#게시물 왼쪽 부분#}
-                <div>
-                    <div class = "resume-list-header">
-                        <span class = "title-category">{{ resume.occupationName }} |</span>
-                        <span class = "title-category">{{ resume.jobName }} |</span>
-                        <span class = "title-category">{{ resume.level }}</span>
-                        <a href = "/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
-                    </div>
-                    <p class="Regular-16">공개 여부 : {{ '공개' if resume.isPublic else '비공개' }}</p>
+
+{% block content %}
+<div class = "container">
+    {% include 'components/mypage.html' %}
+    {% for resume in response.resumes %}
+        <div class = "resume-list">
+            {#게시물 왼쪽 부분#}
+            <div>
+                <div class = "resume-list-header">
+                    <span class = "title-category">{{ resume.occupationName }} |</span>
+                    <span class = "title-category">{{ resume.jobName }} |</span>
+                    <span class = "title-category">{{ resume.level }}</span>
+                    <a href = "/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
                 </div>
-                {#게시물 오른쪽 부분#}
-                <div>
-                    <p class = "Regular-16">작성일 : {{ resume.createdTime }}</p>
-                    <div class = "resume-list-Engagement">
-                        <div>
-                            <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                            <span class = "Regular-16-light">{{ resume.viewCount }}</span>
-                        </div>
-                        <div>
-                            {% if resume.isLike %}
-                                <img src="{{ url_for('static', filename='img/like_active.svg') }}">
-                            {% else %}
-                                <img src="{{ url_for('static', filename='img/like.svg') }}">
-                            {% endif %}
-                            <span class = "Regular-16-light">{{ resume.likeCount }}</span>
-                        </div>
+                <p class="Regular-16">공개 여부 : {{ '공개' if resume.isPublic else '비공개' }}</p>
+            </div>
+            {#게시물 오른쪽 부분#}
+            <div>
+                <p class = "Regular-16">작성일 : {{ resume.createdTime }}</p>
+                <div class = "resume-list-Engagement">
+                    <div>
+                        <span uk-icon="icon: eye; ratio: 1.0;"></span>
+                        <span class = "Regular-16-light">{{ resume.viewCount }}</span>
+                    </div>
+                    <div>
+                        {% if resume.isLike %}
+                            <img src="{{ url_for('static', filename='img/like_active.svg') }}">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='img/like.svg') }}">
+                        {% endif %}
+                        <span class = "Regular-16-light">{{ resume.likeCount }}</span>
                     </div>
                 </div>
             </div>
-           {% if loop.index0 < response.resumes|length %}
-               <hr>
-           {% endif %}
-        {% endfor %}
-        {# 페이지네이션 #}
-        <nav aria-label="Pagination">
-            <ul class="uk-pagination uk-flex-center" uk-margin>
-                {# Previous 버튼 렌더링 조건 #}
-                {% if startPage > 1 %}
-                    <li>
-                        <a href="/resume?page={{ startPage - 1 }}&count=5"
-                                class="Regular-20-light">
-                            <span class="Regular-20-light" uk-pagination-previous></span>
-                        </a>
-                    </li>
-                {% endif %}
+        </div>
+       {% if loop.index0 < response.resumes|length %}
+           <hr>
+       {% endif %}
+    {% endfor %}
+    {# 페이지네이션 #}
+    {% if response.total > 5 %}
+    <nav aria-label="Pagination">
+        <ul class="uk-pagination uk-flex-center" uk-margin>
+            {# Previous 버튼 렌더링 조건 #}
+            {% if startPage > 1 %}
+                <li>
+                    <a href="/resume?page={{ startPage - 1 }}&count=5"
+                            class="Regular-20-light">
+                        <span class="Regular-20-light" uk-pagination-previous></span>
+                    </a>
+                </li>
+            {% endif %}
 
-                {# 페이지 번호 생성 #}
-                {% for pageNum in range(startPage, endPage + 1) %}
-                    <li class="{% if pageNum == page %}uk-active{% endif %}">
-                        {% if pageNum == page %}
-                            <span class="Regular-20-light" aria-current="page" style = "color : #175FE6">{{ pageNum }}</span>
-                        {% else %}
-                           <a href="/user/mypage/resume?page={{ pageNum }}&count=5"
-                                class="Regular-20-light">{{ pageNum }}
-                           </a>
-                        {% endif %}
-                    </li>
-                {% endfor %}
+            {# 페이지 번호 생성 #}
+            {% for pageNum in range(startPage, endPage + 1) %}
+                <li class="{% if pageNum == page %}uk-active{% endif %}">
+                    {% if pageNum == page %}
+                        <span class="Regular-20-light" aria-current="page" style = "color : #175FE6">{{ pageNum }}</span>
+                    {% else %}
+                       <a href="/user/mypage/resume?page={{ pageNum }}&count=5"
+                            class="Regular-20-light">{{ pageNum }}
+                       </a>
+                    {% endif %}
+                </li>
+            {% endfor %}
 
-                {# Next 버튼 렌더링 조건 #}
-                {% if endPage < totalPages %}
-                    <li>
-                        <a href="/resume?page={{ endPage + 1 }}&count=5"
-                                class="Regular-20-light">
-                            <span class="Regular-20-light" uk-pagination-next></span>
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-       </nav>
-    </div>
+            {# Next 버튼 렌더링 조건 #}
+            {% if endPage < totalPages %}
+                <li>
+                    <a href="/resume?page={{ endPage + 1 }}&count=5"
+                            class="Regular-20-light">
+                        <span class="Regular-20-light" uk-pagination-next></span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+   </nav>
+    {% endif %}
+</div>
 {% endblock %}
