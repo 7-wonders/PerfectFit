@@ -132,73 +132,121 @@ def register_necessary_info():
         # 요청 바디에서 필수 정보 데이터를 추출합니다.
         name = request.form.get("name")
         age = int(request.form.get("age"))
-        emaiL_domain = request.form.get("emailDomain") if request.form.get("emailDomain") is not None else ""
-        email = request.form.get("email") + emaiL_domain
+        email_local = request.form.get("email", "")  # 기본값을 ""로 설정
+        email_domain = request.form.get("emailDomain", "")  # 기본값을 ""로 설정
+        email = email_local + email_domain
+        print(email_local, email_domain, email)
+        print(name,age)
         address = request.form.get("address")
         detail_address = request.form.get("detailAddress")
 
-        # 필수 필드 유효성 검사를 수행합니다.
-        if not all([name, age, email, address]):
-            return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400,
-                            content_type='application/json; charset=utf-8')
 
         # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
         NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
 
         # 응답: 성공 시 204 No Content를 반환
-        return redirect(f"/user/test/selected")
+        return redirect(f"/user/optional")
 
 
-@user_bp.route('/user/optional', methods=['POST'])
+@user_bp.route('/user/optional',methods=['GET','POST'])
 def register_optional_info():
-    # 헤더에서 사용자 ID 추출
-    user_id = request.headers.get("user_id")
+    print("###################################")
+    user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+    print("###################################")
+    if request.method == 'GET':
+        print("1")
+        response = NecessaryInfoService.get_optional_info()
+        print("2")
+        return render_template("information_selected.html", response=response)
+    else:
+        major = request.form.get("major") # 전공
+        university = request.form.get("university")
+        university_status = request.form.get("universityStatus")
+        grade = request.form.get("grade") # 학점
+        phone_number = request.form.get("phoneNumber")
 
-    # 요청 바디에서 선택 정보 데이터를 추출합니다.
-    data = request.get_json()
-    major = data.get("major")
-    university = data.get("university")
-    university_status = data.get("universityStatus")
-    grade = data.get("grade")
-    project_experiences = data.get("projectExperiences", [])
-    work_experiences = data.get("workExperiences", [])
-    phone_number = data.get("phoneNumber")
+        project_experiences = []
+        index = 0
 
-    # Redis에 저장할 데이터 생성
-    redis_data = {
-        "user_id": user_id,
-        "major": major,
-        "university": university,
-        "university_status": university_status,
-        "grade": grade,
-        "project_experiences": project_experiences,
-        "work_experiences": work_experiences,
-        "phone_number": phone_number,
-    }
+        while True:
+            project_name = request.form.get(f"projectExperiences[{index}][projectName]")
+            from_date = request.form.get(f"projectExperiences[{index}][fromDate]")
+            to_date = request.form.get(f"projectExperiences[{index}][toDate]")
+            contents = request.form.getlist(f"projectExperiences[{index}][contents]")
 
-    # Redis에 데이터 저장
-    from config.config_redis import Redis
-    redis_handler = Redis()
-    redis_key = f"user:{user_id}:optional_info"
-    redis_value = json.dumps(redis_data, ensure_ascii=False)
+            if not project_name:
+                break
 
-    redis_handler.save(redis_key, redis_value)
+            project_experiences.append({
+                "projectName": project_name,
+                "fromDate": from_date,
+                "toDate": to_date,
+                "contents": contents
+            })
+            index += 1
+        work_experiences = []
+        index = 0
 
-    # 데이터베이스에 저장하기 위해 서비스 계층 호출
-    OptionalInfoService.register_info(
-        user_id=user_id,
-        major=major,
-        university=university,
-        university_status=university_status,
-        grade=grade,
-        project_experiences=project_experiences,
-        work_experiences=work_experiences,
-        phone_number=phone_number
-    )
+        while True:
+            company_name = request.form.get(f"workExperiences[{index}][company_name]")
+            from_date = request.form.get(f"workExperiences[{index}][fromDate]")
+            to_date = request.form.get(f"workExperiences[{index}][toDate]")
+            position = request.form.get(f"workExperiences[{index}][position]")
+            responsibility = request.form.get(f"workExperiences[{index}][responsibility]")
+            reason = request.form.get(f"workExperiences[{index}][reason]")
 
-    # 성공 시 리다이렉션
-    redirect_uri = "/optional-info/success"
-    return redirect(redirect_uri)
+            if not company_name:
+                break
+
+            work_experiences.append({
+                "companyName": company_name,
+                "fromDate": from_date,
+                "toDate": to_date,
+                "position": position,
+                "responsibility": responsibility,
+                "reason": reason
+            })
+            index += 1
+
+        print("슛~~~~~~~~~~~~~~~~~~~", user_id)
+        OptionalInfoService.register_info(
+            user_id=user_id,
+            major=major,
+            university=university,
+            university_status=university_status,
+            grade=grade,
+            project_experiences=project_experiences,
+            work_experiences=work_experiences,
+            phone_number=phone_number
+        )
+
+        OptionalInfoService.register_projectexp(
+            user_id=user_id,
+            major=major,
+            university=university,
+            university_status=university_status,
+            grade=grade,
+            project_experiences=project_experiences,
+            work_experiences=work_experiences,
+            phone_number=phone_number
+        )
+
+
+        OptionalInfoService.register_workexp(
+            user_id=user_id,
+            major=major,
+            university=university,
+            university_status=university_status,
+            grade=grade,
+            project_experiences=project_experiences,
+            work_experiences=work_experiences,
+            phone_number=phone_number
+        )
+
+
+        # 성공 시 리다이렉션
+        redirect_uri = "/optional-info/success"
+        return redirect(redirect_uri)
 
 
 @user_bp.route('/user/verify/send', methods=['POST'])
@@ -323,3 +371,4 @@ def logout():
 @user_bp.route('/user/test/selected')
 def get_mypage_selected():
     return render_template("information_selected.html")
+
