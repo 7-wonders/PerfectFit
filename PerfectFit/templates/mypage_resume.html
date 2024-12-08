@@ -1,56 +1,3 @@
-{#{% set response = {#}
-{#    "user": {#}
-{#        "userId": 1,#}
-{#        "username": "홍길동",#}
-{#        "profilePath": url_for('static', filename='img/logo.svg')#}
-{#    },#}
-{#    "resumes": [#}
-{#        {#}
-{#            "resumeId": 1,#}
-{#            "title": "웹 개발자 자기소개서",#}
-{#            "viewCount": 15,#}
-{#            "likeCount": 3,#}
-{#            "isPublic": True,#}
-{#            "occupation": {#}
-{#                "occupationId": 101,#}
-{#                "occupationName": "웹 개발"#}
-{#            },#}
-{#            "job": "프론트엔드 개발자",#}
-{#            "level": "경력",#}
-{#            "createdTime": "2024-10-10"#}
-{#        },#}
-{#        {#}
-{#            "resumeId": 2,#}
-{#            "title": "백엔드 개발자 자기소개서",#}
-{#            "viewCount": 20,#}
-{#            "likeCount": 5,#}
-{#            "isPublic": false,#}
-{#            "occupation": {#}
-{#                "occupationId": 102,#}
-{#                "occupationName": "백엔드 개발"#}
-{#            },#}
-{#            "job": "백엔드 개발자",#}
-{#            "level": "신입",#}
-{#            "createdTime": "2024-11-01"#}
-{#        },#}
-{#        {#}
-{#            "resumeId": 3,#}
-{#            "title": "풀스택 개발자 자기소개서",#}
-{#            "viewCount": 30,#}
-{#            "likeCount": 8,#}
-{#            "isPublic": True,#}
-{#            "occupation": {#}
-{#                "occupationId": 103,#}
-{#                "occupationName": "풀스택 개발"#}
-{#            },#}
-{#            "job": "풀스택 개발자",#}
-{#            "level": "경력",#}
-{#            "createdTime": "2024-09-15"#}
-{#        }#}
-{#    ],#}
-{#    "total": 3#}
-{#} %}#}
-
 {% set page = request.args.get('page', 1) | default(1) | int %}
 {% set pageRange = 5 %}
 {% set totalPages = ( response.total + pageRange - 1) // pageRange %}
@@ -64,8 +11,8 @@
                 {#게시물 왼쪽 부분#}
                 <div>
                     <div class = "resume-list-header">
-                        <span class = "title-category">{{ resume.occupation.occupationName }} |</span>
-                        <span class = "title-category">{{ resume.job }} |</span>
+                        <span class = "title-category">{{ resume.occupationName }} |</span>
+                        <span class = "title-category">{{ resume.jobName }} |</span>
                         <span class = "title-category">{{ resume.level }}</span>
                         <a href = "/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
                     </div>
@@ -80,7 +27,11 @@
                             <span class = "Regular-16-light">{{ resume.viewCount }}</span>
                         </div>
                         <div>
-                            <span uk-icon="icon: heart; ratio: 1.0;"></span>
+                            {% if resume.isLike %}
+                                <img src="{{ url_for('static', filename='img/like_active.svg') }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='img/like.svg') }}">
+                            {% endif %}
                             <span class = "Regular-16-light">{{ resume.likeCount }}</span>
                         </div>
                     </div>

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List
 
 from dto.company_best.company_best import CompanyBestDto
+from dto.user.user import UserDto
 
 
 class InterviewDto:
@@ -57,6 +58,25 @@ class InterviewDto:
         @dataclass
         class IsPublicList:
             interviews: list['InterviewDto.Response.IsPublicInterview']
+
+        @dataclass
+        class MyInterview:
+            interviewId: int
+            title: str
+            level: str
+            viewCount: int
+            likeCount: int
+            isLike: bool
+            isPublic: bool
+            createdTime: str
+            occupationName: str
+            jobName: str
+
+        @dataclass
+        class MyInterviews:
+            user: "UserDto.Response.IntroUserWithProfile"
+            interviews: list['InterviewDto.Response.MyInterview']
+            total: int
 
         @dataclass
         class QuestionList:

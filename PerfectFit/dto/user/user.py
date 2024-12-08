@@ -50,22 +50,29 @@ class UserDto:
 
         @dataclass
         class UserDetail:
-            user_id: int
+            userId: int
             username: str
             age: int
             major: str
             university: str
-            university_status: str
+            universityStatus: str
             grade: float
             address: str
-            detail_address: str
+            detailAddress: str
             email: str
-            phone_number: str
-            profile_path: str
+            phoneNumber: str
+            profilePath: str
 
         @dataclass
         class DetailUser:
             user: 'UserDto.Response.UserDetail'
             work_experiences: List['WorkExperienceDTO.Response.WorkExperience']
             project_experiences: List['PexDTO.Response.ProjectExperience']
-            resumes: List['ResumeDto.Response.MyResume'] = field(default=None)
+
+        @dataclass
+        class NecessaryInfo:
+            username: str
+            age: int
+            email: str
+            address: str
+            detailAddress: str

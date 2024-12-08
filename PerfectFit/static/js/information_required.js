@@ -7,13 +7,19 @@ document.addEventListener('DOMContentLoaded', function() {
     formInputs.forEach(input => {
         input.addEventListener('input', checkInputs);
     });
+
+    if (isLogin) {
+        emailSuccess = true;
+    }
+
+    checkInputs();
+    disabledDomain();
 });
 
 async function send_verification_code() {
     const emailTmp = document.getElementById(`email`).value;
     const emailDomain = document.getElementById(`emailDomain`).value;
     const email = emailTmp + emailDomain;
-    console.log(email);
 
     try {
         const response = await instance.post('/user/verify/send', JSON.stringify({
@@ -36,29 +42,25 @@ function checkInputs() {
     const nextButton = document.getElementById('nextButton');
     const formInputs = document.querySelectorAll('#informationForm input');
 
+    for (const input of formInputs) {
+        if (input.id === 'verificationCode') {
+            continue;
+        }
 
-    // 각 입력 필드에서 값이 비어있는지 확인
-    formInputs.forEach(input => {
         if (input.value.trim() === '') {
             allFilled = false;
         }
-    });
+    }
 
     // 모든 입력이 채워지면 "다음" 버튼 활성화
-    if (allFilled && emailSuccess) {
-        nextButton.disabled = false;
-    } else {
-        nextButton.disabled = true;
-    }
+    nextButton.disabled = !(allFilled && emailSuccess);
 }
 
 function disabledDomain() {
-    console.log("disabled 실행");
     const emailInput = document.getElementById('email');
     const emailDomainSelect = document.getElementById('emailDomain');
 
-    // 이메일 입력 필드의 값이 변경될 때 이벤트 처리
-    emailInput.addEventListener('input', () => {
+    const emailInputHandler = () => {
         if (emailInput.value.includes('@')) {
             emailDomainSelect.disabled = true; // 비활성화
             emailDomainSelect.value = "";
@@ -67,7 +69,13 @@ function disabledDomain() {
             emailDomainSelect.disabled = false; // 활성화
             document.getElementById(`none-domain`).textContent = "이메일 주소 선택"
         }
-    });
+    }
+
+    // 이메일 입력 필드의 값이 변경될 때 이벤트 처리
+    emailInput.addEventListener('input', emailInputHandler);
+
+    // 초기에 한 번 실행
+    emailInputHandler();
 }
 
 async function compare_verification_code() {

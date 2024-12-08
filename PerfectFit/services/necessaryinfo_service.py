@@ -1,8 +1,40 @@
+from flask import request
+from sqlalchemy import select
+
 from domain.models.app_user import AppUser
 from config.config_mysql import get_session
+from dto.user.user import UserDto
+from utils.jwt_factory import JWTFactory
 
 
 class NecessaryInfoService:
+    @staticmethod
+    def get_info() -> UserDto.Response.NecessaryInfo:
+        user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+
+        with get_session() as session:
+            user_query = (
+                select(
+                    AppUser.user_id.label('userId'),
+                    AppUser.username,
+                    AppUser.age,
+                    AppUser.address,
+                    AppUser.detail_address.label('detailAddress'),
+                    AppUser.email
+                )
+                .where(AppUser.user_id == user_id)
+            )
+
+            user_info = session.execute(user_query).mappings().first()
+
+            return UserDto.Response.NecessaryInfo(
+                username=user_info['username'],
+                age=user_info['age'],
+                email=user_info['email'],
+                address=user_info['address'],
+                detailAddress=user_info['detailAddress']
+            )
+
     @staticmethod
     def register_info(user_id: int, name: str, age: int, email: str, address: str, detail_address: str):
         with get_session() as session :
