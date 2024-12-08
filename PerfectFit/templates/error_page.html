@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Error Page!</title>
-</head>
-<body>
-    {% if error %}
-        <p>{{ error.exception.status_code }}</p>
-        <p>{{ error.exception.error_code }}</p>
-        <p>{{ error.exception.message }}</p>
-    {% endif %}
-</body>
-</html>
+{% extends "index.html" %}
+
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/not_found.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="not-found">
+        <img src="{{ url_for('static', filename='img/error.svg') }}" alt="not found" />
+        {% if error %}
+            <h4>{{ error.exception.message }}</h4>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -21,7 +21,7 @@
     <div class="search-container">
         <div class="uk-inline search-box">
             <a class="uk-form-icon uk-form-icon-flip" href="#" uk-icon="icon: search;" id="icon"></a>
-            <input class="uk-input search-input" type="text" id="search" />
+            <input class="uk-input search-input" type="text" id="search" value="{{ request.args.get('keyword') or "" }}" />
         </div>
     </div>
 
