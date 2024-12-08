@@ -10,11 +10,13 @@
 {% block scripts %}
      <script>
         task_id = "{{ task_id }}";
+        interview_id = "{{ interview_id }}";
         setInterval(() => {
             fetch(`/interview/task/${ task_id }`, { method: "POSt" })
                 .then(response => {
                     if (response.status === 200) {
-                        window.location.href = `/interview/improvement/task/${ task_id }`;
+                        {#window.location.href = `/interview/improvement/task/${ task_id }`;#}
+                        window.location.href = `/interview/improvement/${ interview_id }`;
                     } else if (response.status === 202) {
                         console.log("Running...")
                     } else {

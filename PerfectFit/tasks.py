@@ -70,8 +70,15 @@ def start_async_ai_task(user_answers: list[str], question_ids: list[int],questio
                     # JSON 문자열을 Python 객체로 변환
                     result_dict = json.loads(result)
                     print(result_dict)
-                    if result_dict['InterviewImprovement']['UserAnswer'] is not None:
-                        result_dict['InterviewImprovement']['UserAnswer'] = user_answer
+                    interview_improvements = result_dict['InterviewImprovement']
+
+                    if isinstance(interview_improvements, list):  # 리스트일 경우
+                        for improvement in interview_improvements:
+                            if improvement['UserAnswer'] is not None:
+                                improvement['UserAnswer'] = user_answer
+                    else:  # 딕셔너리일 경우
+                        if interview_improvements['UserAnswer'] is not None:
+                            interview_improvements['UserAnswer'] = user_answer
                     results.append(result_dict)
                 except json.JSONDecodeError as e:
                     # JSON 디코딩 실패 시 에러 로그 출력
@@ -80,7 +87,7 @@ def start_async_ai_task(user_answers: list[str], question_ids: list[int],questio
             except KeyError as e:
                 print(f"Error: {e}")
                 return None
-
+        print("results :: ", results)
         return results
 
     except Exception as e:

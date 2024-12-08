@@ -176,7 +176,6 @@ def get_task(task_id):
 
         #여기서 DB 작업
         InterviewService.post_question_answer_after(task_id)
-
         return jsonify({"task_id": task.id}), HTTPStatus.OK
     elif state == 'failure':
         raise CustomException(ExceptionType.CELERY_ERROR)
@@ -305,9 +304,10 @@ def loading_create():
     return render_template("Loading-create.html")
 
 
-@interview_bp.route('/loading-analyze/<task_id>')
-def loading_analyze(task_id: int):
-    return render_template("Loading-analyze.html", task_id=task_id)
+@interview_bp.route('/loading-analyze/<task_id>/<question_id>')
+def loading_analyze(task_id: int, question_id: int):
+    interview_id = InterviewService.get_interview_id(question_id)
+    return render_template("Loading-analyze.html", task_id=task_id, interview_id=interview_id)
 
 
 @interview_bp.route('/')
@@ -532,5 +532,5 @@ def get_interview_select():
 
 @interview_bp.route('/make/company')
 def make_company():
+    # make_company_interview()
     make_company_improvement()
-    return render_template("resume_loading.html.html")

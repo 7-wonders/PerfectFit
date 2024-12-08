@@ -3,6 +3,7 @@ from typing import Tuple, Any, List
 import celery
 from sqlalchemy import func, desc
 from flask import current_app, flash
+from sqlalchemy.orm import joinedload, subqueryload
 
 from config.config_mysql import get_session
 from domain.models import ResumeView, ResumeLike, InterviewImprovement, Company, AppUser, Job, CompanyBest, \
@@ -79,82 +80,56 @@ class InterviewService:
         company_total = 0
 
         with get_session() as session:
+            # 1. Occupation과 Competencies를 한 번에 로드
             occupations = (
-                session
-                .query(Occupation)
+                session.query(
+                    Occupation.occupation_id,
+                    Occupation.occupation_name,
+                    Competencies.content.label("competencies")
+                )
+                .outerjoin(Competencies, Competencies.occupation_id == Occupation.occupation_id)
                 .all()
             )
+
             job_interviews = [
-                {"occupationId":occupation.occupation_id,
+                {"occupationId": occupation.occupation_id,
                  "occupationName": occupation.occupation_name,
-                 "competencies": [ coms.content  for coms in session.query(Competencies).filter(Competencies.occupation_id == occupation.occupation_id).all()],
+                 "competencies": [oc.competencies for oc in occupations if
+                                  oc.occupation_id == occupation.occupation_id],
                  "jobInterviews": [],
                  "total": 0} for occupation in occupations
             ]
-
-            results = (
-                session
-                .query(InterviewQuestion)
+            # 2. Interview와 관련 데이터를 미리 로드
+            interviews = (
+                session.query(Interview)
+                .options(
+                    joinedload(Interview.user),  # AppUser
+                    joinedload(Interview.job),  # Job
+                    joinedload(Interview.company),  # Company
+                    joinedload(Interview.company).subqueryload(Company.company_bests),  # CompanyBest
+                    joinedload(Interview.company).joinedload(Company.company_worsts)  # CompanyWorst
+                )
+                .join(InterviewQuestion, InterviewQuestion.interview_id == Interview.interview_id)
                 .filter(InterviewQuestion.is_shared == True)
                 .all()
             )
 
-            questions = [
-                InterviewDto.Response.InterviewQuestion(question.interview_id, question.question_id, question.question)
-                for question in results
-            ]
-
-            if not questions:
-                raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
-
-            interviews: List[Interview] = (
-                session
-                .query(Interview)
-                .filter(Interview.interview_id.in_(
-                    session.query(InterviewQuestion.interview_id)
-                    .filter(InterviewQuestion.is_shared == True)
-                ))
-                .all()
-            )
-
+            # 3. Interview 데이터 처리
             for interview in interviews:
+                user = interview.user
+                job = interview.job
+                company = interview.company
 
-                user:AppUser= (
-                    session
-                    .query(AppUser)
-                    .filter(AppUser.user_id == interview.user_id)
-                    .first()
-                )
-
-                job:Job= (
-                    session
-                    .query(Job)
-                    .filter(Job.job_id == interview.job_id)
-                    .first()
-                )
                 company_name = None
-                if interview.company_id is not None :
-                    company:Company = (
-                        session
-                        .query(Company)
-                        .filter(Company.company_id == interview.company_id)
-                        .first()
-                    )
-
-                    company_bests:list[CompanyBest] = (
-                        session
-                        .query(CompanyBest)
-                        .filter(CompanyBest.company_id == interview.company_id)
-                        .all()
-                    )
-
-                    company_worst:CompanyWorst= (
-                        session
-                        .query(CompanyWorst)
-                        .filter(CompanyWorst.company_id == interview.company_id)
-                        .first()
-                    )
-
+                if company:
+                    print(interview.company.__dict__)  # 속성들을 딕셔너리 형태로 출력
+                    company_bests = [
+                        CompanyBestDto.Response.CompanyBest(
+                            companyBestId=company_best.company_id,
+                            content=company_best.content
+                        ) for company_best in interview.company.company_bests[:2]
+                    ]
+                    company_worst = interview.company.company_worsts[0].content if interview.company.company_worsts else None
                     company_name = company.company_name
 
                     company_interview = InterviewDto.Response.CompanyInterviewResponse(
@@ -164,23 +139,20 @@ class InterviewService:
                         title=interview.title,
                         jobName=job.job_name,
                         university=user.university,
-                        companyBest= [CompanyBestDto.Response.CompanyBest(
-                            companyBestId=company_best.company_id,
-                            content=company_best.content)
-                            for company_best in company_bests[:2]],
-                        companyWorst= company_worst.content)
-
+                        companyBest=company_bests,
+                        companyWorst=company_worst
+                    )
                     company_interviews.append(company_interview)
                     company_total += 1
 
                 job_interview = InterviewDto.Response.JobInterviewResponse(
                     interviewId=interview.interview_id,
-                    companyName=company_name if company_name is not None else None,
+                    companyName=company_name,
                     level=interview.level,
                     title=interview.title,
                     jobName=job.job_name,
                     university=user.university
-                    )
+                )
 
                 for job_entry in job_interviews:
                     if job_entry["occupationId"] == job.occupation_id:
@@ -327,22 +299,28 @@ class InterviewService:
 
     @staticmethod
     def post_question_answer_after(task_id: str):
+
+        task = start_async_ai_task.AsyncResult(task_id)
+        improvements = task.get()
         with get_session() as session:
-            task = start_async_ai_task.AsyncResult(task_id)
-            improvements = task.get()
             print(improvements)
+            add_improvements = []
             for interview_improvement in improvements:
                 improvement = interview_improvement['InterviewImprovement']
+                old_improvement = session.query(InterviewImprovement).filter_by(question_id=improvement['questionId']).first()
+                if old_improvement is not None :
+                    continue
+
                 new_improvement = InterviewImprovement(
                     question_id=improvement['questionId'],
                     answer=improvement['UserAnswer'],
                     improvement=improvement['Improvement'],
                     translated_answer=improvement['TranslatedAnswer']
                 )
-                session.add(new_improvement)
-            # 상태 업데이트 (COMPLETED)
-            # update_task_status(task_id, status='COMPLETED')
+                add_improvements.append(new_improvement)
+            session.add_all(add_improvements)
             session.commit()
+
 
 
     @staticmethod
@@ -503,15 +481,13 @@ class InterviewService:
             return improvementList, is_mine, is_like, view_count, like_count
 
     @staticmethod
-    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any:
-        with (get_session() as session):
-            interview: Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
-            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(
-                InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(
-                10).all()
+    def get_improvement_based_id(interview_id: int, user_id: int) -> list[InterviewDto.Response.Improvement] | Any :
+        with (get_session() as session) :
+            interview:Interview = session.query(Interview).filter_by(interview_id=interview_id).first()
+            questions: list[InterviewQuestion] = session.query(InterviewQuestion).filter(InterviewQuestion.interview_id == interview_id).order_by(desc(InterviewQuestion.created_time)).limit(10).all()
             improvementList = []
 
-            if not questions:
+            if questions is None:
                 raise CustomException(ExceptionType.NOT_FOUND_QUESTION)
 
             for question in questions:
@@ -632,3 +608,48 @@ class InterviewService:
             return result.checked
         except Exception as e:
             print("Error occurred:", e)
+
+    @staticmethod
+    def get_interviews(user_id: int, page: int, count: int) -> tuple[list[InterviewDto.Response.InterviewSummary], int]:
+        session = get_session()
+
+        # 면접 데이터를 가져오는 쿼리 정의
+        interviews_query = session.query(Interview).filter(Interview.user_id == user_id)
+        total = interviews_query.count()
+
+        interviews = (
+            interviews_query.order_by(Interview.created_time.desc())
+            .offset((page - 1) * count)
+            .limit(count)
+            .all()
+        )
+
+        # 조회수 및 좋아요 수 계산
+        interview_summaries = []
+        for interview in interviews:
+            view_count = session.query(func.sum(ResumeView.view_count)).filter(
+                ResumeView.resume_id == interview.interview_id
+            ).scalar() or 0
+
+            like_count = session.query(func.sum(ResumeLike.like_count)).filter(
+                ResumeLike.resume_id == interview.interview_id
+            ).scalar() or 0
+
+            summary = InterviewDto.Response.InterviewSummary(
+                interview_id=interview.interview_id,
+                title=interview.title,
+                created_time=interview.created_time,
+                view_count=view_count,
+                like_count=like_count,
+            )
+            interview_summaries.append(summary)
+
+        return interview_summaries, total
+
+    @staticmethod
+    def get_interview_id(question_id: int) -> int:
+        with get_session() as session :
+            question = session.query(InterviewQuestion).filter_by(question_id=question_id).first()
+            if question is None:
+                raise CustomException(ExceptionType.NOT_FOUND_INTERVIEW)
+            return question.interview_id
