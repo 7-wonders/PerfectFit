@@ -310,6 +310,8 @@ class InterviewService:
                 old_improvement = session.query(InterviewImprovement).filter_by(question_id=improvement['questionId']).first()
                 if old_improvement is not None :
                     continue
+                if isinstance(improvement, list):
+                    improvement = improvement[0]
 
                 new_improvement = InterviewImprovement(
                     question_id=improvement['questionId'],
