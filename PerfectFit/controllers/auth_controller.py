@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, render_template, request, redirect, session, make_response, Response, url_for
 
+from constants.sns_kind import SnsKind
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger

@@ -54,5 +54,4 @@ class AppUser(db.Model):
     __table_args__ = (
         # 1001: Naver, 1002: Google, 1003: Kakao
         CheckConstraint("sns_kind IN ('1001', '1002', '1003')", name="check_sns_kind"),
-        CheckConstraint("university_status IN ('재학', '중퇴', '졸업예정', '졸업')", name="check_university_status"),
     )

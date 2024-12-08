@@ -6,7 +6,7 @@ from sqlalchemy.orm import scoped_session
 
 from constants.sns_kind import SnsKind
 from config.config_mysql import get_session
-from domain.models import AppUser
+from domain.models import AppUser, ProjectExperience, ProjectExperienceTask, WorkExperience
 from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
@@ -69,6 +69,7 @@ class AuthService:
 
             return UserDto.Request.Signup(
                 snsId=sns_id,
+                snsKind=SnsKind.GOOGLE.value,
                 username=name,
                 email=email,
                 profilePath=profile_image,
@@ -109,6 +110,7 @@ class AuthService:
 
             return UserDto.Request.Signup(
                 snsId=sns_id,
+                snsKind=SnsKind.NAVER.value,
                 username=name,
                 email=email,
                 phoneNumber=phone_number,
@@ -142,6 +144,7 @@ class AuthService:
 
             return UserDto.Request.Signup(
                 snsId=sns_id,
+                snsKind=SnsKind.KAKAO.value,
                 username=name,
                 profilePath=profile_image,
             ), False
@@ -153,3 +156,63 @@ class AuthService:
         _delete_refresh_token()
 
         return token_info
+
+    @staticmethod
+    def signup(
+            major: str, university: str, university_status: str, grade: str, phone_number: str,
+            project_experiences: list, work_experiences: list,
+            info: UserDto.Response.NecessaryInfo
+    ):
+        with get_session() as session:
+            user = AppUser(
+                sns_kind=info['snsKind'],
+                sns_id=info['snsId'],
+                username=info['username'],
+                email=info['email'],
+                age=info['age'],
+                address=info['address'],
+                detail_address=info['detailAddress'],
+                profile_path=info['profilePath'] or None,
+                major=major,
+                university=university,
+                university_status=university_status,
+                grade=grade,
+                phone_number=phone_number,
+            )
+
+            session.add(user)
+            session.flush()
+
+            for project in project_experiences:
+                new_project = ProjectExperience(
+                    user_id=user.user_id,
+                    project_name=project['projectName'],
+                    from_date=project['fromDate'],
+                    to_date=project['toDate'],
+                )
+
+                session.add(new_project)
+                session.flush()
+
+                for content in project['contents']:
+                    new_task = ProjectExperienceTask(
+                        project_experience_id=new_project.project_experience_id,
+                        content=content,
+                    )
+                    session.add(new_task)
+
+            for work in work_experiences:
+                new_work = WorkExperience(
+                    user_id=user.user_id,
+                    company_name=work['companyName'],
+                    position=work['position'],
+                    from_date=work['fromDate'],
+                    to_date=work['toDate'],
+                    reason=work['reason'],
+                    responsibility=work['responsibility'],
+                )
+                session.add(new_work)
+
+            session.commit()
+
+            return _create_token(user.user_id)

@@ -34,6 +34,7 @@ class UserDto:
         @dataclass
         class Signup:
             snsId: str
+            snsKind: str
             username: str
             age: Optional[int] = field(default=None)
             email: Optional[str] = field(default=None)
@@ -85,6 +86,8 @@ class UserDto:
             email: str
             address: str
             detailAddress: str
+            snsId: Optional[str] = field(default=None)
+            snsKind: Optional[str] = field(default=None)
 
         @dataclass
         class OptionalInfo:

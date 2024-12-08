@@ -6,7 +6,9 @@ from werkzeug.utils import secure_filename
 
 from flask import Blueprint, render_template, redirect, make_response
 
+from controllers.auth_controller import _create_response
 from dto.user.user import UserDto
+from services.auth_service import AuthService
 from services.necessaryinfo_service import NecessaryInfoService
 from services.optionalinfo_service import OptionalInfoService
 from services.requirements_service import RequirementsService
@@ -34,13 +36,14 @@ def get_users():
         pages=paginate_user.pages,
     )
 
-    return render_template("testusers.html", response = asdict(response))
+    return render_template("testusers.html", response=asdict(response))
+
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.user_id, user.username)
-    return render_template("testusers.html", response = response)
+    return render_template("testusers.html", response=response)
 
 
 @user_bp.route('/user/mypage/information')
@@ -122,11 +125,28 @@ def create_requirements():
 
 @user_bp.route('/user/necessary', methods=['GET', 'POST'])
 def register_necessary_info():
-    user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
-
     if request.method == 'GET':
-        response = NecessaryInfoService.get_info()
-        return render_template("information_required.html", response=response)
+        is_login = bool(request.cookies.get('access_token')) or bool(session.get('user_info'))
+
+        if session.get('user_info'):
+            user_info: UserDto.Request.Signup = session.get('user_info')
+
+            return render_template("information_required.html", response={
+                "username": user_info['username'],
+                "age": user_info['age'] if user_info['age'] else '',
+                "email": user_info['email'] if user_info['email'] else '',
+                "isLogin": is_login
+            })
+        else:
+            response = NecessaryInfoService.get_info()
+            return render_template("information_required.html", response={
+                "username": response.username,
+                "age": response.age,
+                "email": response.email,
+                "address": response.address,
+                "detailAddress": response.detailAddress,
+                "isLogin": is_login
+            })
     else:
         # 요청 바디에서 필수 정보 데이터를 추출합니다.
         name = request.form.get("name")
@@ -137,25 +157,50 @@ def register_necessary_info():
         address = request.form.get("address")
         detail_address = request.form.get("detailAddress")
 
-
         # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
-        NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
+        if session.get('user_info'):
+            session_data = session.get('user_info')
+            data = {
+                "snsId": session_data['snsId'],
+                "snsKind": session_data['snsKind'],
+                "profilePath": session_data['profilePath'],
+                "username": name,
+                "age": age,
+                "email": email,
+                "address": address,
+                "detailAddress": detail_address,
+            }
+            session['user_info'] = data
 
-        # 응답: 성공 시 204 No Content를 반환
-        return redirect(f"/user/optional")
+            return redirect("/user/optional")
+        else:
+            user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+            NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
+
+            # 응답: 성공 시 204 No Content를 반환
+            return redirect(f"/user/mypage/information")
 
 
-@user_bp.route('/user/optional',methods=['GET','POST'])
+@user_bp.route('/user/optional', methods=['GET', 'POST'])
 def register_optional_info():
-    user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
     if request.method == 'GET':
-        response = NecessaryInfoService.get_optional_info()
-        return render_template("information_selected.html", response=response)
+        if session.get('user_info'):
+            user_info: UserDto.Response.NecessaryInfo = session.get('user_info')
+            return render_template("information_selected.html", response={
+                "username": user_info['username'],
+                "age": user_info['age'],
+                "email": user_info['email'],
+                "address": user_info['address'],
+                "detailAddress": user_info['detailAddress'],
+            })
+        else:
+            response = NecessaryInfoService.get_optional_info()
+            return render_template("information_selected.html", response=response)
     else:
-        major = request.form.get("major") # 전공
+        major = request.form.get("major")  # 전공
         university = request.form.get("university")
         university_status = request.form.get("universityStatus")
-        grade = request.form.get("grade") # 학점
+        grade = request.form.get("grade")  # 학점
         phone_number = request.form.get("phoneNumber")
 
         project_experiences = []
@@ -201,44 +246,47 @@ def register_optional_info():
             })
             index += 1
 
-        OptionalInfoService.register_info(
-            user_id=user_id,
-            major=major,
-            university=university,
-            university_status=university_status,
-            grade=grade,
-            project_experiences=project_experiences,
-            work_experiences=work_experiences,
-            phone_number=phone_number
-        )
+        if session.get('user_info'):
+            user_info: UserDto.Response.NecessaryInfo = session.get('user_info')
+            token_info = AuthService.signup(
+                major=major,
+                university=university,
+                university_status=university_status,
+                grade=grade,
+                phone_number=phone_number,
+                project_experiences=project_experiences,
+                work_experiences=work_experiences,
+                info=user_info,
+            )
 
-        OptionalInfoService.register_projectexp(
-            user_id=user_id,
-            major=major,
-            university=university,
-            university_status=university_status,
-            grade=grade,
-            project_experiences=project_experiences,
-            work_experiences=work_experiences,
-            phone_number=phone_number
-        )
+            redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
+            session.pop('redirect_uri', None)
+            session.pop('user_info', None)
 
+            return _create_response(token_info, redirect_uri)
+        else:
+            user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+            OptionalInfoService.register_info(
+                user_id=user_id,
+                major=major,
+                university=university,
+                university_status=university_status,
+                grade=grade,
+                phone_number=phone_number
+            )
 
-        OptionalInfoService.register_workexp(
-            user_id=user_id,
-            major=major,
-            university=university,
-            university_status=university_status,
-            grade=grade,
-            project_experiences=project_experiences,
-            work_experiences=work_experiences,
-            phone_number=phone_number
-        )
+            OptionalInfoService.register_projectexp(
+                user_id=user_id,
+                project_experiences=project_experiences,
+            )
 
+            OptionalInfoService.register_workexp(
+                user_id=user_id,
+                work_experiences=work_experiences,
+            )
 
-        # 성공 시 리다이렉션
-        redirect_uri = "/optional-info/success"
-        return redirect(redirect_uri)
+            redirect_uri = "/user/mypage/information"
+            return redirect(redirect_uri)
 
 
 @user_bp.route('/user/verify/send', methods=['POST'])
@@ -248,7 +296,8 @@ def send_verification_code():
     email = data.get("email")
     # 필수 값 확인
     if not email:
-        return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 서비스 계층에서 이메일 인증 코드 발송을 처리
     VerificationService.send_verification_code(email)
@@ -266,13 +315,14 @@ def verify_code():
 
     # 필수 값 확인
     if not email or not verify_code:
-        return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
-    is_valid = VerificationService.verify_code(email, verify_code) # 서비스 계층에서 이메일 인증 코드 검증을 처리
+    is_valid = VerificationService.verify_code(email, verify_code)  # 서비스 계층에서 이메일 인증 코드 검증을 처리
 
     if is_valid:
 
-        return Response(status=204) # 인증 성공 시 204 No Content 반환
+        return Response(status=204)  # 인증 성공 시 204 No Content 반환
     else:
         # 인증 실패 시 400 Bad Request 반환
         return Response(json.dumps({"error": "잘못된 인증 코드입니다."}), status=400,
@@ -318,13 +368,15 @@ def delete_user():
 
     # 필수 값 확인
     if not user_id:
-        return Response(json.dumps({"error": "사용자 ID가 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "사용자 ID가 필요합니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 서비스 계층에서 사용자 삭제 처리
     try:
         UserService.delete_user(user_id)
     except Exception as e:
-        return Response(json.dumps({"error": "사용자 삭제 중 오류가 발생했습니다."}), status=500, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "사용자 삭제 중 오류가 발생했습니다."}), status=500,
+                        content_type='application/json; charset=utf-8')
 
     # 성공 시 204 No Content 반환
     return Response(status=204)
@@ -347,6 +399,7 @@ def logout():
 
     return response
 
+
 # @user_bp.route('/user/mypage/resume')
 # def get_mypage_resume():
 #     return render_template("mypage_resume.html", active_page = 'resume')
@@ -362,4 +415,3 @@ def logout():
 @user_bp.route('/user/test/selected')
 def get_mypage_selected():
     return render_template("information_selected.html")
-
