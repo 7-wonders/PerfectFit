@@ -6,8 +6,7 @@
     font-family: 'Noto Sans KR', sans-serif;
     margin : 0 auto;
     gap : 45px;
-    background: rgba(23, 95, 230, 0.03);
-    padding : 12px 16px;
+    padding : 0 16px;
 }
 
 /*인풋 박스 내용 폰트 Regular-16-light로 지정*/

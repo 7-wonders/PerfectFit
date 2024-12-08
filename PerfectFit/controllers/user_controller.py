@@ -1,18 +1,14 @@
 import os
 from dataclasses import asdict
 import json
-from flask import current_app, Response, request
+from flask import current_app, Response, request, session
 from werkzeug.utils import secure_filename
 
 from flask import Blueprint, render_template, redirect, make_response
 
-from dto.interview.interview import InterviewDto
-from dto.occupation.occupation import OccupationDto
-from dto.project_experience.project_experience import PexDTO
-from dto.resume.resume import ResumeDto
+from controllers.auth_controller import _create_response
 from dto.user.user import UserDto
-from dto.work_experience.work_experience import WorkExperienceDTO
-from services.interview_service import InterviewService
+from services.auth_service import AuthService
 from services.necessaryinfo_service import NecessaryInfoService
 from services.optionalinfo_service import OptionalInfoService
 from services.requirements_service import RequirementsService
@@ -40,74 +36,20 @@ def get_users():
         pages=paginate_user.pages,
     )
 
-    return render_template("testusers.html", users=asdict(response))
+    return render_template("testusers.html", response=asdict(response))
 
 
 @user_bp.route('/user/<user_id>')
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     response: UserDto.Response.IntroUser = UserDto.Response.IntroUser(user.user_id, user.username)
-    return render_template("testusers.html", user=response)
+    return render_template("testusers.html", response=response)
 
 
-@user_bp.route('/user/mypage/info')
+@user_bp.route('/user/mypage/information')
 def get_info():
-    # try:
-    #     # 말씀하신 jwt 토큰 방식으로 변경하였습니다!
-    #     access_token = request.cookies.get('access_token')
-    #     jwt_factory = JWTFactory()
-    #     user_id = jwt_factory.verify_access_token(access_token)
-    # except ValueError as e:
-    #     return Response(
-    #         json.dumps({"error": str(e)}),
-    #         status=401,
-    #         content_type='application/json; charset=utf-8'
-    #     )
-    user = UserService.get_user()
-
-    response = UserDto.Response.DetailedUser(
-        user_id=user.user_id,
-        username=user.username,
-        age=user.age,
-        major=user.major,
-        university=user.university,
-        university_status=user.university_status,
-        grade=user.grade,
-        address=user.address,
-        detail_address=user.detail_address,
-        email=user.email,
-        phone_number=user.phone_number,
-        profile_path=user.profile_path,
-        work_experiences=[
-            WorkExperienceDTO.Response.WorkExperience(
-                work_experience_id=exp.work_experience_id,
-                from_date=exp.from_date,
-                to_date=exp.to_date,
-                company_name=exp.company_name,
-                position=exp.position,
-                responsibility=exp.responsibility
-            )
-            for exp in user.work_experiences
-        ],
-        project_experiences=[
-            PexDTO.Response.ProjectExperience(
-                project_experience_id=proj.project_experience_id,
-                project_name=proj.project_name,
-                from_date=proj.from_date,
-                to_date=proj.to_date,
-                contents=[
-                    PexDTO.Response.ProjectExperienceContent(
-                        project_experience_task_id=task.project_experience_task_id,
-                        content=task.content
-                    )
-                    for task in proj.contents
-                ]
-            )
-            for proj in user.project_experiences
-        ]
-    )
-
-    return render_template("testusers.html", user=asdict(response))  # JSON 데이터 전달
+    response = UserService.get_information()
+    return render_template("mypage_information.html", response=response)
 
 
 @user_bp.route('/user/profile')
@@ -118,76 +60,27 @@ def get_profile():
         "profilePath": user.profile_path
     }
 
-    json_response = json.dumps(response, ensure_ascii=False, indent=2)
-    return render_template("testusers.html", user=response)
+    return Response(
+        json.dumps(response, ensure_ascii=False, indent=2),  ##  한글이 깨지지 않도록 처리하였습니다!
+        status=200,
+        content_type='application/json; charset=utf-8'
+    )
 
 
 @user_bp.route('/user/mypage/resume')
 def get_resumes():
     page, count = get_pagination_params()
 
-    # get_user 하지말고 get_user with resumes 메소드를 만들어서 컨트롤러에 대응하는 서비스 만들고. user랑 resumes를 join시켰습니다
-    user, resumes, total = UserService.get_user_with_resumes(page, count)
-
-    # DTO를 사용하여 응답 생성
-    response = ResumeDto.Response.MyResume(
-        user=UserDto.Response.IntroUserWithProfile(
-            userId=user.user_id,
-            username=user.username,
-            profilePath=user.profile_path
-        ),
-        resumes=[
-            ResumeDto.Response.MyResumeInfo(
-                resume_id=resume.resume_id,
-                title=resume.title,
-                # 컬럼에 view_count, like_count가 없어서 주석처리했습니다.
-                # 직접 DB COUNT 해서 가져와야 합니다.
-                # view_count=resume.view_count,
-                # like_count=resume.like_count,
-                view_count=1,
-                like_count=1,
-                occupation=OccupationDto.Response.Occupation(
-                    # occupation 테이블을 통해서 가져와야 합니다.
-                    # occupationId=resume.occupation_id,
-                    # occupationName=resume.occupation_name
-                    occupationId=1,
-                    occupationName="Software Engineer"
-                ),
-                job=resume.job,
-                level=resume.level,
-                created_time=resume.created_time
-            )
-            for resume in resumes
-        ],
-        total=total
-    )
-
-    return render_template("testusers.html", user=response)
+    response = UserService.get_user_with_resumes(page, count)
+    return render_template("mypage_resume.html", response=response)
 
 
 @user_bp.route('/user/mypage/interview')
 def get_interviews():
-    user_id = request.headers.get("user_id")
     page, count = get_pagination_params()
+    response = UserService.get_my_interviews(page, count)
 
-    # 사용자 및 인터뷰 데이터 조회
-    user = UserService.get_user(user_id)
-    interviews, total = InterviewService.get_interviews(user_id, page, count)
-
-    # DTO를 사용하여 응답 생성
-    response = InterviewDto.Response.isPublicList(
-        interviews=[
-            InterviewDto.Response.isPublicInterview(
-                questionId=interview.question_id,
-                title=interview.title,
-                answer=interview.answer,
-                isPublic=interview.is_public
-            )
-            for interview in interviews
-        ]
-    )
-
-    return render_template("testusers.html", user=response)
+    return render_template("mypage_interview.html", response=response)
 
 
 @user_bp.route('/user/requirements', methods=['POST'])
@@ -220,7 +113,7 @@ def create_requirements():
 
     # Redis에 데이터 저장
     from config.config_redis import Redis
-    redis_instance = Redis()  # Redis 인스턴스 생성
+    redis_instance = Redis()
     redis_key = f"user:{user_id}:requirements"
     redis_value = json.dumps(data, ensure_ascii=False)
 
@@ -229,81 +122,171 @@ def create_requirements():
     # 리다이렉션으로 응답 반환
     return redirect("/requirements/success")
 
-@user_bp.route('/user/necessary', methods=['POST'])
+
+@user_bp.route('/user/necessary', methods=['GET', 'POST'])
 def register_necessary_info():
-    # 헤더에서 ACCESS TOKEN을 통해 사용자 ID를 추출
-    user_id = request.headers.get("user_id")
+    if request.method == 'GET':
+        is_login = bool(request.cookies.get('access_token')) or bool(session.get('user_info'))
 
-    # 요청 바디에서 필수 정보 데이터를 추출합니다.
-    data = request.get_json()
-    name = data.get("name")
-    age = data.get("age")
-    email = data.get("email")
-    address = data.get("address")
-    detail_address = data.get("detailAddress")
+        if session.get('user_info'):
+            user_info: UserDto.Request.Signup = session.get('user_info')
 
-    # 필수 필드 유효성 검사를 수행합니다.
-    if not all([name, age, email, address]):
-        return Response(json.dumps({"error": "필수 필드가 누락되었습니다."}), status=400,
-                        content_type='application/json; charset=utf-8')
+            return render_template("information_required.html", response={
+                "username": user_info['username'],
+                "age": user_info['age'] if user_info['age'] else '',
+                "email": user_info['email'] if user_info['email'] else '',
+                "isLogin": is_login
+            })
+        else:
+            response = NecessaryInfoService.get_info()
+            return render_template("information_required.html", response={
+                "username": response.username,
+                "age": response.age,
+                "email": response.email,
+                "address": response.address,
+                "detailAddress": response.detailAddress,
+                "isLogin": is_login
+            })
+    else:
+        # 요청 바디에서 필수 정보 데이터를 추출합니다.
+        name = request.form.get("name")
+        age = int(request.form.get("age"))
+        email_local = request.form.get("email", "")  # 기본값을 ""로 설정
+        email_domain = request.form.get("emailDomain", "")  # 기본값을 ""로 설정
+        email = email_local + email_domain
+        address = request.form.get("address")
+        detail_address = request.form.get("detailAddress")
 
-    # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
-    NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
+        # 데이터베이스에 저장하기 위해 서비스 계층을 호출합니다.
+        if session.get('user_info'):
+            session_data = session.get('user_info')
+            data = {
+                "snsId": session_data['snsId'],
+                "snsKind": session_data['snsKind'],
+                "profilePath": session_data['profilePath'],
+                "username": name,
+                "age": age,
+                "email": email,
+                "address": address,
+                "detailAddress": detail_address,
+            }
+            session['user_info'] = data
 
-    # 응답: 성공 시 204 No Content를 반환
-    return Response(status=204)
+            return redirect("/user/optional")
+        else:
+            user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+            NecessaryInfoService.register_info(user_id, name, age, email, address, detail_address)
+
+            # 응답: 성공 시 204 No Content를 반환
+            return redirect(f"/user/mypage/information")
 
 
-@user_bp.route('/user/optional', methods=['POST'])
+@user_bp.route('/user/optional', methods=['GET', 'POST'])
 def register_optional_info():
-    # 헤더에서 사용자 ID 추출
-    user_id = request.headers.get("user_id")
+    if request.method == 'GET':
+        if session.get('user_info'):
+            user_info: UserDto.Response.NecessaryInfo = session.get('user_info')
+            return render_template("information_selected.html", response={
+                "username": user_info['username'],
+                "age": user_info['age'],
+                "email": user_info['email'],
+                "address": user_info['address'],
+                "detailAddress": user_info['detailAddress'],
+            })
+        else:
+            response = NecessaryInfoService.get_optional_info()
+            return render_template("information_selected.html", response=response)
+    else:
+        major = request.form.get("major")  # 전공
+        university = request.form.get("university")
+        university_status = request.form.get("universityStatus")
+        grade = request.form.get("grade")  # 학점
+        phone_number = request.form.get("phoneNumber")
 
-    # 요청 바디에서 선택 정보 데이터를 추출합니다.
-    data = request.get_json()
-    major = data.get("major")
-    university = data.get("university")
-    university_status = data.get("universityStatus")
-    grade = data.get("grade")
-    project_experiences = data.get("projectExperiences", [])
-    work_experiences = data.get("workExperiences", [])
-    phone_number = data.get("phoneNumber")
+        project_experiences = []
+        index = 0
 
-    # Redis에 저장할 데이터 생성
-    redis_data = {
-        "user_id": user_id,
-        "major": major,
-        "university": university,
-        "university_status": university_status,
-        "grade": grade,
-        "project_experiences": project_experiences,
-        "work_experiences": work_experiences,
-        "phone_number": phone_number,
-    }
+        while True:
+            project_name = request.form.get(f"projectExperiences[{index}][projectName]")
+            from_date = request.form.get(f"projectExperiences[{index}][fromDate]")
+            to_date = request.form.get(f"projectExperiences[{index}][toDate]")
+            contents = request.form.getlist(f"projectExperiences[{index}][contents]")
 
-    # Redis에 데이터 저장
-    from config.config_redis import Redis
-    redis_handler = Redis()
-    redis_key = f"user:{user_id}:optional_info"
-    redis_value = json.dumps(redis_data, ensure_ascii=False)
+            if not project_name:
+                break
 
-    redis_handler.save(redis_key, redis_value)
+            project_experiences.append({
+                "projectName": project_name,
+                "fromDate": from_date,
+                "toDate": to_date,
+                "contents": contents
+            })
+            index += 1
+        work_experiences = []
+        index = 0
 
-    # 데이터베이스에 저장하기 위해 서비스 계층 호출
-    OptionalInfoService.register_info(
-        user_id=user_id,
-        major=major,
-        university=university,
-        university_status=university_status,
-        grade=grade,
-        project_experiences=project_experiences,
-        work_experiences=work_experiences,
-        phone_number=phone_number
-    )
+        while True:
+            company_name = request.form.get(f"workExperiences[{index}][company_name]")
+            from_date = request.form.get(f"workExperiences[{index}][fromDate]")
+            to_date = request.form.get(f"workExperiences[{index}][toDate]")
+            position = request.form.get(f"workExperiences[{index}][position]")
+            responsibility = request.form.get(f"workExperiences[{index}][responsibility]")
+            reason = request.form.get(f"workExperiences[{index}][reason]")
 
-    # 성공 시 리다이렉션
-    redirect_uri = "/optional-info/success"
-    return redirect(redirect_uri)
+            if not company_name:
+                break
+
+            work_experiences.append({
+                "companyName": company_name,
+                "fromDate": from_date,
+                "toDate": to_date,
+                "position": position,
+                "responsibility": responsibility,
+                "reason": reason
+            })
+            index += 1
+
+        if session.get('user_info'):
+            user_info: UserDto.Response.NecessaryInfo = session.get('user_info')
+            token_info = AuthService.signup(
+                major=major,
+                university=university,
+                university_status=university_status,
+                grade=grade,
+                phone_number=phone_number,
+                project_experiences=project_experiences,
+                work_experiences=work_experiences,
+                info=user_info,
+            )
+
+            redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
+            session.pop('redirect_uri', None)
+            session.pop('user_info', None)
+
+            return _create_response(token_info, redirect_uri)
+        else:
+            user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
+            OptionalInfoService.register_info(
+                user_id=user_id,
+                major=major,
+                university=university,
+                university_status=university_status,
+                grade=grade,
+                phone_number=phone_number
+            )
+
+            OptionalInfoService.register_projectexp(
+                user_id=user_id,
+                project_experiences=project_experiences,
+            )
+
+            OptionalInfoService.register_workexp(
+                user_id=user_id,
+                work_experiences=work_experiences,
+            )
+
+            redirect_uri = "/user/mypage/information"
+            return redirect(redirect_uri)
 
 
 @user_bp.route('/user/verify/send', methods=['POST'])
@@ -311,10 +294,10 @@ def send_verification_code():
     # 요청 바디에서 이메일 주소를 추출합니다.
     data = request.get_json()
     email = data.get("email")
-
     # 필수 값 확인
     if not email:
-        return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "이메일은 필수 항목입니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 서비스 계층에서 이메일 인증 코드 발송을 처리
     VerificationService.send_verification_code(email)
@@ -332,13 +315,14 @@ def verify_code():
 
     # 필수 값 확인
     if not email or not verify_code:
-        return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "이메일과 인증 코드는 필수 항목입니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
-    is_valid = VerificationService.verify_code(email, verify_code) # 서비스 계층에서 이메일 인증 코드 검증을 처리
+    is_valid = VerificationService.verify_code(email, verify_code)  # 서비스 계층에서 이메일 인증 코드 검증을 처리
 
     if is_valid:
 
-        return Response(status=204) # 인증 성공 시 204 No Content 반환
+        return Response(status=204)  # 인증 성공 시 204 No Content 반환
     else:
         # 인증 실패 시 400 Bad Request 반환
         return Response(json.dumps({"error": "잘못된 인증 코드입니다."}), status=400,
@@ -384,13 +368,15 @@ def delete_user():
 
     # 필수 값 확인
     if not user_id:
-        return Response(json.dumps({"error": "사용자 ID가 필요합니다."}), status=400, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "사용자 ID가 필요합니다."}), status=400,
+                        content_type='application/json; charset=utf-8')
 
     # 서비스 계층에서 사용자 삭제 처리
     try:
         UserService.delete_user(user_id)
     except Exception as e:
-        return Response(json.dumps({"error": "사용자 삭제 중 오류가 발생했습니다."}), status=500, content_type='application/json; charset=utf-8')
+        return Response(json.dumps({"error": "사용자 삭제 중 오류가 발생했습니다."}), status=500,
+                        content_type='application/json; charset=utf-8')
 
     # 성공 시 204 No Content 반환
     return Response(status=204)
@@ -413,6 +399,7 @@ def logout():
 
     return response
 
+
 # @user_bp.route('/user/mypage/resume')
 # def get_mypage_resume():
 #     return render_template("mypage_resume.html", active_page = 'resume')
@@ -425,3 +412,6 @@ def logout():
 # def get_mypage_information():
 #     return render_template("mypage_information.html", active_page = 'information')
 
+@user_bp.route('/user/test/selected')
+def get_mypage_selected():
+    return render_template("information_selected.html")

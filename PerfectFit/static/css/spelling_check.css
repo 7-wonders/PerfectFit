@@ -1,0 +1,84 @@
+.container {
+    max-width: 68rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px
+}
+
+.uk-grid {
+    padding-top: 20px;
+}
+
+.text_area {
+    position: relative;
+}
+
+.wrap_area {
+    padding: 17px 0 0 20px;
+    border: 1px solid lightgray;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.text_result_area {
+    position: relative;
+    padding: 17px 0 0 20px;
+    border: 1px solid lightgray;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+textarea#input-text {
+    height: 400px;
+    resize: none;
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+textarea#output-text {
+    height: 400px;
+    resize: none;
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+#copy-logo {
+    position: absolute;
+    bottom: 10px;   /* 오른쪽 하단으로 배치 */
+    right: 20px;    /* 오른쪽 끝에 배치 */
+    width: 30px;    /* 이미지 크기 */
+    height: 30px;   /* 이미지 크기 */
+    cursor: pointer;
+}
+
+#check-info {
+    position: absolute; /* text_area 내에서 절대 위치 */
+    bottom: 10px; /* textarea 하단에서 10px 간격 */
+    left: 0;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.check_title {
+    padding-left: 8px;
+}
+
+.check_result_title {
+    padding-left: 8px;
+}
+
+#check-btn {
+    border-radius: 8px;
+}
+
+.uk-article-title {
+    font-size: 1.9rem;
+}
+
+h3 {
+    font-size: 1.3rem;
+}

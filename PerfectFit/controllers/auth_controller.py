@@ -1,8 +1,9 @@
 import os
 from http import HTTPStatus
 
-from flask import Blueprint, render_template, request, redirect, session, make_response, Response
+from flask import Blueprint, render_template, request, redirect, session, make_response, Response, url_for
 
+from constants.sns_kind import SnsKind
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
@@ -35,11 +36,6 @@ def _create_response(token_info: dict, redirect_uri: str | None) -> Response:
     return response
 
 
-@auth_bp.route('/test', methods=['GET'])
-def test():
-    return render_template('test.html')
-
-
 @auth_bp.route('/login/google', methods=['GET'])
 def login_google():
     session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
@@ -51,7 +47,6 @@ def auth_google_callback():
     code = request.args.get('code', type=str)
     error = request.args.get('error', type=str)
     redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
-    session.pop('redirect_uri', None)
 
     if error == 'access_denied':
         return redirect(redirect_uri)
@@ -59,8 +54,14 @@ def auth_google_callback():
     if not code or error:
         raise CustomException(ExceptionType.GOOGLE_LOGIN_ERROR)
 
-    token_info = AuthService.google_login(code)
-    return _create_response(token_info, redirect_uri)
+    response, isExists = AuthService.google_login(code)
+
+    if isExists:
+        session.pop('redirect_uri', None)
+        return _create_response(response, redirect_uri)
+    else:
+        session['user_info'] = response
+        return redirect(url_for('user.register_necessary_info'))
 
 
 @auth_bp.route('/login/naver', methods=['GET'])
@@ -74,18 +75,26 @@ def auth_naver_callback():
     code = request.args.get('code', type=str)
     state = request.args.get('state', type=str)
     redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
-    session.pop('redirect_uri', None)
 
     if not code or not state:
         raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
 
-    token_info = AuthService.naver_login(code, state)
-    return _create_response(token_info, redirect_uri)
+    response, isExists = AuthService.naver_login(code, state)
+
+    if isExists:
+        session.pop('redirect_uri', None)
+        return _create_response(response, redirect_uri)
+    else:
+        session['user_info'] = response
+        return redirect(url_for('user.register_necessary_info'))
 
 
 @auth_bp.route('/login/kakao', methods=['GET'])
 def auth_kakao():
     session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
+    print(session.get('redirect_uri'))
+    print("======================================")
+    print(request.args.get('redirect_uri', type=str))
     return redirect(KakaoOAuthHandler().get_login_url())
 
 
@@ -96,7 +105,6 @@ def auth_kakao_callback():
     state = request.args.get('state', type=str)
 
     redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
-    session.pop('redirect_uri', None)
 
     if error == 'access_denied':
         return redirect(redirect_uri)
@@ -104,8 +112,14 @@ def auth_kakao_callback():
     if not code or error:
         raise CustomException(ExceptionType.KAKAO_LOGIN_ERROR)
 
-    token_info = AuthService.kakao_login(code, state)
-    return _create_response(token_info, redirect_uri)
+    response, isExists = AuthService.kakao_login(code, state)
+
+    if isExists:
+        session.pop('redirect_uri', None)
+        return _create_response(response, redirect_uri)
+    else:
+        session['user_info'] = response
+        return redirect(url_for('user.register_necessary_info'))
 
 
 @auth_bp.route('/', methods=['POST'])
@@ -121,3 +135,7 @@ def renew_token():
     response.status_code = HTTPStatus.NO_CONTENT
 
     return response
+
+@auth_bp.route('/login')
+def get_login():
+    return render_template('login_page.html')

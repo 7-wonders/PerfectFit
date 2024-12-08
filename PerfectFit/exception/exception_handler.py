@@ -33,10 +33,10 @@ def custom_exception(e: CustomException):
             if previous_url is None or 'localhost' not in previous_url:
                 previous_url = "http://localhost:5000/"
 
-            response = make_response(redirect("http://localhost:5000/login?redirect_uri=" + previous_url))
+            response = make_response(redirect("http://localhost:5000/auth/login?redirect_uri=" + previous_url))
             return delete_cookie(response)
 
-        response = make_response(redirect("http://localhost:5000/login?redirect_uri=" + request.url))
+        response = make_response(redirect("http://localhost:5000/auth/login?redirect_uri=" + request.url))
         return delete_cookie(response)
 
     if is_api_call(request):

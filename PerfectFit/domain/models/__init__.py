@@ -19,3 +19,5 @@ from .resume_like import ResumeLike
 from .resume_section import ResumeSection
 from .resume_view import ResumeView
 from .work_experience import WorkExperience
+from .represent import Represent
+from .competencies import Competencies

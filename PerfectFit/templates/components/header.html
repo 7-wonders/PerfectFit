@@ -4,14 +4,28 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+
+    {# refresh_token 가져오기 #}
+    {% if request.cookies.get('refresh_token') %}
+        <script>const refreshToken = {{ request.cookies.get('refresh_token') | tojson }};</script>
+    {% endif %}
+
+    {# 로그인 여부 확인 #}
+    {% if request.cookies.get('access_token') or request.cookies.get('refresh_token') %}
+        <script>login = true</script>
+    {% else %}
+        <script>login = false</script>
+    {% endif %}
 {% endblock %}
 
-{% set login = true %}
+{% if request.cookies.get('access_token') or request.cookies.get('refresh_token') %}
+    {% set login = true %}
+{% endif %}
 
 <header>
     <div class="header-wrapper">
         <nav class="uk-navbar-container header-nav" uk-navbar>
-            <a href="http://127.0.0.1:5000/" class="uk-navbar-item uk-logo logo">
+            <a href="/" class="uk-navbar-item uk-logo logo">
                 <img src="{{ url_for('static', filename='img/logo.svg') }}" />
             </a>
             <div class = "main-menu">
@@ -21,8 +35,8 @@
                             <a href="#">자기소개서</a>
                             <div class="uk-navbar-dropdown">
                                 <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="http://127.0.0.1:5000/resume/list/1">자기소개서 목록</a></li>
-                                    <li><a href="http://127.0.0.1:5000/resume/select">자기소개서 작성</a></li>
+                                    <li><a href="/resume?count=5">자기소개서 목록</a></li>
+                                    <li><a href="/resume/select">자기소개서 작성</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -30,12 +44,12 @@
                             <a href="/about">AI 모의 면접</a>
                             <div class="uk-navbar-dropdown">
                                 <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="#">면접 목록</a></li>
-                                    <li><a href="#">모의 면접 진행</a></li>
+                                    <li><a href="/interview/list">면접 목록</a></li>
+                                    <li><a href="/interview/select">모의 면접 진행</a></li>
                                 </ul>
                             </div>
                         </li>
-                        <li><a href="/contact2">맞춤법 검사기</a></li>
+                        <li><a href="/interview/spellcheck">맞춤법 검사기</a></li>
                     </ul>
                 </div>
             </div>
@@ -58,11 +72,11 @@
 {#            ==================== 로그인이 됐을 때 ===================#}
             {% else %}
                 <div class="uk-navbar-right">
-                    <img src="{{ url_for('static', filename='img/logo.svg') }}" class = "user-profile" />
+                    <img id="userProfileImage" class = "user-profile" />
                     <div class="uk-navbar-dropdown">
                         <ul class="uk-nav uk-navbar-dropdown-nav">
-                            <li><a href="http://127.0.0.1:5000/user/mypage/resume">마이페이지</a></li>
-                            <li><a href="#">로그아웃</a></li>
+                            <li><a href="/user/mypage/resume">마이페이지</a></li>
+                            <li><a href="#" onclick = "deleteCookie()">로그아웃</a></li>
                         </ul>
                     </div>
                 </div>

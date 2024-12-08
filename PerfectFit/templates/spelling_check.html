@@ -1,0 +1,47 @@
+{% extends "index.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spelling_check.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/spelling_check.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+        <div class="container">
+
+            <div class="uk-margin">
+                <article class="uk-article">
+                    <h1 class="uk-article-title"><a class="uk-link-reset" href="">PerfectFit 맞춤법 검사기</a></h1>
+                </article>
+            </div>
+
+            <div class="uk-grid uk-child-width-1-2@s" uk-grid>
+                <div class="text_box_original">
+                    <div class="wrap_area">
+                        <h3 class="check_title">원문</h3>
+                        <div class="text_area">
+                            <textarea maxlength="300" id="input-text" name="content" class="uk-textarea" rows="10" placeholder="여기에 텍스트를 입력하세요."></textarea>
+                            <div class="uk-flex uk-flex-between" id="check-info">
+                                <span class="txt_limit">
+                                    <em id="char-count">0</em> / 300자
+                                </span>
+
+                                <button class="uk-button uk-button-primary" id="check-btn" onclick="spell_check()">검사하기</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text_box right _result">
+                    <div class="text_result_area">
+                        <h3 class="check_result_title">교정 문구</h3>
+                        <textarea id="output-text" class="uk-textarea" rows="10" readonly></textarea>
+                        <img src="{{ url_for('static', filename='img/copy_logo.svg') }}" id="copy-logo" onclick="copy()" />
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

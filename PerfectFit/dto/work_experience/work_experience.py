@@ -6,9 +6,10 @@ class WorkExperienceDTO:
     class Response:
         @dataclass
         class WorkExperience:
-            work_experience_id: int
-            from_date: date
-            to_date: date
-            company_name: str
+            workExperienceId: int
+            fromDate: date
+            toDate: date
+            companyName: str
             position: str
+            reason: str
             responsibility: str

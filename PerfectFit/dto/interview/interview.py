@@ -2,98 +2,128 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from typing import List
 
+from dto.company_best.company_best import CompanyBestDto
+from dto.user.user import UserDto
+
 
 class InterviewDto:
     class Request:
         @dataclass
-        class postInterviewAnswer:
-            questionId: int
-            answer: str
+        class PostInterviewAnswer:
+            questionIds: list[int]
+            answers: list[str]
               
         @dataclass
-        class postMakeInterviewResume:
+        class PostMakeInterviewResume:
             resumeId: int
             level: str
+            title: str
 
         @dataclass
-        class postMakeInterviewJob:
+        class PostMakeInterviewJob:
             jobId: int
             userId: int
             level: str
+            title: str
               
         @dataclass
-        class patchInterviewTitle:
+        class PatchInterviewTitle:
             interviewId: int
             title: str
 
         @dataclass
-        class spellCheck:
+        class SpellCheck:
             content: str
 
-        @dataclass
-        class isPublicIds:
-            questionIds: list[int]
 
     class Response:
         @dataclass
-        class interview:
+        class InterviewQuestion:
             interview_id: int
-            user_id: int
-            resume_id: int
-            job_id: int
-            company_id: int
-            title: str
-            level: str
-
-        @dataclass
-        class interviewQuestion:
             question_id: int
             question: str
 
         @dataclass
-        class questions:
-            questions: list['InterviewDto.Response.interviewQuestion']
+        class Questions:
+            questions: list['InterviewDto.Response.InterviewQuestion']
             total: int
 
         @dataclass
-        class isPublicInterview:
+        class IsPublicInterview:
             questionId: int
             title: str
             answer: str
             isPublic: bool
 
         @dataclass
-        class isPublicList:
-            interviews: list['InterviewDto.Response.isPublicInterview']
+        class IsPublicList:
+            interviews: list['InterviewDto.Response.IsPublicInterview']
 
         @dataclass
-        class improvement:
+        class MyInterview:
+            interviewId: int
+            title: str
+            level: str
+            viewCount: int
+            likeCount: int
+            isLike: bool
+            isPublic: bool
+            createdTime: str
+            occupationName: str
+            jobName: str
+
+        @dataclass
+        class MyInterviews:
+            user: "UserDto.Response.IntroUserWithProfile"
+            interviews: list['InterviewDto.Response.MyInterview']
+            total: int
+
+        @dataclass
+        class QuestionList:
+            questions: list['InterviewDto.Response.InterviewQuestion']
+            total: int
+
+        @dataclass
+        class Improvement:
             improvementId: int
             questionId: int
+            question: str
             answer: str
             improvement: str
             translatedAnswer: str
 
-        @dataclass
-        class improvementList:
-            improvements: list['InterviewDto.Response.improvement']
-
-        @dataclass
-        class spellChecked:
-            translatedContent: str
-
         # 새로 추가된 interviewSummary
         @dataclass
-        class interviewSummary:
+        class InterviewSummary:
             interview_id: int
             title: str
             created_time: str
             view_count: int
             like_count: int
-              
+
         class InterviewQuestionAnswer(BaseModel):
             Question: str
             BestAnswer: str
 
         class InterviewResponse(BaseModel):
             InterviewQuestions: List['InterviewDto.Response.InterviewQuestionAnswer']
+
+        @dataclass
+        class CompanyInterviewResponse:
+            interviewId: int
+            companyName: str
+            level: str
+            title: str
+            jobName: str
+            university: str
+            companyBest: list[CompanyBestDto.Response.CompanyBest]
+            companyWorst: str
+
+        @dataclass
+        class JobInterviewResponse:
+            interviewId: int
+            companyName: str
+            level: str
+            title: str
+            jobName: str
+            university: str

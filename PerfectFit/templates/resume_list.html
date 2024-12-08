@@ -5,78 +5,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_list.css') }}" />
 {% endblock %}
 
-{% set occupations = [
-    {
-        "occupationId": 1,
-        "occupationName": "직군1",
-        "majorCategory": "대분류 아이디1",
-        "subCategory": "소분류 아이디1"
-    },
-    {
-        "occupationId": 2,
-        "occupationName": "직군2",
-        "majorCategory": "대분류 아이디2",
-        "subCategory": "소분류 아이디2"
-    },
-    {
-        "occupationId": 3,
-        "occupationName": "직군3",
-        "majorCategory": "대분류 아이디3",
-        "subCategory": "소분류 아이디3"
-    },
-    {
-        "occupationId": 4,
-        "occupationName": "직군4",
-        "majorCategory": "대분류 아이디4",
-        "subCategory": "소분류 아이디4"
-    },
-    {
-        "occupationId": 5,
-        "occupationName": "직군5",
-        "majorCategory": "대분류 아이디5",
-        "subCategory": "소분류 아이디5"
-    },
-]%}
-
-{% set jobs = {
-        '직군1': ['직업1-1', '직업1-2', '직업1-3'],
-        '직군2': ['직업2-1', '직업2-2'],
-        '직군3': ['직업3-1', '직업3-2', '직업3-3', '직업3-4'],
-        '직군4': ['직업4-1', '직업4-2'],
-        '직군5': ['직업5-1', '직업5-2', '직업5-3']
-}%}
-
-{% set resumes = [
-    {
-        "resumeId": 1,
-        "title": "자기소개서 제목",
-        "occupation" : "직군",
-        "job": "직업",
-        "level": "신입",
-        "user": {
-            "username": "한정석",
-            "profilePath": url_for('static', filename='img/logo.svg')
-        },
-        "viewCount": 32,
-        "likeCount": 16,
-        "createdTime": "2024-02-02"
-    }
-]%}
-
+{% set page = request.args.get('page', 1) | default(1) | int %}
 {% set pageRange = 5 %}
-{% set totalPages = (total + pageRange - 1) // pageRange %}
+{% set totalPages = ( response.total + pageRange - 1) // pageRange %}
 {% set startPage = ((page - 1) // pageRange) * pageRange + 1 %}
 {% set endPage = startPage + pageRange - 1 if startPage + pageRange - 1 <= totalPages else totalPages %}
+
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/resume_list.js') }}"></script>
 {% endblock %}
 
 {% block content %}
-    {% include 'components/header.html' %}
+
     <div class = "container">
-        <p class = "Bold-30-none-weight" style = "margin-top: 45px">카테고리 선택</p>
-        {# =========================== 검색 필터 부분 ================================ #}
+        <p class = "Bold-30-none-weight">카테고리 선택</p>
+{#         =========================== 검색 필터 부분 ================================ #}
         <ul class="uk-subnav uk-subnav-pill search-filter-wrapper" uk-switcher style = "margin-top: 20px !important">
             <li>
                 <a href="#" class = "Regular-16-light search-box">
@@ -92,24 +36,46 @@
             </li>
             <li>
                 <a href="#" class = "Regular-16-light search-box">
-                    <span id = "level">경력 선택</span>
+                    {% if request.args.get('level') %}
+                        <span id = "level">{{ request.args.get('level') }}</span>
+                    {% else %}
+                        <span id = "level">경력 선택</span>
+                    {% endif %}
                     <img src="{{ url_for('static', filename='img/down_arrow_light.svg') }}" />
                 </a>
             </li>
         </ul>
-        {# =========================== 검색 필터 부분 끝 ================================ #}
+{#         =========================== 검색 필터 부분 끝 ================================ #}
 
-        {# ====================== 필터에 해당하는 내용 부분 ================================ #}
+{#         ====================== 필터에 해당하는 내용 부분 ================================ #}
         <div class="uk-switcher uk-margin">
-            {# 직군 선택 필터 #}
+{#             직군 선택 필터#}
             <div class = "search-content" id = "occupation-list-box">
                 <table class="uk-table">
                     <tbody>
-                        {% if occupations %}
-                            {% for occupation in occupations %}
+                        {% if response.occupations %}
+                            {% for i in range(0, response.occupations|length, 5) %}
                                 <tr>
-                                    {% for occupation in occupations %}
-                                        <td class = "list-array"><button type = "button" class = "none-style-btn Regular-16-light" id = "select-occupation" onclick="showJobList(this)">{{ occupation.occupationName }}</button></td>
+                                    {% for occupation in response.occupations[i:i + 5] %}
+                                        {% if request.args.get('occupation_id') | int == occupation.occupationId %}
+                                            <td class="list-array">
+                                                <button type="button" class="none-style-btn Regular-16-light" style = "color : #2B7FFF !important;"
+                                                        id="select-occupation"
+                                                        value="{{ occupation.occupationId }}"
+                                                        onclick="showJobList(this)">
+                                                    {{ occupation.occupationName }}
+                                                </button>
+                                            </td>
+                                        {% else %}
+                                        <td class="list-array">
+                                            <button type="button" class="none-style-btn Regular-16-light"
+                                                    id="select-occupation"
+                                                    value="{{ occupation.occupationId }}"
+                                                    onclick="showJobList(this)">
+                                                {{ occupation.occupationName }}
+                                            </button>
+                                        </td>
+                                        {% endif %}
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -140,52 +106,64 @@
                 </table>
             </div>
         </div>
-        {# ====================== 필터에 해당하는 내용 부분 끝 ================================ #}
+        <div class ="search-btn-box">
+            <button class = "search-btn" id = "search-btn" onclick = "searchBtn(this)">검색</button>
+        </div>
+{#         ====================== 필터에 해당하는 내용 부분 끝 ================================ #}
 
-        {# ======================= 최신, 인기순, 검색창 ============================= #}
+{#         ======================= 최신, 인기순, 검색창 ============================= #}
         <div class="array-and-search">
             <div class="recent-or-popular">
+                {% if request.args.get('sort') == "f" %}
+                    <button type="button" class="none-style-btn Regular-16 select-array" onclick="setArray('최신순')">최신순</button>
+                    <button type="button" class="none-style-btn Regular-16 selected select-array" onclick="setArray('인기순')">인기순</button>
+                {% else %}
                 <button type="button" class="none-style-btn Regular-16 selected select-array" onclick="setArray('최신순')">최신순</button>
                 <button type="button" class="none-style-btn Regular-16 select-array" onclick="setArray('인기순')">인기순</button>
+                {% endif %}
             </div>
             <div class="search-space" id="search-space">
                 <img src="{{ url_for('static', filename='img/search_icon.svg') }}" width="20px" height="20px" />
-                <input class="search-input Regular-16-light" id="search-input" type="text" placeholder="검색어 입력" style="margin-left: 5px" />
+                <input class="search-input Regular-16-light" id="search-input" type="text" placeholder="검색어 입력" style="margin-left: 5px"
+                    {% if request.args.get('search') and request.args.get('search') != "" %}
+                        value="{{ request.args.get('search') }}"
+                    {% endif %}
+                />
             </div>
         </div>
 
-        {# ============================ 게시물 부분 ================================== #}
+{#         ============================ 게시물 부분 ================================== #}
         <p class = "Bold-30-none-weight" style = "margin-top: 30px !important;">자기소개서 목록</p>
-        {% for i in range(5) %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
+        {% for resume in response.resumes %} {# 백엔드에서 데이터를 줄 경우 resumes의 길이만큼 반복 #}
             <div class = "resume-list">
-                {#게시물 왼쪽 부분#}
+{#                게시물 왼쪽 부분#}
                 <div>
                     <div class = "resume-title">
-                        <span class = "title-category">{{ resumes[0].occupation }}{{ i + 1 }} |</span>
-                        <span class = "title-category">{{ resumes[0].job }}{{ i + 1 }} |</span>
-                        <span class = "title-category">{{ resumes[0].level }}</span>
-                        <a href = "http://127.0.0.1:5000/resume/detail/1" class = "resume-link"><span class = Medium-20>{{ resumes[0].title }}{{ i + 1 }}</span></a>
+                        <span class = "title-category">{{ resume.occupationName }} |</span>
+                        <span class = "title-category">{{ resume.jobName }} |</span>
+                        <span class = "title-category">{{ resume.level }}</span>
+                        <a href = "/resume/{{ resume.resumeId }}" class = "resume-link"><span class = Medium-20>{{ resume.title }}</span></a>
                     </div>
                     <div style = "margin-top: 10px;">
-                        <img src="{{ resumes[0].user.profilePath }}" class = "user-profile" />
-                        <span class = "Regular-16" style = "margin-left : 5px">{{ resumes[0].user.username }}</span>
-                        <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ resumes[0].createdTime }}</span>
+                        <img src="{{ resume.profilePath }}" class = "user-profile" />
+                        <span class = "Regular-16" style = "margin-left : 5px">{{ resume.username }}</span>
+                        <span class = "Regular-16-light" style = "margin-left : 5px">작성일 : {{ resume.createdTime }}</span>
                     </div>
                 </div>
                 <div class = "resume-list-Engagement">
                     <div style = "margin-right: 10px;">
                         <span uk-icon="icon: eye; ratio: 1.0;"></span>
-                        <span class = "Regular-16-light">{{ resumes[0].viewCount }}</span>
+                        <span class = "Regular-16-light">{{ resume.viewCount }}</span>
                     </div>
                     <div>
                         <span uk-icon="icon: heart; ratio: 1.0;"></span>
-                        <span class = "Regular-16-light">{{ resumes[0].likeCount }}</span>
+                        <span class = "Regular-16-light">{{ resume.likeCount }}</span>
                     </div>
                 </div>
             </div>
             <hr>
         {% endfor %}
-        {# ========================== 게시물 부분 끝 ================================= #}
+{#         ========================== 게시물 부분 끝 ================================= #}
 
         {# 페이지네이션 #}
        <nav aria-label="Pagination">
@@ -193,7 +171,14 @@
                 {# Previous 버튼 렌더링 조건 #}
                 {% if startPage > 1 %}
                     <li>
-                        <a href="/resume/list/{{ startPage - 1 }}">
+                        <a href="/resume?page={{ startPage - 1 }}&count=5{% for param in [
+                                ('occupation', request.args.get('occupation')),
+                                ('job', request.args.get('job')),
+                                ('level', request.args.get('level')),
+                                ('sort', request.args.get('sort')),
+                                ('search', request.args.get('search'))
+                                ] if param[1] %}&{{ param[0] }}={{ param[1] }}{% endfor %}"
+                                class="Regular-20-light">
                             <span class="Regular-20-light" uk-pagination-previous></span>
                         </a>
                     </li>
@@ -205,7 +190,15 @@
                         {% if pageNum == page %}
                             <span class="Regular-20-light" aria-current="page">{{ pageNum }}</span>
                         {% else %}
-                            <a href="/resume/list/{{ pageNum }}" class="Regular-20-light">{{ pageNum }}</a>
+                           <a href="/resume?page={{ pageNum }}&count=5{% for param in [
+                                ('occupation', request.args.get('occupation')),
+                                ('job', request.args.get('job')),
+                                ('level', request.args.get('level')),
+                                ('sort', request.args.get('sort')),
+                                ('search', request.args.get('search'))
+                                ] if param[1] %}&{{ param[0] }}={{ param[1] }}{% endfor %}"
+                                class="Regular-20-light">{{ pageNum }}
+                           </a>
                         {% endif %}
                     </li>
                 {% endfor %}
@@ -213,7 +206,14 @@
                 {# Next 버튼 렌더링 조건 #}
                 {% if endPage < totalPages %}
                     <li>
-                        <a href="/resume/list/{{ endPage + 1 }}">
+                        <a href="/resume?page={{ endPage + 1 }}&count=5{% for param in [
+                                ('occupation', request.args.get('occupation')),
+                                ('job', request.args.get('job')),
+                                ('level', request.args.get('level')),
+                                ('sort', request.args.get('sort')),
+                                ('search', request.args.get('search'))
+                                ] if param[1] %}&{{ param[0] }}={{ param[1] }}{% endfor %}"
+                                class="Regular-20-light">
                             <span class="Regular-20-light" uk-pagination-next></span>
                         </a>
                     </li>

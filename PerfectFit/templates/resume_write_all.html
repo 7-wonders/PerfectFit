@@ -5,123 +5,47 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_write.css') }}" />
 {% endblock %}
 
-{#{% set level = "경력" %}#}
-{#{% set pros = "전 밥을 잘먹습니다." %}#}
-{#{% set cons = "밥을 잘먹어서 살이 많이 쪘습니다." %}#}
-{#{% set keywords = ['성실', '근면', '정직'] %}#}
-{#{% set directional = "제가 대식가인걸 강조해줬으면 합니다." %}#}
-{##}
-{#{% set selectedOccupation = [#}
-{#    {#}
-{#        "occupationId": 3,#}
-{#        "occupationName": "직군3",#}
-{#        "majorCategory": "대분류3",#}
-{#        "subCategory": "소분류3"#}
-{#    }#}
-{# ]%}#}
-{% set occupationList = [
-    {
-        "occupationId": 1,
-        "occupationName": "직군1",
-        "majorCategory": "대분류1",
-        "subCategory": "소분류1"
-    },
-    {
-        "occupationId": 2,
-        "occupationName": "직군2",
-        "majorCategory": "대분류2",
-        "subCategory": "소분류2"
-    },
-    {
-        "occupationId": 3,
-        "occupationName": "직군3",
-        "majorCategory": "대분류3",
-        "subCategory": "소분류3"
-    },
-
- ]%}
-
-{% set resumes = [
-    {
-        "resumeId": 1,
-        "title": "자기소개서 제목1",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 2,
-        "title": "자기소개서 제목2",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 3,
-        "title": "자기소개서 제목3",
-        "createdTime": "2024-10-04 02:17:32"
-    },
-    {
-        "resumeId": 4,
-        "title": "자기소개서 제목4",
-        "createdTime": "2024-10-04 02:17:32"
-    }
-]%}
-
-{% set Total = resumes | length %}
-
-{#{% set list = [#}
-{#    {#}
-{#        "title": "자기소개서 항목1",#}
-{#        "content": "자기소개서 내용1"#}
-{#    },#}
-{#    {#}
-{#        "title": "자기소개서 항목2",#}
-{#        "content": "자기소개서 내용2"#}
-{#    },#}
-{#    {#}
-{#        "title": "자기소개서 항목3",#}
-{#        "content": "자기소개서 내용3"#}
-{#    },#}
-{#    {#}
-{#        "title": "자기소개서 항목4",#}
-{#        "content": "자기소개서 내용4"#}
-{#    },#}
-{#]%}#}
-
 {% block scripts %}
     <script>const iconAiPath = "{{url_for('static', filename = 'img/icon_ai.svg')}}";</script>
     <script>const iconRemovePath = "{{url_for('static', filename = 'img/remove.svg')}}";</script>
     <script src="{{ url_for('static', filename='js/resume_write.js') }}"></script>
     <script src="{{ url_for('static', filename='js/resume_api.js') }}"></script>
-    <script>
-        let sectionCount = {{ (list | length if list else 1) - 1 }};
-    </script>
+    {% if response.resume.sections is none or response.resume.sections | length == 0 %}
+        <script>let sectionCount = 0;</script>
+    {% else %}
+        <script>let sectionCount = {{ response.resume.sections | length - 1 }};</script>
+    {% endif %}
 
+    {% if response.jobs is none or response.jobs | length == 0 %}
+        <script>const getJob = true</script>
+    {% endif %}
 
     <script>let badgeCounter = {{ keywords | length }};</script>
 {% endblock %}
 
 {% block content %}
-    {% include 'components/header.html' %}
 
     <div class="container">
         <div class ="saved-resume-box">
              <ul uk-accordion>
                 <li>
-                    <a class="uk-accordion-title" href>임시저장 목록({{ Total }}/10)</a>
+                    <a class="uk-accordion-title" href>임시저장 목록({{ response.drafts | length }}/10)</a>
                     <div class="uk-accordion-content">
                         <table class="uk-table saved-resume-content">
                             <tbody>
-                                {% if resumes %}
+                                {% if response.drafts %}
                                     <tr>
                                         <td class = "Medium-16">번호</td>
                                         <td class = "Medium-16">제목</td>
                                         <td class = "Medium-16">저장일시</td>
                                         <td class = "Medium-16">삭제</td>
                                     </tr>
-                                    {% for resume in resumes %}
-                                        <tr id="resume-{{ resume.resumeId }}">
-                                            <td class = "Medium-16">{{ resume.resumeId }}</td>
-                                            <td class = "Medium-16"><button class="custom-button Medium-16" onclick="loadResumeData('{{ resume.resumeId }}')">{{ resume.title }}</button></td>
-                                            <td class = "Medium-16">{{ resume.createdTime }}</td>
-                                            <td><button type="button" class = "custom-button" onclick="removeResumeData('{{ resume.resumeId }}')"><img src="{{ url_for('static', filename='img/remove.svg') }}"/></button></td>
+                                    {% for draft in response.drafts %}
+                                        <tr id="resume-{{ draft.draftId }}">
+                                            <td class = "Medium-16">{{ loop.index }}</td>
+                                            <td class = "Medium-16"><button class="custom-button Medium-16" onclick="loadResumeData('{{ draft.draftId }}')">{{ draft.title }}</button></td>
+                                            <td class = "Medium-16">{{ draft.createdTime }}</td>
+                                            <td><button type="button" class = "custom-button" onclick="removeResumeData('{{ draft.draftId }}')"><img src="{{ url_for('static', filename='img/remove.svg') }}"/></button></td>
                                         </tr>
                                     {% endfor %}
                                 {% else %}
@@ -136,7 +60,7 @@
 
         <div class = "resume-write-box">
             <p class = "Medium-22">자기소개서 작성</p>
-            <form class="uk-form-stacked" id="resume_write_form">
+            <form class="uk-form-stacked" id="resume_write_form" method="POST" action="/resume/write">
                 {# 제목 #}
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-main-title">제목</label>
@@ -149,29 +73,29 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-occupation">직군</label>
                     <div class="uk-form-controls">
-                        <select class="uk-select" id="resume-write-occupation" name="occupation" onchange = "updateJobList()">
-                            {% if selectedOccupation %}
-                                <option selected value = "{{ selectedOccupation[0].occupationId }}">{{ selectedOccupation[0].occupationName }}</option>
-                                {% for oc in occupationList %}
-                                    {% if oc.occupationId != selectedOccupation[0].occupationId %}
-                                        <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                {% for oc in occupationList %}
-                                    <option value="{{ oc.occupationId }}">{{ oc.occupationName }}</option>
-                                {% endfor %}
-                            {% endif %}
+                        <select class="uk-select" id="resume-write-occupation" name="occupation_id" onchange = "updateJobList()">
+                             {% for occupation in response.occupations %}
+                                <option {% if occupation.isSelected %} selected {% endif %} value = "{{ occupation.occupationId }}">
+                                    {{ occupation.occupationName }}
+                                </option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
-
                 {# 직업 #}
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-job">직업</label>
                     <div class="uk-form-controls">
-                        <select class="uk-select" id="resume-write-job" name = "jobName">
-                            <option disabled>직군을 선택해주세요.</option>
+                        <select class="uk-select" id="resume-write-job" name = "job_id">
+                            {% if response.jobs %}
+                                {% for job in response.jobs %}
+                                    <option value="{{ job.jobId }}" {% if job.isSelected %} selected {% endif %}>
+                                        {{ job.jobName }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option disabled selected>직군을 선택해주세요.</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>
@@ -181,16 +105,8 @@
                     <label class="uk-form-label" for="resume-write-experience">경력 여부</label>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="resume-write-experience" name = "level">
-                            {% if level == "신입" %}
-                                <option selected>{{ level }}</option>
-                                <option>경력</option>
-                            {% elif level =="경력" %}
-                                <option selected>{{ level }}</option>
-                                <option>신입</option>
-                            {% else %}
-                                <option>신입</option>
-                                <option>경력</option>
-                            {% endif %}
+                            <option value="신입" {% if response.resume and response.resume.level == '신입' %} selected {% endif %}>신입</option>
+                            <option value="경력" {% if response.resume and response.resume.level == '경력' %} selected {% endif %}>경력</option>
                         </select>
                     </div>
                 </div>
@@ -199,7 +115,7 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-merit">장점</label>
                     <div class="uk-form-controls">
-                        <textarea class="uk-textarea custom-textarea" id="resume-write-merit" name="pros" placeholder="장점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ pros }}</textarea>
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-merit" name="pros" placeholder="장점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ response.resume.pros if response.resume }}</textarea>
                     </div>
                 </div>
 
@@ -207,7 +123,7 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-disadvantage">단점</label>
                     <div class="uk-form-controls">
-                        <textarea class="uk-textarea custom-textarea" id="resume-write-disadvantage" name="cons" placeholder="단점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ cons }}</textarea>
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-disadvantage" name="cons" placeholder="단점을 입력해주세요." style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ response.resume.cons if response.resume }}</textarea>
                     </div>
                 </div>
 
@@ -216,13 +132,15 @@
                     <label class="uk-form-label" for="resume-write-keyword">주요 키워드</label>
                     <div class="keyword-input-box">
                         <div class = "badge-container">
-                            {% for keyword in keywords %}
-                                <div class = "badge">
-                                    <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
-                                    <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
-                                    <input type = "hidden" id = "badge-input-{{ loop.index0 }}" name = "keywords" value="{{ keyword }}" />
-                                </div>
-                            {% endfor %}
+                            {% if response.resume %}
+                                {% for keyword in response.resume.keywords %}
+                                    <div class = "badge">
+                                        <span class = "badge-text" id = "badge-text-{{ loop.index0 }}">{{ keyword }}</span>
+                                        <button class = "badge-button" id = "badge-btn-{{ loop.index0 }}">X</button>
+                                        <input type = "hidden" id = "badge-input-{{ loop.index0 }}" name = "keywords[]" value="{{ keyword }}" />
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
                             <input class="keyword-input Regular-16" id="resume-write-keyword" type="text">
                         </div>
                     </div>
@@ -233,11 +151,11 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="resume-write-directionality">방향성(선택 사항)</label>
                     <div class="uk-form-controls">
-                        <textarea class="uk-textarea custom-textarea" id="resume-write-directionality" placeholder="AI가 참고할 방향성에 대해 적어주세요." name = "directional" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ directional }}</textarea>
+                        <textarea class="uk-textarea custom-textarea" id="resume-write-directionality" placeholder="AI가 참고할 방향성에 대해 적어주세요." name = "directional" style="resize: none; overflow-y: hidden;" oninput="adjustHeight(this)">{{ response.resume.directional }}</textarea>
                     </div>
                 </div>
-                {% if list %}
-                    {% for resumeList in list %}
+                {% if response.resume %}
+                    {% for resumeList in response.resume.sections %}
                         <div class = "resume-container" id = "resume-write-container-{{ loop.index0 }}">
                             {# 항목 #}
                             <div class="uk-margin">
@@ -290,12 +208,12 @@
                 </div>
 
                 <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid public-check-box">
-                    <label class="Regular-16 public-radio"><input class="uk-radio" type="radio" value = "true" name="isPublic">공개</label>
-                    <label class = "Regular-16"><input class="uk-radio" type="radio" value = "false" name="isPublic" checked>비공개</label>
+                    <label class="Regular-16 public-radio"><input class="uk-radio" type="radio" value = "true" name="is_shared">공개</label>
+                    <label class = "Regular-16"><input class="uk-radio" type="radio" value = "false" name="is_shared" checked>비공개</label>
                 </div>
 
                 <div class = "resume-submit-box">
-                    <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "submit">임시저장</button>
+                    <button class = "tmp-save-btn Medium-18" id = "resume-write-tmp-submit" type = "button" onclick = "submitDraft()">임시저장</button>
                     <button class = "save-btn Medium-18" id = "resume-write-submit" type="submit" onclick = "submitResume()">저장</button>
                 </div>
             </form>

@@ -2,7 +2,6 @@ import json
 
 from openai.types.chat import ChatCompletion
 
-from dto.resume.resume import ResumeDto
 from dto.resume.resume_gpt import ResumeGPT
 from dto.resume_section.resume_section import ResumeSectionDto
 from utils.openai.resume.resume_strategy import ResumeStrategy

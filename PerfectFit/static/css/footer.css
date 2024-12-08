@@ -1,0 +1,26 @@
+footer {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding: 50px 0;
+    font-size: 14px;
+    margin-top: 30px;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+    background: #f7f7f7 !important;
+
+    .uk-navbar-container:not(.uk-navbar-transparent) {
+        background: #f7f7f7 !important;
+    }
+
+    .uk-navbar-left {
+        margin-right: 30px !important;
+    }
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    p { margin: 0; }
+}

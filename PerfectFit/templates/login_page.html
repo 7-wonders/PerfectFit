@@ -1,0 +1,18 @@
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_page.css') }}" />
+{% endblock %}
+
+{% block content %}
+    <div class = "container">
+        <div class = "login-container-box">
+            <a href = "/"><img src="{{ url_for('static', filename='img/logo.svg') }}" /></a>
+            <p class = "custom-text">소셜 계정으로 간편 로그인</p>
+            <a href = "/auth/login/naver?redirect_uri={{ request.args.get('redirect_uri') or "http://127.0.0.1:5000" }}"><img src="{{ url_for('static', filename='img/naver.svg') }}" width = "237" height = "70"  class = "login-img"/></a>
+            <a href = "/auth/login/google?redirect_uri={{ request.args.get('redirect_uri') or "http://127.0.0.1:5000" }}"><img src="{{ url_for('static', filename='img/google.svg') }}" width = "237" height = "70" class = "login-img"/></a>
+            <a href="/auth/login/kakao?redirect_uri={{ request.args.get('redirect_uri') or "http://127.0.0.1:5000" }}">
+                <img src="{{ url_for('static', filename='img/kakao.svg') }}" width="237" height="70" class="login-img"/>
+            </a>
+        </div>
+    </div>
+{% endblock %}

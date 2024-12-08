@@ -1,47 +1,79 @@
-from domain.models import ProjectExperience, WorkExperience
+from domain.models.project_experience import ProjectExperience
+from domain.models.project_experience_task import ProjectExperienceTask
+from domain.models.work_experience import WorkExperience
 from domain.models.app_user import AppUser
 from config.config_mysql import get_session
 
 class OptionalInfoService:
     @staticmethod
     def register_info(user_id: int, major: str, university: str, university_status: str,
-                      grade: float, project_experiences: list, work_experiences: list, phone_number: str):
-        session = get_session()
+                      grade: str, phone_number: str):
 
-        # 사용자의 선택 정보를 업데이트합니다.
-        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+        with get_session() as session:
+            # 사용자의 선택 정보를 업데이트합니다.
+            user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
 
-        if user:
-            # 기본 필드 업데이트
-            user.major = major
-            user.university = university
-            user.university_status = university_status
-            user.grade = grade
-            user.phone_number = phone_number
+            if user:
+                # 기본 필드 업데이트
+                user.major = major or None
+                user.university = university or None
+                user.university_status = university_status or None
+                user.grade = grade or None
+                user.phone_number = phone_number or None
+                session.commit()
 
-            # 프로젝트 경험 정보 업데이트
-            user.project_experience.clear()  # 기존 프로젝트 경험 삭제
+    @staticmethod
+    def register_projectexp(user_id: int, project_experiences: list):
+
+        with get_session() as session:
+            # 사용자의 선택 정보를 업데이트합니다.
+            user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+
+            for project in user.project_experiences:
+                for task in project.tasks:
+                    session.delete(task)
+                session.delete(project)
+
             for project in project_experiences:
+                # 프로젝트 경험 객체 생성
                 new_project = ProjectExperience(
-                    user_id=user_id,
-                    project_name=project["projectName"],
-                    from_date=project["fromDate"],
-                    to_date=project["toDate"],
-                    contents=project["contents"]
+                    user_id=int(user_id),
+                    project_name=str(project["projectName"]),
+                    from_date=str(project["fromDate"]),
+                    to_date=str(project["toDate"]),
                 )
-                session.add(new_project)
 
-            # 직장 경험 정보 업데이트
-            user.work_experience.clear()  # 기존 직장 경험 삭제
+                session.add(new_project)
+                session.flush()
+
+                for content in project["contents"]:
+                    new_task = ProjectExperienceTask(
+                        project_experience_id=int(new_project.project_experience_id),
+                        content=str(content),
+                    )
+                    session.add(new_task)
+
+            session.commit()
+
+    @staticmethod
+    def register_workexp(user_id: int, work_experiences: list):
+
+        with get_session() as session:
+            # 사용자의 선택 정보를 업데이트합니다.
+            user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+
+            for work in user.work_experiences:
+                session.delete(work)
+
             for work in work_experiences:
                 new_work = WorkExperience(
-                    user_id=user_id,
-                    company_name=work["company_name"],
-                    from_date=work["fromDate"],
-                    to_date=work["toDate"],
-                    position=work["position"],
-                    responsibility=work["responsibility"],
-                    reason=work["reason"]
+                    user_id=int(user_id),
+                    company_name=str(work["companyName"]),
+                    from_date=str(work["fromDate"]),
+                    to_date=str(work["toDate"]),
+                    position=str(work["position"]),
+                    responsibility=str(work["responsibility"]),
+                    reason=str(work["reason"])
                 )
                 session.add(new_work)
 

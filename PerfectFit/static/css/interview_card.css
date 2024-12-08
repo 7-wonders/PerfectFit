@@ -1,0 +1,95 @@
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    padding: 60px 20px 20px 20px;
+    border: 1px solid #E6E5E7;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: white;
+    cursor: pointer;
+    box-sizing: border-box;
+
+    .level {
+        position: absolute;
+        top: 25px;
+        right: 20px;
+        display: flex;
+        justify-items: center;
+        align-items: center;
+        padding: 2px 5px;
+        border-top-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        color: white;
+        font-size: 0.825rem;
+    }
+
+    .newbie { background-color: #24C997; }
+    .junior { background-color: #F7C43F; }
+
+    .title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #222222;
+    }
+
+    .info {
+        display: flex;
+        gap: 5px;
+        padding: 10px 0;
+        width: 100%;
+        border-top: 1px solid #E6E5E7;
+        border-bottom: 1px solid #E6E5E7;
+
+        p { margin: 0; }
+        .company { flex: 1; }
+
+        .line {
+            width: 1px;
+            height: 100%;
+            background-color: #E6E5E7;
+        }
+
+        .info-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+
+            .field { font-size: 0.825rem; }
+            .name { color: #222222; }
+        }
+    }
+
+    .pros-cons-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+        padding: 10px 0;
+
+        p { margin: 0; }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 4px;
+            color: #222222;
+        }
+
+        .pros {
+            background-color: #F5F7FF;
+        }
+
+        .cons {
+            background-color: #FAE6E6;
+        }
+    }
+}

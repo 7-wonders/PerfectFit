@@ -31,6 +31,16 @@ class UserDto:
                 self.prompt = data.get("prompt", "")
                 self.title = data.get("title", [])
 
+        @dataclass
+        class Signup:
+            snsId: str
+            snsKind: str
+            username: str
+            age: Optional[int] = field(default=None)
+            email: Optional[str] = field(default=None)
+            phoneNumber: Optional[str] = field(default=None)
+            profilePath: Optional[str] = field(default=None)
+
     class Response:
         @dataclass
         class IntroUser:
@@ -49,19 +59,42 @@ class UserDto:
             pages: int
 
         @dataclass
-        class DetailedUser:
-            user_id: int
+        class UserDetail:
+            userId: int
             username: str
             age: int
             major: str
             university: str
-            university_status: str
+            universityStatus: str
             grade: float
             address: str
-            detail_address: str
+            detailAddress: str
             email: str
-            phone_number: str
-            profile_path: str
+            phoneNumber: str
+            profilePath: str
+
+        @dataclass
+        class DetailUser:
+            user: 'UserDto.Response.UserDetail'
             work_experiences: List['WorkExperienceDTO.Response.WorkExperience']
             project_experiences: List['PexDTO.Response.ProjectExperience']
-            resumes: List['ResumeDto.Response.MyResume'] = field(default=None)
+
+        @dataclass
+        class NecessaryInfo:
+            username: str
+            age: int
+            email: str
+            address: str
+            detailAddress: str
+            snsId: Optional[str] = field(default=None)
+            snsKind: Optional[str] = field(default=None)
+
+        @dataclass
+        class OptionalInfo:
+            major: str
+            university: int
+            university_status: str
+            grade: str
+            phone_number: str
+            work_experiences: List['WorkExperienceDTO.Response.WorkExperience']
+            project_experiences: List['PexDTO.Response.ProjectExperience']

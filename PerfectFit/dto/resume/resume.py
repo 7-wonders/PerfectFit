@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
+
+from dto.resume_draft.resume_draft import ResumeDraftDto
 from dto.validation_class import FormModel
 
 if TYPE_CHECKING:
@@ -24,6 +26,7 @@ class ResumeDto:
             cons: str
             is_shared: bool
             sections: list["ResumeSectionDto.Request.Create"]
+            draft_id: Optional[str] = field(default=None)
             directional: Optional[str] = field(default=None)
 
             def __validation__(self):
@@ -41,8 +44,6 @@ class ResumeDto:
                     return "장점은 필수입니다."
                 elif not self.cons.strip():
                     return "단점은 필수입니다."
-                elif not self.is_shared:
-                    return "공개 여부는 필수입니다."
                 elif not self.sections or len(self.sections) < 1:
                     return "자기소개서 단락은 1개 이상이어야 합니다."
 
@@ -121,8 +122,9 @@ class ResumeDto:
         @dataclass
         class ResumeForWrite:
             resume: "ResumeGPT.Response.FullResume.Resume" or None
+            drafts: list["ResumeDraftDto.Response.Intro"]
             jobs: "JobDto.Response.Jobs" or None
-            occupations: List["OccupationDto.Response.Occupation"]
+            occupations: list["OccupationDto.Response.Occupation"]
 
         @dataclass
         class Resume:
@@ -136,6 +138,7 @@ class ResumeDto:
             createdTime: str
             user: "UserDto.Response.IntroUserWithProfile"
             section: list["ResumeSectionDto.Response.Section"]
+            isMine: bool
             isLike: Optional[bool] = field(default=None)
 
         @dataclass
@@ -158,14 +161,16 @@ class ResumeDto:
 
         @dataclass
         class MyResumeInfo:
-            resume_id: int
+            resumeId: int
             title: str
-            view_count: int
-            like_count: int
-            occupation: 'OccupationDto.Response.Occupation'
-            job: str
+            viewCount: int
+            likeCount: int
+            isLike: bool
+            occupationName: str
+            jobName: str
             level: str
-            created_time: datetime
+            isPublic: bool
+            createdTime: datetime
 
         @dataclass
         class MyResume:

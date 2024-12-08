@@ -1,0 +1,38 @@
+{% extends "index.html" %}
+
+
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_job.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/interview_card.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/interview_card.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% with total = response.total %}
+        {% include 'components/interview_title.html' %}
+    {% endwith %}
+    {% include 'components/interview_list_nav.html' %}
+    <ul uk-accordion="multiple: true" class="accordion">
+        {% for occupation_item in response.interviews %}
+            <li>
+                <a class="uk-accordion-title" href>
+                    <span class="occupation">{{ occupation_item.occupationName }}</span>
+                    <span class="total">({{ occupation_item.total }}개)</span>
+                </a>
+                <div class="uk-accordion-content accordion-content">
+                    {% for interview in occupation_item.interviews %}
+                        {% with interview=interview, competencies=occupation_item.competencies %}
+                            {% include 'interview_card.html' %}
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
