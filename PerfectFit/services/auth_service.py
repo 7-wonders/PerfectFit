@@ -7,6 +7,7 @@ from sqlalchemy.orm import scoped_session
 from constants.sns_kind import SnsKind
 from config.config_mysql import get_session
 from domain.models import AppUser
+from dto.user.user import UserDto
 from exception.custom_exception import CustomException
 from exception.exception_type import ExceptionType
 from logs.log import Logger
@@ -43,7 +44,7 @@ def _delete_refresh_token():
 
 class AuthService:
     @staticmethod
-    def google_login(code: str) -> dict:
+    def google_login(code: str) -> tuple[UserDto.Request.Signup | dict, bool]:
         with get_session() as session:
             access_token, token_type = GoogleOAuthHandler().get_access_token(code)
             user_response_json = GoogleOAuthHandler().get_user_info(token_type, access_token)
@@ -61,25 +62,20 @@ class AuthService:
             already_user: Optional[AppUser] = session.query(AppUser).filter(AppUser.sns_id == sns_id).first()
             if already_user:
                 _delete_refresh_token()
-                return _create_token(already_user.user_id)
-
-            user = AppUser(sns_id=sns_id, sns_kind=SnsKind.GOOGLE.value, email=email, username=name,
-                           profile_path=profile_image)
-            session.add(user)
-            session.flush()
+                return _create_token(already_user.user_id), True
 
             logger.info(f'Google Signup Success\n'
                         f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image}')
 
-            token_info = _create_token(user.user_id)
-            _delete_refresh_token()
-
-            session.commit()
-
-            return token_info
+            return UserDto.Request.Signup(
+                snsId=sns_id,
+                username=name,
+                email=email,
+                profilePath=profile_image,
+            ), False
 
     @staticmethod
-    def naver_login(code: str, state: str) -> dict:
+    def naver_login(code: str, state: str) -> tuple[UserDto.Request.Signup | dict, bool]:
         with get_session() as session:
             session = cast(scoped_session[Session], session)
 
@@ -100,7 +96,7 @@ class AuthService:
             already_user = session.query(AppUser).filter(AppUser.sns_id == sns_id).first()
             if already_user:
                 _delete_refresh_token()
-                return _create_token(already_user.user_id)
+                return _create_token(already_user.user_id), True
 
             # MM-DD 형식
             response_birthday = user_response_json.get('response').get('birthday')
@@ -108,23 +104,20 @@ class AuthService:
             birth_month, birth_day = map(int, response_birthday.split('-'))
             age = get_age(int(birth_year), birth_month, birth_day)
 
-            user = AppUser(sns_id=sns_id, sns_kind=SnsKind.NAVER.value, email=email, username=name,
-                           profile_path=profile_image, phone_number=phone_number, age=age)
-            session.add(user)
-            session.flush()
-
             logger.info(f'Naver Signup Success\n'
                         f'sns_id : {sns_id} | email : {email} | name : {name} | profile_image : {profile_image} | phone_number : {phone_number} | age : {age}')
 
-            token_info = _create_token(user.user_id)
-            _delete_refresh_token()
-
-            session.commit()
-
-            return token_info
+            return UserDto.Request.Signup(
+                snsId=sns_id,
+                username=name,
+                email=email,
+                phoneNumber=phone_number,
+                profilePath=profile_image,
+                age=age,
+            ), False
 
     @staticmethod
-    def kakao_login(code: str, state: str) -> dict:
+    def kakao_login(code: str, state: str) -> tuple[UserDto.Request.Signup | dict, bool]:
         with get_session() as session:
             access_token, token_type = KakaoOAuthHandler().get_access_token(code, state=state)
             user_response_json = KakaoOAuthHandler().get_user_info(token_type, access_token)
@@ -142,21 +135,16 @@ class AuthService:
 
             if already_user:
                 _delete_refresh_token()
-                return _create_token(already_user.user_id)
-
-            user = AppUser(sns_id=sns_id, sns_kind=SnsKind.KAKAO.value, username=name, profile_path=profile_image)
-            session.add(user)
-            session.flush()
+                return _create_token(already_user.user_id), True
 
             logger.info(f'Kakao Signup Success\n'
                         f'sns_id : {sns_id} | name : {name} | profile_image : {profile_image}')
 
-            token_info = _create_token(user.user_id)
-            _delete_refresh_token()
-
-            session.commit()
-
-            return token_info
+            return UserDto.Request.Signup(
+                snsId=sns_id,
+                username=name,
+                profilePath=profile_image,
+            ), False
 
     @staticmethod
     def renew_token(refresh_token: str) -> dict:

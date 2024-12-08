@@ -1,18 +1,12 @@
 import os
 from dataclasses import asdict
 import json
-from flask import current_app, Response, request
+from flask import current_app, Response, request, session
 from werkzeug.utils import secure_filename
 
 from flask import Blueprint, render_template, redirect, make_response
 
-from dto.interview.interview import InterviewDto
-from dto.occupation.occupation import OccupationDto
-from dto.project_experience.project_experience import PexDTO
-from dto.resume.resume import ResumeDto
 from dto.user.user import UserDto
-from dto.work_experience.work_experience import WorkExperienceDTO
-from services.interview_service import InterviewService
 from services.necessaryinfo_service import NecessaryInfoService
 from services.optionalinfo_service import OptionalInfoService
 from services.requirements_service import RequirementsService
@@ -128,6 +122,7 @@ def create_requirements():
 
 @user_bp.route('/user/necessary', methods=['GET', 'POST'])
 def register_necessary_info():
+    print(session.get('user_info'))
     user_id = JWTFactory().verify_access_token(request.cookies.get('access_token'))
 
     if request.method == 'GET':

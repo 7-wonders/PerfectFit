@@ -31,6 +31,15 @@ class UserDto:
                 self.prompt = data.get("prompt", "")
                 self.title = data.get("title", [])
 
+        @dataclass
+        class Signup:
+            snsId: str
+            username: str
+            age: Optional[int] = field(default=None)
+            email: Optional[str] = field(default=None)
+            phoneNumber: Optional[str] = field(default=None)
+            profilePath: Optional[str] = field(default=None)
+
     class Response:
         @dataclass
         class IntroUser:
