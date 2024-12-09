@@ -243,6 +243,7 @@ class ResumeService:
                 Resume.resume_id.label('resumeId'),
                 Resume.title,
                 Resume.level,
+                Resume.is_shared.label('isShared'),
                 Resume.created_time.label('createdTime'),
                 like_scalar_query.label('likeCount'),
                 view_scalar_query.label('viewCount'),
@@ -262,12 +263,15 @@ class ResumeService:
                 .join(Job, Job.job_id == Resume.job_id)
                 .join(Occupation, Occupation.occupation_id == Job.occupation_id)
                 .join(AppUser, AppUser.user_id == Resume.user_id)
-                .filter(Resume.resume_id == resume_id, Resume.is_shared.is_(True))
+                .filter(Resume.resume_id == resume_id)
             )
 
             resume = session.execute(resume_query).mappings().first()
 
             if not resume:
+                return None
+
+            if user_id != resume.get('user.userId') and resume.get('isShared') is False:
                 return None
 
             sections_query = (
