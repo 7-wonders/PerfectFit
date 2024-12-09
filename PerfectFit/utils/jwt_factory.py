@@ -42,7 +42,7 @@ class JWTFactory:
             cls._refresh_public_key = cls._load_key(os.getenv(cls._conf_names[3]))
 
             cls._algorithm = os.getenv("JWT_ALGORITHM") or "RS256"
-            cls._issuer = os.getenv("JWT_ISSUER") or "localhost"
+            cls._issuer = os.getenv("JWT_ISSUER") or "127.0.0.1"
 
             cls._initialize_redis()
             cls._instance = JWTFactory()

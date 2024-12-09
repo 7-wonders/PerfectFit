@@ -30,13 +30,13 @@ def custom_exception(e: CustomException):
             previous_url = request.headers.get("Referer")
 
             # 호스팅 시 주소 변경 필요
-            if previous_url is None or 'localhost' not in previous_url:
-                previous_url = "http://localhost:5000/"
+            if previous_url is None or '127.0.0.1' not in previous_url:
+                previous_url = "http://127.0.0.1:5000/"
 
-            response = make_response(redirect("http://localhost:5000/auth/login?redirect_uri=" + previous_url))
+            response = make_response(redirect("http://127.0.0.1:5000/auth/login?redirect_uri=" + previous_url))
             return delete_cookie(response)
 
-        response = make_response(redirect("http://localhost:5000/auth/login?redirect_uri=" + request.url))
+        response = make_response(redirect("http://127.0.0.1:5000/auth/login?redirect_uri=" + request.url))
         return delete_cookie(response)
 
     if is_api_call(request):

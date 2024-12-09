@@ -259,7 +259,7 @@ def register_optional_info():
                 info=user_info,
             )
 
-            redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
+            redirect_uri = session.get('redirect_uri') or 'http://127.0.0.1:5000/'
             session.pop('redirect_uri', None)
             session.pop('user_info', None)
 
@@ -386,7 +386,7 @@ def delete_user():
 def logout():
     redirect_uri = request.args.get('redirect_uri')
     if redirect_uri is None:
-        redirect_uri = request.headers.get('Referer') or 'http://localhost:5000/'
+        redirect_uri = request.headers.get('Referer') or 'http://127.0.0.1:5000/'
 
     response = make_response(redirect(redirect_uri))
     response.delete_cookie('access_token')

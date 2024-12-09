@@ -19,7 +19,7 @@ logger = Logger('auth_controller')
 env = os.getenv('FLASK_ENV')
 
 if env == 'development':
-    domain = 'localhost'
+    domain = '127.0.0.1'
 else:
     domain = os.getenv('PRODUCTION_URL')
 
@@ -38,7 +38,7 @@ def _create_response(token_info: dict, redirect_uri: str | None) -> Response:
 
 @auth_bp.route('/login/google', methods=['GET'])
 def login_google():
-    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
+    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://127.0.0.1:5000/'
     return redirect(GoogleOAuthHandler().get_login_url())
 
 
@@ -46,7 +46,7 @@ def login_google():
 def auth_google_callback():
     code = request.args.get('code', type=str)
     error = request.args.get('error', type=str)
-    redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
+    redirect_uri = session.get('redirect_uri') or 'http://127.0.0.1:5000/'
 
     if error == 'access_denied':
         return redirect(redirect_uri)
@@ -66,7 +66,7 @@ def auth_google_callback():
 
 @auth_bp.route('/login/naver', methods=['GET'])
 def auth_naver():
-    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
+    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://127.0.0.1:5000/'
     return redirect(NaverOAuthHandler().get_login_url())
 
 
@@ -74,7 +74,7 @@ def auth_naver():
 def auth_naver_callback():
     code = request.args.get('code', type=str)
     state = request.args.get('state', type=str)
-    redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
+    redirect_uri = session.get('redirect_uri') or 'http://127.0.0.1:5000/'
 
     if not code or not state:
         raise CustomException(ExceptionType.NAVER_LOGIN_ERROR)
@@ -91,7 +91,7 @@ def auth_naver_callback():
 
 @auth_bp.route('/login/kakao', methods=['GET'])
 def auth_kakao():
-    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://localhost:5000/'
+    session['redirect_uri'] = request.args.get('redirect_uri', type=str) or 'http://127.0.0.1:5000/'
     print(session.get('redirect_uri'))
     print("======================================")
     print(request.args.get('redirect_uri', type=str))
@@ -104,7 +104,7 @@ def auth_kakao_callback():
     error = request.args.get('error', type=str)
     state = request.args.get('state', type=str)
 
-    redirect_uri = session.get('redirect_uri') or 'http://localhost:5000/'
+    redirect_uri = session.get('redirect_uri') or 'http://127.0.0.1:5000/'
 
     if error == 'access_denied':
         return redirect(redirect_uri)
