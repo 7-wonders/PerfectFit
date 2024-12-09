@@ -12,25 +12,26 @@
 - 사용자들은 자신의 자기소개서와 모의 면접을 다른 사람들에게 공개할 수 있습니다.
 
 <br>
-## 사용 방법
 
-** 1. Project Root 폴더에 " .env " 파일이 있는지 확인합니다. **
+## 사용 방법 ❤
+
+**1. Project Root 폴더에 " .env " 파일이 있는지 확인합니다.**
 - 만약에 " .env " 파일이 존재하지 않는다면, **dbstjdqls14@naver.com**으로 요청 부탁드립니다.
 
-** 2. Project Root 폴더에 아래의 .pem 확장자의 공개키, 비밀키가 있는지 확인합니다. **
+**2. Project Root 폴더에 아래의 .pem 확장자의 공개키, 비밀키가 있는지 확인합니다.**
 - access_token_private_key.pem
 - access_token_public_key.pem
 - refrest_token_private_key.pem
 - refrest_token_public_key.pem
 - 만약에 파일이 존재하지 않는다면, **seungyong20@naver.com**으로 요청 부탁드립니다.
 
-** 3. 필수 라이브러리를 설치합니다. **
+**3. 필수 라이브러리를 설치합니다.**
 - $ pip install -r requirements.txt
 
-** 4. Terminal에서 비동기 작업을 위한 "Celery"를 실행시켜줍니다. **
+**4. Terminal에서 비동기 작업을 위한 "Celery"를 실행시켜줍니다.**
 - $ python -m celery -A tasks worker --loglevel=info -P solo
 
-** 5. Flask 서버를 실행합니다. **
+**5. Flask 서버를 실행합니다.**
 - $ python app.py
 - 127.0.0.1:5000/  을 통해 메인페이지로 접속 후, 사용하시면 됩니다.
 
@@ -42,7 +43,7 @@
 
 | **윤성빈** | **김승용** | **한정석** | **손민재** | **최영원** | **문건규** | **김민우** |
 | :------: |  :------: | :------: | :------: | :------: | :------: | :------: |
-| [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) |
+| [<img src="https://avatars.githubusercontent.com/u/22989582?v=4" height=150 width=150> <br/> @dbstjdqls14](https://github.com/dbstjdqls14) | [<img src="https://avatars.githubusercontent.com/u/44765636?v=4" height=150 width=150> <br/> @seungyong](https://github.com/seungyong) | [<img src="https://avatars.githubusercontent.com/u/115478278?s=96&v=4" height=150 width=150> <br/> @JeongseokHan](https://github.com/JeongseokHan) | [<img src="https://avatars.githubusercontent.com/u/124759163?s=96&v=4" height=150 width=150> <br/> @etherworker](https://github.com/etherworker) | [<img src="https://avatars.githubusercontent.com/u/128608471?s=96&v=4" height=150 width=150> <br/> @Youngwon210](https://github.com/Youngwon210) | [<img src="https://avatars.githubusercontent.com/u/182182907?s=96&v=4" height=150 width=150> <br/> @gungyumun](https://github.com/gungyumun) | [<img src="https://avatars.githubusercontent.com/u/128578002?s=96&v=4" height=150 width=150> <br/> @Minu0803](https://github.com/Minu0803) |
 
 </div>
 
@@ -244,6 +245,7 @@
     - 페이지 : 필수 정보 입력 (수정), 선택 정보 입력 (수정), 면접 선택, 면접 진행
 - **Bakcend**
     - 페이지 : 면접 목록(기업, 직업, 검색), 면접 상세, 면접 진행, 필수 정보 입력, 선택 정보 입력
+    - 상위 100기업 대표 직업군 모의 면접 생성
 - **기능**
     - 면접 목록
     - 면접 상세
