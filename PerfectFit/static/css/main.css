@@ -31,46 +31,59 @@ a {
 }
 
 .resume-card {
-    position : relative;
-    border-radius: 25px !important;
-    height : 550px;
-
+    display: flex;
+    flex-direction: column;
+    height: 420px;
+    border-radius: 25px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
 }
 
 .resume-card:hover {
-    filter: drop-shadow(0px 4px 12px #010D3E);
+    box-shadow: 0 4px 12px rgba(1, 13, 62, 0.5);
 }
 
-.resume-category {
-    font-size : 14px !important;
+.resume-card-title {
+    margin: 10px 0 0 0;
+}
+
+.resume-card-content {
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 10;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: clip;
+    font-size: 16px;
+    line-height: 1.4;
+    color: #222;
+    font-family: "Noto Sans KR", sans-serif;
+}
+
+.Engagement {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .card-title {
     display: flex;
-    align-items: center;  /* 수직 가운데 정렬 */
-    gap: 8px; /* 텍스트 사이 간격 */
+    flex-direction: column; /* 세로 정렬 */
+    gap: 8px; /* 위아래 간격 */
+}
+
+.card-categories {
+    display: flex;
+    gap: 8px; /* 카테고리 사이 간격 */
+    font-size: 13px;
+    color: #175FE6;
+}
+
+.card-title-text {
     font-size: 18px;
-    position: relative;
-}
-
-.card-category {
-    color : #175FE6;
-    font-size : 13px;
-}
-
-.resume-card-content {
+    font-weight: bold;
     color: #222;
-    /* Regular-16 */
-    font-family: "Noto Sans KR";
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    display : -webkit-box;
-    -webkit-line-clamp: 14;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    overflow: hidden;
 }
 
 .uk-card-large .uk-card-body, .uk-card-large.uk-card-body {
@@ -122,4 +135,17 @@ a {
     filter: drop-shadow(0px 4px 12px #010D3E);
 }
 
+.interview-tab .uk-card {
+    display: flex;
+    flex-direction: column;
+}
 
+.interview-tab .interview-card-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+}
+
+.card-question {
+    margin: 10px 0 0 0;
+}

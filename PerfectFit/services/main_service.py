@@ -79,7 +79,7 @@ class MainService:
             .join(AppUser, AppUser.user_id == Resume.user_id)
             .where(Resume.is_shared.is_(True))
             .order_by(view_scalar_query.desc(), like_scalar_query.desc(), Resume.created_time.desc())
-            .limit(2)
+            .limit(3)
         )
         with get_session() as session:
             resumes = session.execute(resume_query).mappings().all()
@@ -109,8 +109,8 @@ class MainService:
             question_alias = aliased(InterviewQuestion)
             improvement_alias = aliased(InterviewImprovement)
 
-            # 4개의 유효한 인터뷰를 찾을 때까지 반복
-            while len(valid_interviews) < 4:
+            # 6개의 유효한 인터뷰를 찾을 때까지 반복
+            while len(valid_interviews) < 6:
                 # 1. viewCount 내림차순으로 인터뷰 가져오기
                 interview_query = (
                     select(
