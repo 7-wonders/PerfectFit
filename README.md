@@ -1,12 +1,15 @@
-# 📖 책 취향 공유 서비스앱 README
+# 📖 자기소개서 자동 완성 웹 README
 
-![readme_mockup2](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1H353EhNjMdSW4JyXaFs-rsJuImdFT5m8Mw&s)
+![readme_mockup2](https://github.com/7-wonders/PerfectFit/blob/develop/banner.png)
 
 <br>
 
 ## 프로젝트 소개
 
-- PerfectFit 프로젝트 소개입니다.
+- 사용자의 프로젝트 경험, 일 경험, 직업, 프롬프트 등을 기반하여 자기소개서 및 모의 면접을 생성하는 웹 사이트입니다.
+- 문장에 대한 띄어쓰기, 맞춤법 등을 검사 해주는 기능을 제공합니다.
+- 각 회사 별 인재상을 추출하고, 회사에 대표적인 직업 5가지를 뽑아 모의 면접 내용을 제공합니다.
+- 사용자들은 자신의 자기소개서와 모의 면접을 다른 사람들에게 공개할 수 있습니다.
 
 <br>
 
@@ -24,165 +27,298 @@
 
 ## 1. 개발 환경
 
-- Front : HTML, React, styled-components, Recoil
-- Back-end : 제공된 API 활용
-- 버전 및 이슈관리 : Github, Github Issues, Github Project
-- 협업 툴 : Discord, Notion, Github Wiki
-- 서비스 배포 환경 : Netlify
-- 디자인 : [Figma](https://www.figma.com/file/fAisC2pEKzxTOzet9CfqML/README(oh-my-code)?node-id=39%3A1814)
-- [커밋 컨벤션](https://github.com/likelion-project-README/README/wiki/%EC%BB%A4%EB%B0%8B-%EC%BB%A8%EB%B2%A4%EC%85%98)
-- [코드 컨벤션](https://github.com/likelion-project-README/README/wiki/%EC%BD%94%EB%93%9C-%EC%BB%A8%EB%B2%A4%EC%85%98)
-- [스프라이트](https://github.com/likelion-project-README/README/wiki/%EC%8A%A4%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8A%B8)
+- Front-end : <img src="https://img.shields.io/badge/-HTML-E34F26?logo=html5&logoColor=white" alt="HTML" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" /> <img src="https://img.shields.io/badge/Material--UI-0081CB?logo=mui&logoColor=white" alt="Material-UI" /> <img src="https://img.shields.io/badge/-Jinja-F1A93E?logo=python&logoColor=white" alt="Jinja" />
+- Back-end : <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python" /> <img src="https://img.shields.io/badge/Flask-000000?logo=flask&logoColor=white" alt="Flask" /> <img src="https://img.shields.io/badge/Celery-37814A?logo=celery&logoColor=white" alt="Celery" /> <img src="https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white" alt="Redis" /> <img src="https://img.shields.io/badge/MariaDB-003545?logo=mariadb&logoColor=white" alt="MariaDB" />
+- 버전 및 이슈관리 : <img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white" alt="GitHub" />
+- 협업 툴 : <img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Discord" /> <img src="https://img.shields.io/badge/Notion-000000?logo=notion&logoColor=white" alt="Notion" />
+- 디자인 : <img src="https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white" alt="Figma" />
+<br>
+
+## 2. 개발 참고
+### 디자인 (Figma)
+[![Figma](https://img.shields.io/badge/Figma-바로가기-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/design/3VTTwIWCoKdmb9rWTyEcVm/PerfectFit?node-id=0-1&t=TImuiEmovI954t5U-1)
+
+### 명세서 및 이슈 관리 (Notion)
+[![Notion](https://img.shields.io/badge/Notion-바로가기-000000?style=for-the-badge&logo=notion&logoColor=white)](https://rowan-swift-32e.notion.site/Web-Programming-Project-16711902147648b8a96a3e829acc372b?pvs=4)
+
+### DB ERD
+[![ERDCloud](https://img.shields.io/badge/ERDCloud-바로가기-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)](https://www.erdcloud.com/d/ZFToFGg5GvyZwoDJc)
 <br>
 
 ## 2. 채택한 개발 기술과 브랜치 전략
 
-### React, styled-component
+### Jinja
 
-- React
-    - 컴포넌트화를 통해 추후 유지보수와 재사용성을 고려했습니다.
-    - 유저 배너, 상단과 하단 배너 등 중복되어 사용되는 부분이 많아 컴포넌트화를 통해 리소스 절약이 가능했습니다.
-- styled-component
-    - props를 이용한 조건부 스타일링을 활용하여 상황에 알맞은 스타일을 적용시킬 수 있었습니다.
-    - 빌드될 때 고유한 클래스 이름이 부여되어 네이밍 컨벤션을 정하는 비용을 절약할 수 있었습니다.
-    - S dot naming을 통해 일반 컴포넌트와 스타일드 컴포넌트를 쉽게 구별하도록 했습니다.
+- HTML + Javascript를 사용하여 웹사이트를 구성합니다.
+- Flask와 결합하여 백엔드에서 보낸 데이터를 받아 웹사이트를 동적으로 처리합니다.
     
-### Recoil
+### Flask
 
-- 최상위 컴포넌트를 만들어 props로 유저 정보를 내려주는 방식의 경우 불필요한 props 전달이 발생합니다. 따라서, 필요한 컴포넌트 내부에서만 상태 값을 가져다 사용하기 위해 상태 관리 라이브러리를 사용하기로 했습니다.
-- Redux가 아닌 Recoil을 채택한 이유
-    - Recoil은 React만을 위한 라이브러리로, 사용법도 기존의 useState 훅을 사용하는 방식과 유사해 학습비용을 낮출 수 있었습니다.
-    - 또한 Redux보다 훨씬 적은 코드라인으로 작동 가능하다는 장점이 있었습니다.
-- 로그인과 최초 프로필 설정 시 유저 정보를 atom에 저장하여 필요한 컴포넌트에서 구독하는 방식으로 사용했습니다.
+- AI ChatBot의 복잡한 로직을 간편하게 사용하기 위해 사용하였습니다.
+- AI 개발에 많이 사용되는 언어로, 추후 LLama3 확장을 고려하여 사용하였습니다.
 
-### eslint, prettier
-
-- 정해진 규칙에 따라 자동적으로 코드 스타일을 정리해 코드의 일관성을 유지하고자 했습니다.
-- 코드 품질 관리는 eslint에, 코드 포맷팅은 prettier에 일임해 사용했습니다.
-- airbnb의 코딩 컨벤션을 참고해 사용했고, 예외 규칙은 팀원들과 협의했습니다.
-- 협업 시 매번 컨벤션을 신경 쓸 필요 없이 빠르게 개발하는 데에 목적을 두었습니다.
-
-### 브랜치 전략
-
-- Git-flow 전략을 기반으로 main, develop 브랜치와 feature 보조 브랜치를 운용했습니다.
-- main, develop, Feat 브랜치로 나누어 개발을 하였습니다.
-    - **main** 브랜치는 배포 단계에서만 사용하는 브랜치입니다.
-    - **develop** 브랜치는 개발 단계에서 git-flow의 master 역할을 하는 브랜치입니다.
-    - **Feat** 브랜치는 기능 단위로 독립적인 개발 환경을 위하여 사용하고 merge 후 각 브랜치를 삭제해주었습니다.
-
+### Redis
+- JWT의 Refresh Token을 관리하기 위해 사용하였습니다.
+  - RTR(Refresh Token Rotation) 기법을 사용하기 위해 읽기, 쓰기가 빠른 인메모리 데이터베이스를 채택하였습니다.
+- Celery의 작업 정보를 저장 및 결과를 저장하기 위해 사용하였습니다.
+  - 작업 정보를 Redis에 저장하여, 비동기로 처리 가능하도록 만들었습니다.
+  - 작업 결과물을 Redis에 저장하여, 1일 이내로 정보를 가져올 수 있게 만들었습니다.
+ 
+### Celery
+- 자기소개서 단락 생성, 모의 면접 질문 생성 등 오래 걸리는 작업을 백그라운드 단에서 처리하기 위해 사용했습니다.
+  - 프론트 단에서는 폴링을 통해 1초마다 주기적으로 AI 작업 완성 여부를 판단합니다.
 <br>
 
-## 3. 프로젝트 구조
+### 브랜치 전략
+<br>
+
+- 처음에는 Front-end와 Back-end의 브랜치를 격리하는 전략을 사용하였습니다.
+  - 각 개인 브랜치는 다음과 같은 명명 규칙을 지정하였습니다.
+    - [부모_브랜치명]-[브랜치_생성날짜]-[이름_이니셜]
+    - e.g develop-fontend-1209-ksy
+- 웹 프로토타입을 만든 후 기능 별로 브랜치 전략을 변경하였습니다.
+  - feature : 모든 기능을 총괄하는 브랜치입니다.
+  - feature-기능명 : 특정 기능을 총괄하는 브랜치입니다.
+  - feature-기능명-[frontend|backend] : 특정 기능에서 특정 파트를 담당하는 브랜치입니다.
+
+
+초반 브랜치 전략은 다음 링크에서 자세히 확인하실 수 있습니다.
+<br /> <br />
+[![Notion](https://img.shields.io/badge/Notion-Github_전략-000000?style=for-the-badge&logo=notion&logoColor=white)](https://www.notion.so/Github-5798cdad8ac34b18bd3f0c14e299911d)
+<br>
+
+## 3. 프로젝트 구조 (PerfectFit 폴더 기준)
 
 ```
 ├── README.md
-├── .eslintrc.js
-├── .gitignore
-├── .prettierrc.json
-├── package-lock.json
-├── package.json
-│
-├── public
-│    └── index.html
-└── src
-     ├── App.jsx
-     ├── index.jsx
-     ├── api
-     │     └── mandarinAPI.js
-     ├── asset
-     │     ├── fonts
-     │     ├── css_sprites.png
-     │     ├── logo-404.svg
-     │     └── logo-home.svg
-     │          .
-     │          .
-     │          .
-     ├── atoms
-     │     ├── LoginData.js
-     │     └── LoginState.js
-     ├── common
-     │     ├── alert
-     │     │     ├── Alert.jsx
-     │     │     └── Alert.Style.jsx
-     │     ├── button
-     │     ├── comment
-     │     ├── inputBox
-     │     ├── post
-     │     ├── postModal
-     │     ├── product
-     │     ├── tabMenu
-     │     ├── topBanner
-     │     └── userBanner
-     ├── pages
-     │     ├── addProduct
-     │     │     ├── AddProduct.jsx
-     │     │     └── AddProduct.Style.jsx
-     │     ├── chatList
-     │     ├── chatRoom
-     │     ├── emailLogin
-     │     ├── followerList
-     │     ├── followingList
-     │     ├── home
-     │     ├── join
-     │     ├── page404
-     │     ├── postDetail
-     │     ├── postEdit
-     │     ├── postUpload
-     │     ├── productEdit
-     │     ├── profile
-     │     ├── profileEdit
-     │     ├── profileSetting
-     │     ├── search
-     │     ├── snsLogin
-     │     └── splash
-     ├── routes
-     │     ├── privateRoutes.jsx
-     │     └── privateRoutesRev.jsx  
-     └── styles
-           └── Globalstyled.jsx
+├── .env
+├── access_token_private_key.pem
+├── access_token_public_key.pem
+├── refresh_token_private_key.pem
+├── refresh_token_public_key.pem
+├── requirements.txt
+├── app.py
+├── tasks.py
+├── config
+│     ├── config_mysql.py
+│     └── config_redis.py
+├── constants
+│     └── sns_kind.py
+├── controllers
+│     ├── auth_controller.py
+│     ├── resume_controller.py
+│     └── interview_controller.py
+│                .
+│                .
+│                .
+├── services
+│     ├── auth_service.py
+│     ├── resume_service.py
+│     └── interview_service.py
+│                .
+│                .
+│                .
+├── domain
+│     └── models
+│           ├── __init__.py
+│           ├── app_user.py
+│           ├── resume.py
+│           └── interview.py
+│                   .
+│                   .
+│                   .
+├── dto
+│     ├── comapny_best
+│     │     └── comapny_best.py
+│     ├── interview
+│     ├── interviews
+│     ├── job
+│     ├── keyword
+│     ├── main
+│     ├── occupation
+│     ├── project_experience
+│     ├── resume
+│     ├── resume_draft
+│     ├── user
+│     ├── work_experience
+│     └── validatin_class.py
+├── exception
+│     ├── custom_exception.py
+│     ├── exception_handler.py
+│     └── exception_type.py
+├── logs
+│     ├── output
+│     │      ├── auth_controller.log
+│     │      └── chat_gpt.log
+│     │              .
+│     │              .
+│     │              .
+│     └── log.py
+├── middlewares
+│     └── auth_middleware.py
+├── static
+│     ├── css
+│     │     ├── error_page.css
+│     │     └── resume.css
+│     │             .
+│     │             .
+│     │             .
+│     ├── img
+│     │     ├── arrow_right.svg
+│     │     └── banner.svg
+│     │             .
+│     │             .
+│     │             .
+│     ├── js
+│     │     ├── footer.js
+│     │     └── header.js
+│     │             .
+│     │             .
+│     │             .
+│     └── favicon.ico
+├── templates
+│     ├── components
+│     │     ├── header.html
+│     │     └── footer.html
+│     │             .
+│     │             .
+│     │             .
+│     ├── error_page.html
+│     └── index.html
+│                .
+│                .
+│                .
+├── utils
+│     ├── oauth
+│     │     ├── google_oauth_handler.py
+│     │     ├── kakao_oauth_handler.py
+│     │     ├── naver_oauth_handler.py
+│     │     └── oauth_handler.py
+│     ├── openai
+│     │     └── resume
+│     │     │     └── full_resume_strategy.py
+│     │     │     └── partial_resume_strategy.py
+│     │     │     └── resume_helper.py
+│     │     │     └── resume_strategy.py
+│     │     └── chatgpt.py
+│     ├── age.py
+│     ├── model_converter.py
+│     └── celery_util.py
+│                .
+│                .
+│                .
 ```
 
 <br>
 
 ## 4. 역할 분담
 
-### 🍊고지연
-
-- **UI**
-    - 페이지 : 홈, 검색, 게시글 작성, 게시글 수정, 게시글 상세, 채팅방
-    - 공통 컴포넌트 : 게시글 템플릿, 버튼
+### 🐷윤성빈
+- **팀장**
+    - 정기 회의 진행 및 의사 결정을 총괄
+    - 팀원 역할 분배
+- **Frontend**
+    - 페이지 : 필수 정보 입력 (수정), 선택 정보 입력 (수정), 면접 선택, 면접 진행
+- **Bakcend**
+    - 페이지 : 면접 목록(기업, 직업, 검색), 면접 상세, 면접 진행, 필수 정보 입력, 선택 정보 입력
 - **기능**
-    - 유저 검색, 게시글 등록 및 수정, 게시글 상세 확인, 댓글 등록, 팔로워 게시글 불러오기, 좋아요 기능
+    - 면접 목록
+    - 면접 상세
+    - 면접 질문 생성
+    - 면접 답변 개선 및 도출
+    - 좋아요, 조회수
+    - 공개 여부 설정
+    - 직군, 직업, 회사 추가
+    - 회사 또는 직업에 따른 모의 면접 데이터 생성
+    - 사용자 필수 정보 입력 및 선택 정보 입력 수정
 
 <br>
     
-### 👻김민제
-
-- **UI**
-    - 페이지 : 프로필 설정, 프로필 수정, 팔로잉&팔로워 리스트, 상품 등록, 상품 수정, 채팅 목록, 404 페이지
-    - 공통 컴포넌트 : 탭메뉴, InputBox, Alert 모달, 댓글
+### 👻김승용
+- **Design**
+    - 면접 선택, 작성, 로딩, 공개 모달창, 진행
+- **Frontend**
+    - 페이지 : 면접 목록 (기업, 직업, 검색), 면접 상세, 필수 정보 입력 (수정), 선택 정보 입력 (수정)
+    - 공통 컴포넌트 : 전체적인 CSS 수정
+- **Bakcend**
+    - 페이지 : 자기소개서 선택, 자기소개서 필수 정보 입력, 자기소개서 로딩, 자기소개서 작성, 자기소개서 목록, 마이페이지, 필수 정보 입력, 선택 정보 입력
+    - 공통 컴포넌트 : 로그인
 - **기능**
-    - 프로필 설정 및 수정 페이지 유저 아이디 유효성 및 중복 검사, 상품 등록 및 수정
+    - 자기소개서 목록
+    - 자기소개서 상세
+    - 자기소개서 단락 생성
+    - 자기소개서 단락에 대한 답변 생성
+    - 좋아요, 조회수
+    - 공개 여부 설정
+    - 자신의 자기소개서, 모의 면접, 내 정보 가져오기
+    - 필수 정보 입력
+    - 선택 정보 입력
+    - 로그인 및 회원가입
 
 <br>
 
-### 😎양희지
-
-- **UI**
-    - 페이지 : splash 페이지, sns 로그인 페이지, 로그인, 회원가입
-    - 공통 컴포넌트 : 상품 카드, 사용자 배너
+### 😋김민우
+- **Bakcend**
+    - 페이지 : 마이페이지
 - **기능**
-    - splash 페이지, sns로그인 페이지, 로그인 유효성 및 중복 검사, 회원가입 유효성 및 중복 검사, 이메일 검증, 프로필 설정, 접근제한 설정
+    - 사용자 프로필 사진 가져오기
+    - 자신의 자기소개서, 모의 면접, 내 정보 가져오기
 
 <br>
 
-### 🐬지창언
-
-- **UI**
-    - 페이지 : 사용자 프로필 페이지
-    - 공통 컴포넌트 : 탑배너, 하단 모달창
+### 😎한정석
+- **Design**
+    - 헤더, 푸터, 메인, 마이페이지, 정보 입력창, 자기소개서
+- **Frontend**
+    - 페이지 : 자기소개서 선택, 자기소개서 필수 정보 입력, 자기소개서 로딩, 자기소개서 작성, 자기소개서 목록, 마이페이지, 필수 정보 입력, 선택 정보 입력
+    - 공통 컴포넌트 : 헤더, 푸터
 - **기능**
-    - 팔로우 & 언팔로우, 로그아웃, 하단 모달창, 댓글 삭제, 게시글 삭제, 상품 삭제, 사용자 게시글 앨범형 이미지, 탑 배너 뒤로가기 버튼, Alert 모달
+    - 자기소개서 목록
+    - 자기소개서 상세
+    - 자기소개서 단락 생성
+    - 좋아요, 조회수
+    - 공개 여부 설정
+    - 필수 정보 입력
+    - 선택 정보 입력
+    - 로그인 및 회원가입
+
+<br>
+
+### 😎최영원
+- **Design**
+    - 면접 목록, 면접 진행, 면접 상세, 면접 공개창
+- **Frontend**
+    - 페이지 : 면접 목록(기업, 직업, 검색), 면접 상세, 면접 진행, 면접 로딩
+- **기능**
+    - 면접 목록
+    - 면접 상세
+    - 면접 진행
+    - 면접 공개 수정
+    - 면접 로딩
+
+<br>
+
+### 😎문건규
+- **Frontend**
+    - 페이지 : 선택 정보, 필수 정보, 맞춤법 검사기
+    - 공통 컴포넌트 : 푸터
+- **기능**
+    - 맞춤법 검사기
+    - 필수 정보 입력
+    - 선택 정보 입력
+
+<br>
+
+### 🐬손민재
+
+- **데이터 분석**
+    - 회사 별 인재상 데이터 전처리 및 저장
+    - 직업, 직군 데이터 전처리 및 저장
+- **일정관리**
+    - 팀원의 전체적인 일정을 조율
+- **시각화**
+    - 회사 별 인재상 데이터 시각화
+    - 직업, 직군 분류 코드 추출 및 시각화
     
 <br>
 
@@ -190,24 +326,26 @@
 
 ### 개발 기간
 
-- 전체 개발 기간 : 2022-12-09 ~ 2022-12-31
-- UI 구현 : 2022-12-09 ~ 2022-12-16
-- 기능 구현 : 2022-12-17 ~ 2022-12-31
+- 전체 개발 기간 : 2024-09-09 ~ 2024-12-09
+- UI 구현 : 2022-12-09 ~ 2022-12-01
+- 기능 구현 : 2022-12-09 ~ 2022-12-09
 
 <br>
 
 ### 작업 관리
 
-- GitHub Projects와 Issues를 사용하여 진행 상황을 공유했습니다.
-- 주간회의를 진행하며 작업 순서와 방향성에 대한 고민을 나누고 GitHub Wiki에 회의 내용을 기록했습니다.
+- Notion을 통해 API 명세서, 페이지 명세서 등 공통 작업을 작성하였습니다.
+- 주간회의를 진행하며 작업 순서와 방향성에 대한 고민을 나누고 회의록을 작성하였습니다.
+- 개인별 또는 팀별 일정을 작성하여 마감일을 지켰습니다.
+- 오류 보고 및 수정은 Notion의 언급 기능을 사용하여 소통하였습니다.
 
 <br>
 
 ## 6. 신경 쓴 부분
 
-- [접근제한 설정](https://github.com/likelion-project-README/README/wiki/README-6.%EC%8B%A0%EA%B2%BD-%EC%93%B4-%EB%B6%80%EB%B6%84_%EC%A0%91%EA%B7%BC%EC%A0%9C%ED%95%9C-%EC%84%A4%EC%A0%95)
+- [RTR 기법](https://seungyong20.tistory.com/entry/JWT-Access-Token%EA%B3%BC-Refresh-Token-%EA%B7%B8%EB%A6%AC%EA%B3%A0-RTR-%EA%B8%B0%EB%B2%95%EC%97%90-%EB%8C%80%ED%95%B4%EC%84%9C-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90)
 
-- [Recoil을 통한 상태관리 및 유지](https://github.com/likelion-project-README/README/wiki/README-6.%EC%8B%A0%EA%B2%BD-%EC%93%B4-%EB%B6%80%EB%B6%84_Recoil%EC%9D%84-%ED%86%B5%ED%95%9C-%EC%83%81%ED%83%9C%EA%B4%80%EB%A6%AC-%EB%B0%8F-%EC%9C%A0%EC%A7%80)
+- [PyHanSpell Customizing](https://udangtang-dev.tistory.com/9)
 
 <br>
 
@@ -420,60 +558,13 @@
 
 <br>
 
-## 8. 트러블 슈팅
+## 8. 개선 목표
 
-- [탭메뉴 프로필 버튼 이슈](https://github.com/likelion-project-README/README/wiki/README-8.%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85_%ED%83%AD%EB%A9%94%EB%89%B4-%ED%94%84%EB%A1%9C%ED%95%84-%EB%B2%84%ED%8A%BC-%EC%9D%B4%EC%8A%88)
-
-- [프로필 수정 이슈](https://github.com/likelion-project-README/README/wiki/README-8.%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85_%ED%94%84%EB%A1%9C%ED%95%84-%EC%88%98%EC%A0%95-%EC%9D%B4%EC%8A%88)
-
-<br>
-
-## 9. 개선 목표
-
-- API 모듈화 : API를 불러오는 코드의 반복이 많아 모듈화할 예정
-- lighthouse Performance 증진
-    - 모든 페이지에서 특히 Best Practices & SEO 점수는 90~100으로 우수
-    - Performance 점수가 대체적으로 미흡한 문제
-    
-    ![KakaoTalk_Photo_2023-01-04-16-55-30](https://user-images.githubusercontent.com/112460466/210591134-09bf8efd-3c34-4b99-a3d7-895ca99e1457.png)
-    
-- **23-01-17 성능 개선 내용**
-    
-    ![성능개선 후](https://user-images.githubusercontent.com/106502312/212872369-7ceeb2cf-d551-41d2-bfb0-01e35e9903fe.png)
-    
-    - 이미지 최적화
-        - `<img>` 요소에 `width` , `height` 속성값을 명시해 불필요한 Reflow를 방지했습니다.
-        - browser-image-compression 라이브러리를 사용해 유저가 업로드하는 이미지를 압축했습니다.
-        - Intersection Observer API를 사용해 Lazy Loading 기법을 적용하여 홈 피드의 게시글 이미지가 viewport 내에 들어오는 순간 로딩되도록 변경했습니다.
-    - 웹폰트 최적화
-        - WOFF2 포맷을 추가하고 가장 우선적으로 적용되도록 선언했습니다.
-        - 서브셋 폰트로 교체해 용량을 줄였습니다.
-    
-<br>
-
-## 10. 프로젝트 후기
-
-### 🍊 고지연
-
-깃헙을 통한 협업에 익숙해지는 것, 서로 감정 상하지 않고 무사히 마무리하는 것이 1차적인 목표였어서 항상 이 부분을 명심하면서 작업했습니다.
-각자 페이지를 작업하고 합치는 과정에서 마주친 버그들이 몇 있었는데, 시간에 쫓기느라 해결하기에 급급해서 제대로 트러블슈팅 과정을 기록하지 못한 게 살짝 아쉬운 부분으로 남습니다. 그래도 2022년 한 해 동안 가장 치열하게 살았던 한 달인 것 같습니다. 조원들 모두에게 고생했다고 전하고 싶습니다🧡
-
-<br>
-
-### 👻 김민제
-
-여러모로 많은 것들을 배울 수 있었던 한 달이었습니다. 혼자서는 할 수 없었던 일이라는 것을 너무 잘 알기에 팀원들에게 정말 감사하다는 말 전하고 싶습니다. 개인적으로 아쉬웠던 부분은 기한 내에 기능을 구현하는 데에만 집중하면서 트러블 슈팅이나 새로 배웠던 것들을 체계적으로 기록하지 못했다는 점입니다. 이렇게 느낀 바가 있으니 이후의 제가 잘 정리하면서 개발할 거라 믿습니다… 하하 다들 수고하셨습니다!!!!
-
-<br>
-
-### 😎 양희지
-
-팀 프로젝트 시작에 앞서 초기 설정을 진행하며 체계적인 설계의 중요성을 느꼈습니다. 앞으로는 점점 더 체계적이고 효율적으로 프로젝트를 진행할 수 있도록 발전하고 싶습니다.
-정규 수업 직후에 프로젝트를 진행하면서 배운 내용을 직접 구현하는 과정이 어색했지만 어떤 부분이 부족한지 알 수 있는 기회였습니다. 스스로 최대한 노력해보고 팀원들과 함께 해결해 나가면서 협업의 장점을 체감할 수 있었습니다. 하지만 빠르게 작업을 진행하면서 팀원들과 함께 해결한 이슈가 어떤 이슈이며 어떻게 해결했는지에 대해 자세히 작성하지 못한 것이 아쉽습니다.
-’멋쟁이 사자처럼’이라는 같은 목표를 가진 집단에서 프로젝트에 함께할 수 있는 소중한 경험이었습니다. 함께 고생한 조원들 모두 고생하셨습니다! 앞으로도 화이팅해서 함께 목표를 이뤄가고 싶습니다.
-
-<br>
-
-### 🐬 지창언
-
-컨벤션을 정하는 것부터 Readme 파일 작성까지 전 과정을 진행하려니 처음 생각보다 많은 에너지를 썼어요. 좋은 의미로 많이 썼다기보다, 제 능력을 십분 발휘하지 못해서 아쉬움이 남는 쪽입니다. 개발한다고 개발만 해서는 안 된다는 것을 몸소 느껴보는 기간이었던 것 같습니다. 이번 기회로 프로젝트를 진행하면서, 제가 잘하는 점과 부족한 점을 확실하게 알고 가는 건 정말 좋습니다. 기술적인 부분에 있어서는 리액트의 컴포넌트화가 주는 장점을 알았습니다. 조금 느린 개발이 되었을지라도 코드 가독성 부분에 있어서 좋았고, 오류가 발생해도 전체가 아닌 오류가 난 컴포넌트와 근접한 컴포넌트만 살펴보면 수정할 수 있는 부분이 너무 편했습니다. 모두 고생 참 많으셨고 리팩토링을 통해 더 나은 프로젝트 완성까지 화이팅입니다.
+- Chat GPT 프롬프트를 조정하여 답변의 질을 올리고, LAG를 통해 자기소개서에 특화된 모델을 구축해야 합니다.
+- Chat GPT만 사용하는 것이 아닌 Llama 3를 적용하여 모델을 선택할 수 있게 변경하는 것이 목표입니다.
+- SQLAlchemy를 통해 쿼리 최적화를 하는 것이 목표입니다.
+    - 현재, for 문 안에 CRUD를 무분별하게 돌리는 문제가 있어 성능 저하를 초래하고 있습니다.
+    - join, query delete를 통해 성능 최적화에 초점을 두어야 합니다.
+- CSS 통합, Scss를 이용한 클래스 간의 간섭을 최소화해야 합니다.
+- 각 UI 별 Component를 선별하여, 재사용이 가능한 UI로 변경해야 합니다.
+- flash를 통한 오류 메시지를 보여줘야 하며, 페이지를 그리는 함수에서는 오류 발생 보단 flash를 적극 사용해야 합니다.
